@@ -1,1 +1,93 @@
 @import "tailwindcss";
+
+/* =====================================================
+   GLOBAL STYLES
+===================================================== */
+html, body, #root {
+  width: 100%;
+  min-height: 100%;
+}
+
+body {
+  background: #f3f4f6;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* =====================================================
+   PRINT STYLE (A4 Format)
+===================================================== */
+@page {
+  size: A4 portrait;
+  margin: 15mm; /* মার্জিন ঠিক করা হয়েছে */
+}
+
+@media print {
+  /* অপ্রয়োজনীয় ইউআই এলিমেন্ট লুকানো */
+  .no-print, button, nav, aside, header, footer {
+    display: none !important;
+  }
+
+  /* ব্রাউজারের ডিফল্ট ইউআরএল ও তারিখ লুকানো */
+  a[href]:after {
+    content: "" !important;
+  }
+
+  /* ব্যাকগ্রাউন্ড এবং টেক্সট ক্লিনিং */
+  body, .profile-print-container {
+    background: #ffffff !important;
+    width: 100% !important;
+    color: #000 !important;
+    padding: 0 !important;
+  }
+
+  /* মেম্বার ইনফরমেশন গ্রিড ফিক্স (লাল বক্সের সমস্যার জন্য) */
+  .grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+  
+  .md\:col-span-2 {
+    grid-column: span 2 / span 2 !important;
+  }
+
+  /* টেবিল স্টাইলিং */
+  table {
+    display: table !important;
+    width: 100% !important;
+    border-collapse: collapse !important;
+    font-size: 10pt !important;
+    margin-bottom: 20px !important;
+  }
+
+  thead {
+    display: table-header-group !important;
+    background-color: #f3f4f6 !important;
+  }
+
+  tr {
+    display: table-row !important;
+    break-inside: avoid !important;
+  }
+
+  td, th {
+    display: table-cell !important;
+    border: 1px solid #000 !important;
+    padding: 6px !important;
+    text-align: center !important;
+  }
+
+  /* কালার সাপোর্ট নিশ্চিত করা */
+  .text-red-600 { color: #dc2626 !important; -webkit-print-color-adjust: exact !important; }
+  .text-green-600 { color: #16a34a !important; -webkit-print-color-adjust: exact !important; }
+
+  /* সিগনেচার সেকশন স্মার্টলি সাজানো */
+  .signature-section {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: flex-end !important;
+    break-inside: avoid !important;
+    margin-top: 50px !important;
+    width: 100% !important;
+  }
+}
