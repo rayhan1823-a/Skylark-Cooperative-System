@@ -32,7 +32,10 @@ const startBackupScheduler = require("./services/backupScheduler");
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: [
+      "http://localhost:5173",
+      "https://skylark-cooperative-system.vercel.app"
+    ],
     credentials: true,
   })
 );
