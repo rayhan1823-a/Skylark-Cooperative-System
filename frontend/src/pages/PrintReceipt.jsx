@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import MainLayout from "../layouts/MainLayout";
 
-const API = "http://localhost:5000/api";
+const API = "https://skylark-cooperative-system.onrender.com/api";
 
 function PrintReceipt() {
   const { id } = useParams();

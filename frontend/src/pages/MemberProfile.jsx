@@ -6,6 +6,8 @@ import MainLayout from "../layouts/MainLayout";
 function MemberProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const API = "https://skylark-cooperative-system.onrender.com/api";
+  const BASE_URL = "https://skylark-cooperative-system.onrender.com";
 
   const [member, setMember] = useState(null);
   const [summary, setSummary] = useState(null);
@@ -40,7 +42,7 @@ function MemberProfile() {
       const token = localStorage.getItem("token") || localStorage.getItem("authToken");
       const config = { headers: { Authorization: `Bearer ${token}` } };
 
-      const res = await axios.get(`http://localhost:5000/api/members/${id}`, config);
+      const res = await axios.get(`${API}/members/${id}`, config);
       
       console.log("API Full Response:", res.data);
 
@@ -104,7 +106,7 @@ function MemberProfile() {
       profileImageUrl = member.photo;
     } else {
       const cleanFileName = member.photo.replace(/\\/g, '/').split('/').pop();
-      profileImageUrl = `http://localhost:5000/uploads/photos/${cleanFileName}`;
+      profileImageUrl = `${BASE_URL}/uploads/photos/${cleanFileName}`;
     }
   }
 
@@ -187,7 +189,7 @@ function MemberProfile() {
                       <td>{d.year}</td>
                       <td className="font-bold text-green-700">৳ {d.amount || d.paidAmount || 0}</td>
                       <td className="p-2">
-                        <a href={`http://localhost:5000/api/deposit-receipt/${d._id}`} 
+                        <a href={`${API}/deposit-receipt/${d._id}`} 
                            target="_blank" rel="noopener noreferrer" className="text-blue-600 font-bold hover:underline cursor-pointer">
                            {d.receiptNo || "View"}
                         </a>

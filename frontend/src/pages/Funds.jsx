@@ -35,7 +35,7 @@ function Funds() {
   const fetchTransactions = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:5000/api/funds", {
+      const response = await fetch("https://skylark-cooperative-system.onrender.com/api/funds", {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await response.json();
@@ -53,7 +53,7 @@ function Funds() {
   const fetchMembers = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get("http://localhost:5000/api/members", {
+      const response = await axios.get("https://skylark-cooperative-system.onrender.com/api/members", {
         headers: { Authorization: `Bearer ${token}` }
       });
       const memberData = response.data?.members || response.data;
@@ -148,8 +148,8 @@ function Funds() {
     try {
       const token = localStorage.getItem("token");
       const url = editingId
-        ? `http://localhost:5000/api/funds/${editingId}`
-        : "http://localhost:5000/api/funds";
+        ? `https://skylark-cooperative-system.onrender.com/api/funds/${editingId}`
+        : "https://skylark-cooperative-system.onrender.com/api/funds";
       
       const method = editingId ? "PUT" : "POST";
 
@@ -198,7 +198,7 @@ function Funds() {
     if (window.confirm("Are you sure you want to delete this transaction?")) {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch(`http://localhost:5000/api/funds/${id}`, {
+        const response = await fetch(`https://skylark-cooperative-system.onrender.com/api/funds/${id}`, {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` }
         });

@@ -4,6 +4,8 @@ import axios from "axios";
 import toast from "react-hot-toast";
 
 function Register() {
+  const API = "https://skylark-cooperative-system.onrender.com/api";
+
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
@@ -23,7 +25,7 @@ function Register() {
 
     try {
       // আপনার ব্যাকএন্ডের রেজিস্টার এপিআই কল
-      const res = await axios.post("http://localhost:5000/api/auth/register", formData);
+      const res = await axios.post(`${API}/auth/register`, formData);
 
       if (res.data.success) {
         toast.success("Registration Successful!");

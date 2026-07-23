@@ -6,6 +6,8 @@ import axios from "axios";
 import { toast } from "react-hot-toast";
 
 function PenaltyReceipt() {
+  const API = "https://skylark-cooperative-system.onrender.com/api";
+
   const { id } = useParams();
   const navigate = useNavigate();
   const [penalty, setPenalty] = useState(null);
@@ -14,7 +16,7 @@ function PenaltyReceipt() {
   useEffect(() => {
     const fetchPenaltyDetails = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/penalties/${id}`);
+        const res = await axios.get(`${API}/penalties/${id}`);
         if (res.data && res.data.success) {
           setPenalty(res.data.penalty);
         }

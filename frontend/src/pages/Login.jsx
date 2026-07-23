@@ -33,7 +33,7 @@ function Login() {
       setLoading(true);
 
       const res = await axios.post(
-        "http://localhost:5000/api/auth/login",
+        "https://skylark-cooperative-system.onrender.com/api/auth/login",
         {
           phone,
           password,

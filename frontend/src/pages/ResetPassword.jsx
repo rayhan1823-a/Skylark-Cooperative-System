@@ -3,6 +3,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 function ResetPassword() {
+  const API = "https://skylark-cooperative-system.onrender.com/api";
+
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -51,7 +53,7 @@ function ResetPassword() {
       setLoading(true);
 
       const res = await axios.post(
-        "http://localhost:5000/api/forgot-password/reset-password",
+        `${API}/forgot-password/reset-password`,
         {
           email,
           phone,

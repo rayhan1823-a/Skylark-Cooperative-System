@@ -3,13 +3,15 @@ import axios from "axios";
 import { toast } from "react-hot-toast";
 
 function Settings() {
+  const API = "https://skylark-cooperative-system.onrender.com/api";
+
   const fileRef = useRef(null);
   const [loading, setLoading] = useState(false);
 
   const user = JSON.parse(localStorage.getItem("user")) || {};
   const token = localStorage.getItem("token");
 
-  // পাসওয়ার্ড পরিবর্তনের স্টেট
+  // পাসওয়ার্ড পরিবর্তনের স্টেট
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
 
@@ -29,7 +31,7 @@ function Settings() {
     try {
       setLoading(true);
       const response = await axios.get(
-        "http://localhost:5000/api/backup/export",
+        `${API}/backup/export`,
         {
           responseType: "blob",
           headers: { Authorization: `Bearer ${token}` }
@@ -75,7 +77,7 @@ function Settings() {
       setLoading(true);
       const formData = new FormData();
       formData.append("backup", file);
-      const response = await axios.post("http://localhost:5000/api/backup/restore", formData, {
+      const response = await axios.post(`${API}/backup/restore`, formData, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success(response.data.message);
@@ -101,7 +103,7 @@ function Settings() {
     try {
       setLoading(true);
       const res = await axios.put(
-        "http://localhost:5000/api/auth/change-password",
+        `${API}/auth/change-password`,
         { oldPassword, newPassword },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -123,7 +125,7 @@ function Settings() {
     try {
       setLoading(true);
       const res = await axios.post(
-        "http://localhost:5000/api/users",
+        `${API}/users`,
         staffData,
         { headers: { Authorization: `Bearer ${token}` } }
       );

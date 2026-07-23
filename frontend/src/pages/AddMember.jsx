@@ -97,7 +97,7 @@ function AddMember() {
       if (nomineeNid) data.append("nomineeNid", nomineeNid);
 
       await axios.post(
-        "http://localhost:5000/api/members",
+        "https://skylark-cooperative-system.onrender.com/api/members",
         data,
         {
           headers: {

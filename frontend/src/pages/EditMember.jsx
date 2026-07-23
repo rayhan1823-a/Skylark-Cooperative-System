@@ -26,7 +26,7 @@ try{
 
 const res = await axios.get(
 
-`http://localhost:5000/api/members/profile/${id}`
+`https://skylark-cooperative-system.onrender.com/api/members/profile/${id}`
 
 );
 
@@ -103,7 +103,7 @@ try{
 
 await axios.put(
 
-`http://localhost:5000/api/members/${id}`,
+`https://skylark-cooperative-system.onrender.com/api/members/${id}`,
 
 formData
 

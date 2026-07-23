@@ -17,8 +17,9 @@ function MemberIDCard() {
       try {
         const token = localStorage.getItem("token");
 
+        // এখানে লোকালহোস্টের বদলে রেন্ডারের লাইভ ব্যাকএন্ড ইউআরএল যুক্ত করা হয়েছে
         const res = await axios.get(
-          `http://localhost:5000/api/members/${id}`,
+          `https://skylark-cooperative-system.onrender.com/api/members/${id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

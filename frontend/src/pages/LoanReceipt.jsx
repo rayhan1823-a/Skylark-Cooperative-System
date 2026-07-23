@@ -7,7 +7,7 @@ function LoanReceipt() {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const API = "http://localhost:5000/api";
+  const API = "https://skylark-cooperative-system.onrender.com/api";
 
   // টেবিল পেজ থেকে state এর মাধ্যমে পাঠানো রিসিট নম্বর বা লোন ডেটা আগে চেক করা হচ্ছে
   const [loan, setLoan] = useState(location.state?.loan || null);
@@ -62,7 +62,7 @@ function LoanReceipt() {
     );
   }
 
-  // ১০০% নিশ্চিত সঠিক রিসিট নম্বর পাওয়ার সিকোয়েন্স
+  // ১০০% নিশ্চিত সঠিক রিসিট নম্বর পাওয়ার সিকোয়েন্স
   const receiptNo = 
     passedReceiptNo || 
     loan.receiptNo || 

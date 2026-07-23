@@ -6,6 +6,8 @@ import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
 function Penalties() {
+  const API = "https://skylark-cooperative-system.onrender.com/api";
+
   const [penalties, setPenalties] = useState([]);
   const [members, setMembers] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -26,7 +28,7 @@ function Penalties() {
   const fetchPenalties = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:5000/api/penalties", {
+      const res = await axios.get(`${API}/penalties`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = res.data?.penalties || res.data?.data || res.data;
@@ -44,7 +46,7 @@ function Penalties() {
   const fetchMembers = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get("http://localhost:5000/api/members", {
+      const response = await axios.get(`${API}/members`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const memberData = response.data?.members || response.data?.data || response.data;
@@ -89,10 +91,10 @@ function Penalties() {
       };
 
       if (editingId) {
-        await axios.put(`http://localhost:5000/api/penalties/${editingId}`, payload, config);
+        await axios.put(`${API}/penalties/${editingId}`, payload, config);
         toast.success("Penalty updated successfully!");
       } else {
-        await axios.post("http://localhost:5000/api/penalties", payload, config);
+        await axios.post(`${API}/penalties`, payload, config);
         toast.success("Penalty added successfully!");
       }
       fetchPenalties();
@@ -118,7 +120,7 @@ function Penalties() {
     if (window.confirm("Are you sure you want to delete this penalty?")) {
       try {
         const token = localStorage.getItem("token");
-        await axios.delete(`http://localhost:5000/api/penalties/${id}`, {
+        await axios.delete(`${API}/penalties/${id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         toast.success("Deleted successfully!");

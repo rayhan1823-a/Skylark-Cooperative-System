@@ -41,7 +41,7 @@ function ForgotPassword() {
       setLoading(true);
 
       const res = await axios.post(
-        "http://localhost:5000/api/forgot-password/send-otp",
+        "https://skylark-cooperative-system.onrender.com/api/forgot-password/send-otp",
         formData
       );
 

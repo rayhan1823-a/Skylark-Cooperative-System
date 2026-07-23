@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 
 function Loans() {
-  const API = "http://localhost:5000/api";
+  const API = "https://skylark-cooperative-system.onrender.com/api";
   const navigate = useNavigate();
 
   const [members, setMembers] = useState([]);

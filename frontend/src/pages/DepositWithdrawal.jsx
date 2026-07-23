@@ -24,7 +24,7 @@ function DepositWithdrawal() {
   const fetchMembers = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:5000/api/members", {
+      const res = await axios.get("https://skylark-cooperative-system.onrender.com/api/members", {
         headers: { Authorization: `Bearer ${token}` }
       });
       setMembers(res.data.members || res.data || []);
@@ -36,7 +36,7 @@ function DepositWithdrawal() {
   const fetchWithdrawals = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:5000/api/withdrawals", {
+      const res = await axios.get("https://skylark-cooperative-system.onrender.com/api/withdrawals", {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = res.data.withdrawals || [];
@@ -67,7 +67,7 @@ function DepositWithdrawal() {
         note,
       };
 
-      const res = await axios.post("http://localhost:5000/api/withdrawals", payload, {
+      const res = await axios.post("https://skylark-cooperative-system.onrender.com/api/withdrawals", payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.data.success) {
@@ -91,7 +91,7 @@ function DepositWithdrawal() {
     if (window.confirm("Are you sure you want to delete this withdrawal?")) {
       try {
         const token = localStorage.getItem("token");
-        const res = await axios.delete(`http://localhost:5000/api/withdrawals/${id}`, {
+        const res = await axios.delete(`https://skylark-cooperative-system.onrender.com/api/withdrawals/${id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (res.data.success) {

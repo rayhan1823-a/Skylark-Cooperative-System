@@ -5,6 +5,8 @@ import { Users, UserCheck, UserX, DollarSign, Wallet, TrendingDown, Building, Ar
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from "recharts";
 import axios from "axios";
 
+const API = "https://skylark-cooperative-system.onrender.com/api";
+
 function Dashboard() {
   const navigate = useNavigate();
 
@@ -40,8 +42,9 @@ function Dashboard() {
           }
         };
 
+        // ১. মেইন ড্যাশবোর্ড ডাটা ফেচ
         try {
-          const dashRes = await axios.get("http://localhost:5000/api/dashboard", config);
+          const dashRes = await axios.get(`${API}/dashboard`, config);
           if (dashRes.data && dashRes.data.success) {
             const data = dashRes.data.data;
             
@@ -92,8 +95,9 @@ function Dashboard() {
           console.error("Error fetching main dashboard API:", dashErr);
         }
 
+        // ২. মেম্বার রিপোর্ট ডাটা ফেচ
         try {
-          const reportRes = await axios.get("http://localhost:5000/api/reports/members", config);
+          const reportRes = await axios.get(`${API}/reports/members`, config);
           if (reportRes.data && reportRes.data.success) {
             const reportList = reportRes.data.report || [];
             
@@ -122,8 +126,9 @@ function Dashboard() {
           console.error("Error fetching reports API in dashboard:", reportErr);
         }
 
+        // ৩. লোন ডাটা ফেচ
         try {
-          const loanRes = await axios.get("http://localhost:5000/api/loans", config);
+          const loanRes = await axios.get(`${API}/loans`, config);
           const loans = loanRes.data?.loans || loanRes.data?.data || loanRes.data || [];
           
           const totalLoan = loans.reduce((sum, l) => {
@@ -136,8 +141,9 @@ function Dashboard() {
           console.error("Error fetching loans API:", err);
         }
 
+        // ৪. ফান্ড ও ট্রানজেকশন ফেচ
         try {
-          const fundRes = await axios.get("http://localhost:5000/api/funds", config);
+          const fundRes = await axios.get(`${API}/funds`, config);
           const fundData = fundRes.data;
           const transactions = fundData?.success && Array.isArray(fundData.transactions) ? fundData.transactions : (Array.isArray(fundData) ? fundData : []);
           setFundTransactions(transactions);
@@ -153,8 +159,9 @@ function Dashboard() {
           console.error("Error fetching funds:", err);
         }
 
+        // ৫. পেনাল্টি ডাটা ফেচ
         try {
-          const penaltyRes = await axios.get("http://localhost:5000/api/penalties", config);
+          const penaltyRes = await axios.get(`${API}/penalties`, config);
           const penaltyData = penaltyRes.data?.penalties || penaltyRes.data?.data || penaltyRes.data || [];
           if (Array.isArray(penaltyData)) {
             const calculatedPenalty = penaltyData.reduce((sum, item) => sum + Number(item.amount || 0), 0);
@@ -213,7 +220,6 @@ function Dashboard() {
             <p className="text-slate-400 mt-1 font-medium text-sm">Professional Cooperative Management & Financial Core</p>
           </div>
           <div className="flex items-center gap-3">
-            {/* Withdraw Money Button - Only for Admin */}
             {isAdmin && (
               <button 
                 onClick={() => navigate("/deposit-withdrawal")} 
@@ -396,7 +402,6 @@ function Dashboard() {
             </div>
           </div>
 
-          {/* Total Withdrawal Card - Only for Admin */}
           {isAdmin && (
             <div className="bg-gradient-to-br from-purple-950 via-violet-950 to-slate-900 border border-purple-800/50 text-white p-6 rounded-3xl shadow-[0_10px_35px_rgba(88,28,135,0.4)] hover:shadow-2xl transition-all duration-300 flex justify-between items-center group transform hover:-translate-y-1">
               <div>

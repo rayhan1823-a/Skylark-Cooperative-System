@@ -3,7 +3,7 @@ import axios from "axios";
 import { toast } from "react-hot-toast";
 import MainLayout from "../layouts/MainLayout";
 
-const API = "http://localhost:5000/api";
+const API = "https://skylark-cooperative-system.onrender.com/api";
 
 function Deposits() {
   const getConfig = () => ({
@@ -12,7 +12,7 @@ function Deposits() {
     },
   });
 
-  // আজকের তারিখ YYYY-MM-DD ফরম্যাটে নেওয়ার জন্য
+  // আজকের তারিখ YYYY-MM-DD ফরম্যাটে নেওয়ার জন্য
   const getTodayDate = () => new Date().toISOString().split("T")[0];
 
   const [members, setMembers] = useState([]);
@@ -132,7 +132,7 @@ function Deposits() {
           amount: Number(formData.amount),
           month: formData.month,
           year: Number(formData.year),
-          depositDate: formData.depositDate, // ব্যাকএন্ডে হাত দিয়ে বসানো তারিখটি পাঠানো হচ্ছে
+          depositDate: formData.depositDate, // ব্যাকএন্ডে হাত দিয়ে বসানো তারিখটি পাঠানো হচ্ছে
           paymentMethod: formData.paymentMethod,
           note: formData.note,
         },
@@ -148,7 +148,7 @@ function Deposits() {
           month: "long",
         }),
         year: new Date().getFullYear(),
-        depositDate: getTodayDate(), // সাবমিট হওয়ার পর আবার আজকের তারিখ রিসেট হবে
+        depositDate: getTodayDate(), // সাবমিট হওয়ার পর আবার আজকের তারিখ রিসেট হবে
         paymentMethod: "Cash",
         note: "Monthly Deposit",
       });

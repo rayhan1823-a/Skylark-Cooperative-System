@@ -3,6 +3,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 function VerifyOTP() {
+  const API = "https://skylark-cooperative-system.onrender.com/api";
+
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -27,7 +29,7 @@ function VerifyOTP() {
       setLoading(true);
 
       const res = await axios.post(
-        "http://localhost:5000/api/forgot-password/verify-otp",
+        `${API}/forgot-password/verify-otp`,
         {
           email,
           phone,
