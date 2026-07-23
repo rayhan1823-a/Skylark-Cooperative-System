@@ -27,10 +27,20 @@ const getAllMembers = async (req, res) => {
 const getMemberProfile = async (req, res) => {
     try {
         let { id } = req.params;
+
+        // ✅ নিরাপত্তা চেক এবং অটো-রিডাইরেক্ট: 
+        // যদি ইউজার সাধারণ মেম্বার হয় এবং সে যদি নিজের আইডি বা ড্যাশবোর্ড থেকে রিকোয়েস্ট করে,
+        // অথবা রাউটে আইডি হিসেবে 'me' বা নিজের আইডি না পাঠিয়ে থাকে, তবে তাকে তার নিজস্ব আইডিতে রূপান্তর করে নেওয়া হবে।
+        if (req.user && req.user.role === 'MEMBER') {
+            if (!id || id === 'me' || id === 'profile') {
+                id = req.user.id || req.user._id;
+            }
+        }
+
         if (!id) {
             return res.status(400).json({ success: false, message: "Member ID is required" });
         }
-        id = id.trim();
+        id = String(id).trim();
 
         let member = null;
 
@@ -51,15 +61,25 @@ const getMemberProfile = async (req, res) => {
             member = await Member.findOne({ userId: id });
         }
 
+        // যদি টোকেনের আইডি দিয়ে সরাসরি পাওয়া না যায়, তবে টোকেনের ভেতর থাকা আইডি বা ফোন দিয়ে ফাইনাল খোঁজা
+        if (!member && req.user && req.user.role === 'MEMBER') {
+            if (mongoose.Types.ObjectId.isValid(req.user.id)) {
+                member = await Member.findById(req.user.id);
+            }
+            if (!member && req.user.phone) {
+                member = await Member.findOne({ phone: req.user.phone });
+            }
+        }
+
         if (!member) {
             return res.status(404).json({ success: false, message: "Member not found with ID: " + id });
         }
 
-        // নিরাপত্তা চেক: সাধারণ মেম্বার হলে সে কেবল নিজের প্রোফাইলই দেখতে পারবে, অন্যের নয়
+        // নিরাপত্তা চেক: সাধারণ মেম্বার হলে সে কেবল নিজের প্রোফাইলই দেখতে পারবে, অন্যের নয়
         if (req.user && req.user.role === 'MEMBER') {
             const isSelf = 
-                String(member._id) === String(req.user.id) || 
-                String(member.userId) === String(req.user.id) || 
+                String(member._id) === String(req.user.id || req.user._id) || 
+                String(member.userId) === String(req.user.id || req.user._id) || 
                 (req.user.phone && member.phone === req.user.phone);
 
             if (!isSelf) {
