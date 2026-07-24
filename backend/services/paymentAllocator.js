@@ -149,7 +149,7 @@ const generateMemberAllocation = async (memberId) => {
     const totalWithdrawal = withdrawals.reduce((sum, w) => sum + (Number(w.amount) || 0), 0);
 
     let totalPaid = 0;
-    let totalTarget = 0; // মোট কত কিস্তি বা টার্গেট হওয়ার কথা
+    let totalTarget = 0; // মোট কত কিস্তি বা টার্গেট হওয়ার কথা
     const monthlyDetails = [];
     const current = getCurrentYearMonth();
 
@@ -190,27 +190,28 @@ const generateMemberAllocation = async (memberId) => {
       }
     }
 
-    // ✅ নিখুঁত ও চূড়ান্ত হিসাব:
-    // মোট জমা (Total Deposit) = মোট পেমেন্ট থেকে প্রাপ্ত টাকা বা সরাসরি ডিপোজিট সাম
+    // ✅ নিখুঁত ও চূড়ান্ত হিসাব:
     const totalDeposit = deposits.reduce((sum, d) => sum + (Number(d.amount) || 0), 0);
     
-    // বর্তমান কার্যকরী ব্যালেন্স = মোট জমা - মোট উত্তোলন
-    const currentBalance = totalDeposit - totalWithdrawal;
+    // ১. টোটাল ডিপোজিট ডিউ: টার্গেটের বেশি জমা দিলে ০ দেখাবে
+    let totalDepositDue = totalTarget - totalDeposit;
+    if (totalDepositDue < 0) totalDepositDue = 0;
 
-    // আসল বকেয়া (Total Due) = মোট টার্গেট - বর্তমান ব্যালেন্স 
-    // (যদি ব্যালেন্স টার্গেটের চেয়ে বেশি বা সমান হয়, তবে বকেয়া ০ হবে)
+    // ২. টোটাল ডিউ: বর্তমান কার্যকরী ব্যালেন্স (জমা - উত্তোলন) থেকে নিট বকেয়া হিসাব
+    const currentBalance = totalDeposit - totalWithdrawal;
     let finalTotalDue = totalTarget - currentBalance;
     if (finalTotalDue < 0) finalTotalDue = 0;
 
     return {
       totalPaid,
-      totalDue: finalTotalDue, // ✅ এখন একদম সঠিক ৫,০০০ টাকা দেখাবে!
+      totalDue: finalTotalDue,          // ✅ সঠিক নিট বকেয়া (৫,০০০ টাকা)
+      totalDepositDue: totalDepositDue, // ✅ সঠিক ডিপোজিট বকেয়া (০ টাকা)
       totalWithdrawal,
       monthlyDetails,
     };
   } catch (error) {
     console.log("Payment Allocation Error:", error.message);
-    return { totalPaid: 0, totalDue: 0, monthlyDetails: [] };
+    return { totalPaid: 0, totalDue: 0, totalDepositDue: 0, monthlyDetails: [] };
   }
 };
 
@@ -224,7 +225,7 @@ const rebuildAllocation = async (memberId) => {
     const deposits = await Deposit.find({ memberId }).sort({ createdAt: 1 });
 
     if (deposits.length === 0) {
-      return { totalPaid: 0, totalDue: 0, monthlyDetails: [] };
+      return { totalPaid: 0, totalDue: 0, totalDepositDue: 0, monthlyDetails: [] };
     }
 
     const trackingMap = {};
@@ -304,7 +305,7 @@ const rebuildAllocation = async (memberId) => {
 
   } catch (error) {
     console.log("Rebuild Allocation Error:", error.message);
-    return { totalPaid: 0, totalDue: 0, monthlyDetails: [] };
+    return { totalPaid: 0, totalDue: 0, totalDepositDue: 0, monthlyDetails: [] };
   }
 };
 
