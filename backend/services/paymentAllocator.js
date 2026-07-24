@@ -8,7 +8,7 @@
 // ======================================
 
 const Deposit = require("../models/Deposit");
-const Withdrawal = require("../models/Withdrawal"); // ✅ উইথড্রয়াল মডেল যুক্ত
+const Withdrawal = require("../models/Withdrawal");
 
 // ======================================
 // Configuration
@@ -124,7 +124,6 @@ const calculateMonthlyPaid = (deposits, year, month) => {
         paid += Number(allocation.allocatedAmount || 0);
       }
     } else {
-      // Backward Compatibility fallback
       const depositYear = Number(deposit.year);
       const depositMonth = normalizeMonth(deposit.month);
       if (depositYear === Number(year) && depositMonth === Number(month)) {
@@ -143,7 +142,6 @@ const generateMemberAllocation = async (memberId) => {
   try {
     const deposits = await Deposit.find({ memberId }).sort({ createdAt: 1 });
 
-    // ✅ সদস্যের মোট উত্তোলন (Withdrawals) নিরাপদে নিয়ে আসা হলো
     const withdrawals = await Withdrawal.find({ 
       $or: [{ memberId: memberId }, { member: memberId }] 
     }).catch(() => []);
@@ -151,7 +149,7 @@ const generateMemberAllocation = async (memberId) => {
     const totalWithdrawal = withdrawals.reduce((sum, w) => sum + (Number(w.amount) || 0), 0);
 
     let totalPaid = 0;
-    let totalDue = 0;
+    let totalTarget = 0; // মোট কত কিস্তি বা টার্গেট হওয়ার কথা
     const monthlyDetails = [];
     const current = getCurrentYearMonth();
 
@@ -183,7 +181,7 @@ const generateMemberAllocation = async (memberId) => {
       });
 
       totalPaid += paidAmount;
-      totalDue += dueAmount;
+      totalTarget += monthlyAmount; // সব মাসের মোট টার্গেট জমা
 
       month++;
       if (month > 12) {
@@ -192,14 +190,22 @@ const generateMemberAllocation = async (memberId) => {
       }
     }
 
-    // ✅ মূল সংশোধনী: যেহেতু সদস্য জমানো টাকা থেকে ২৬,০০০ টাকা তুলে নিয়েছে, 
-    // তাই বকেয়া হিসাব করার সময় ওই উত্তোলিত টাকা যোগ হবে (কারণ টাকা তুলে নেওয়ায় আগের পরিশোধ করা মাসগুলো পুনরায় বকেয়া হিসেবে গণ্য হবে)।
-    let adjustedTotalDue = totalDue + totalWithdrawal;
+    // ✅ নিখুঁত ও চূড়ান্ত হিসাব:
+    // মোট জমা (Total Deposit) = মোট পেমেন্ট থেকে প্রাপ্ত টাকা বা সরাসরি ডিপোজিট সাম
+    const totalDeposit = deposits.reduce((sum, d) => sum + (Number(d.amount) || 0), 0);
+    
+    // বর্তমান কার্যকরী ব্যালেন্স = মোট জমা - মোট উত্তোলন
+    const currentBalance = totalDeposit - totalWithdrawal;
+
+    // আসল বকেয়া (Total Due) = মোট টার্গেট - বর্তমান ব্যালেন্স 
+    // (যদি ব্যালেন্স টার্গেটের চেয়ে বেশি বা সমান হয়, তবে বকেয়া ০ হবে)
+    let finalTotalDue = totalTarget - currentBalance;
+    if (finalTotalDue < 0) finalTotalDue = 0;
 
     return {
       totalPaid,
-      totalDue: adjustedTotalDue, // ✅ এখন সঠিক বকেয়া দেখাবে (মাসিক বকেয়া + উত্তোলিত টাকার সমন্বয়)
-      totalWithdrawal, 
+      totalDue: finalTotalDue, // ✅ এখন একদম সঠিক ৫,০০০ টাকা দেখাবে!
+      totalWithdrawal,
       monthlyDetails,
     };
   } catch (error) {
@@ -215,22 +221,18 @@ const generateMemberAllocation = async (memberId) => {
 
 const rebuildAllocation = async (memberId) => {
   try {
-    // 1. মেম্বারের সকল ডিপোজিট ক্রিয়েশন টাইম অনুযায়ী সিরিয়ালি তুলে আনা
     const deposits = await Deposit.find({ memberId }).sort({ createdAt: 1 });
 
     if (deposits.length === 0) {
       return { totalPaid: 0, totalDue: 0, monthlyDetails: [] };
     }
 
-    // প্রতি মাসের ট্র্যাকিং করার জন্য একটি অবজেক্ট ম্যাপ তৈরি করি
-    // trackingMap["YEAR-MONTH"] = বকেয়া পূরণ করতে আর কত টাকা লাগবে
     const trackingMap = {};
 
     let currentTrackYear = START_YEAR;
     let currentTrackMonth = START_MONTH;
     const current = getCurrentYearMonth();
 
-    // সিস্টেমের শুরু থেকে বর্তমান মাস এবং তার পরেও (অগ্রিম এর জন্য) ট্র্যাক রেডি করা
     const targetEndYear = current.year + 1; 
     
     while (currentTrackYear < targetEndYear || (currentTrackYear === targetEndYear && currentTrackMonth <= 12)) {
@@ -244,7 +246,6 @@ const rebuildAllocation = async (memberId) => {
       }
     }
 
-    // ২. প্রতিটি ডিপোজিট ফাইলের ওপর লুপ চালিয়ে টাকা নিখুঁতভাবে ডিস্ট্রিবিউট করা
     for (let deposit of deposits) {
       let remainingAmount = Number(deposit.amount);
       const allocationDetails = [];
@@ -252,16 +253,13 @@ const rebuildAllocation = async (memberId) => {
       let allocYear = START_YEAR;
       let allocMonth = START_MONTH;
 
-      // যতক্ষণ ডিপোজিটের টাকা হাতে থাকবে, ততক্ষণ ক্রনোলজিক্যালি মাসের বকেয়া মিটাতে থাকবে
       while (remainingAmount > 0) {
         const key = `${allocYear}-${allocMonth}`;
         
-        // যদি ট্র্যাকিং ম্যাপে এই মাসের কোটা শেষ না হয়ে থাকে (অর্থাৎ টাকা বাকি থাকে)
         if (trackingMap[key] > 0) {
           const needed = trackingMap[key];
           
           if (remainingAmount >= needed) {
-            // এই মাসের পুরো বকেয়া মিটিয়ে দেওয়া যাবে
             allocationDetails.push({
               year: allocYear,
               month: allocMonth,
@@ -271,9 +269,8 @@ const rebuildAllocation = async (memberId) => {
               status: "Paid"
             });
             remainingAmount -= needed;
-            trackingMap[key] = 0; // এই মাস ফুল পেইড
+            trackingMap[key] = 0;
           } else {
-            // টাকা শর্ট, তাই আংশিক (Partial) পেমেন্ট হিসেবে ঢুকবে
             allocationDetails.push({
               year: allocYear,
               month: allocMonth,
@@ -283,30 +280,26 @@ const rebuildAllocation = async (memberId) => {
               status: "Partial"
             });
             trackingMap[key] -= remainingAmount;
-            remainingAmount = 0; // সব টাকা শেষ
+            remainingAmount = 0;
           }
         }
 
-        // পরবর্তী মাসে মুভ করা
         allocMonth++;
         if (allocMonth > 12) {
           allocMonth = 1;
           allocYear++;
         }
 
-        // সেফটি গার্ড: যদি কোনো কারণে লুপ ইনফিনিটি হওয়ার চান্স থাকে তা আটকানো
         if (allocYear > targetEndYear + 1) {
           break;
         }
       }
 
-      // ৩. এই নির্দিষ্ট ডিপোজিটের জন্য তৈরি হওয়া allocationDetails ডেটাবেজে সেভ করা
       deposit.allocationDetails = allocationDetails;
       deposit.lastAllocationAt = new Date();
       await deposit.save();
     }
 
-    // ফাইনাল মেম্বার অ্যালোকেশন ডাটা রিটার্ন করা
     return await generateMemberAllocation(memberId);
 
   } catch (error) {
