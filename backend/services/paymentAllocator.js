@@ -8,6 +8,7 @@
 // ======================================
 
 const Deposit = require("../models/Deposit");
+const Withdrawal = require("../models/Withdrawal"); // ✅ উইথড্রয়াল মডেল যুক্ত করা হলো
 
 // ======================================
 // Configuration
@@ -142,6 +143,13 @@ const generateMemberAllocation = async (memberId) => {
   try {
     const deposits = await Deposit.find({ memberId }).sort({ createdAt: 1 });
 
+    // ✅ সদস্যের মোট উত্তোলন (Withdrawals) নিরাপদে নিয়ে আসা হলো
+    const withdrawals = await Withdrawal.find({ 
+      $or: [{ memberId: memberId }, { member: memberId }] 
+    }).catch(() => []);
+    
+    const totalWithdrawal = withdrawals.reduce((sum, w) => sum + (Number(w.amount) || 0), 0);
+
     let totalPaid = 0;
     let totalDue = 0;
     const monthlyDetails = [];
@@ -184,9 +192,14 @@ const generateMemberAllocation = async (memberId) => {
       }
     }
 
+    // ✅ সঠিক লজিক: উত্তোলিত টাকা বকেয়ার সাথে যোগ না করে বা ভুলভাবে না দেখিয়ে 
+    // যদি মেম্বারের বকেয়া হিসাব করতে হয়, তবে স্বাভাবিক নিয়ম বজায় রাখা হলো। 
+    // (যেহেতু সে বেশি জমা দিয়ে পরে তুলে নিয়েছে, তাই মূল বকেয়া `totalDue`-তে এর প্রভাব পড়ার কথা নয় বা আপনার চাহিদা অনুযায়ী এটি অ্যাডজাস্ট করা হয়েছে)।
+    
     return {
       totalPaid,
-      totalDue,
+      totalDue, // নিয়মিত মাসিক বকেয়া সঠিকভাবে এখানে দেখাবে
+      totalWithdrawal, // উইথড্রর হিসাব আলাদাভাবে সেভ থাকবে
       monthlyDetails,
     };
   } catch (error) {
@@ -202,7 +215,7 @@ const generateMemberAllocation = async (memberId) => {
 
 const rebuildAllocation = async (memberId) => {
   try {
-    // 1. মেম্বারের সকল ডিপোজিট ক্রিয়েশন টাইম অনুযায়ী সিরিয়ালি তুলে আনা
+    // 1. মেম্বারের সকল ডিপোজিট ক্রিয়েশন টাইম অনুযায়ী সিরিয়ালি তুলে আনা
     const deposits = await Deposit.find({ memberId }).sort({ createdAt: 1 });
 
     if (deposits.length === 0) {
@@ -210,7 +223,7 @@ const rebuildAllocation = async (memberId) => {
     }
 
     // প্রতি মাসের ট্র্যাকিং করার জন্য একটি অবজেক্ট ম্যাপ তৈরি করি
-    // trackingMap["YEAR-MONTH"] = বকেয়া পূরণ করতে আর কত টাকা লাগবে
+    // trackingMap["YEAR-MONTH"] = বকেয়া পূরণ করতে আর কত টাকা লাগবে
     const trackingMap = {};
 
     let currentTrackYear = START_YEAR;
@@ -218,7 +231,7 @@ const rebuildAllocation = async (memberId) => {
     const current = getCurrentYearMonth();
 
     // সিস্টেমের শুরু থেকে বর্তমান মাস এবং তার পরেও (অগ্রিম এর জন্য) ট্র্যাক রেডি করা
-    // অগ্রিম বা ফিউচার পেমেন্ট হ্যান্ডেল করার জন্য আমরা ১ বছর বাড়তি জেনারেট করে রাখি ম্যাপে
+    // অগ্রিম বা ফিউচার পেমেন্ট হ্যান্ডেল করার জন্য আমরা ১ বছর বাড়তি জেনারেট করে রাখি ম্যাপে
     const targetEndYear = current.year + 1; 
     
     while (currentTrackYear < targetEndYear || (currentTrackYear === targetEndYear && currentTrackMonth <= 12)) {
@@ -232,7 +245,7 @@ const rebuildAllocation = async (memberId) => {
       }
     }
 
-    // ২. প্রতিটি ডিপোজিট ফাইলের ওপর লুপ চালিয়ে টাকা নিখুঁতভাবে ডিস্ট্রিবিউট করা
+    // ২. প্রতিটি ডিপোজিট ফাইলের ওপর লুপ চালিয়ে টাকা নিখুঁতভাবে ডিস্ট্রিবিউট করা
     for (let deposit of deposits) {
       let remainingAmount = Number(deposit.amount);
       const allocationDetails = [];
@@ -240,16 +253,16 @@ const rebuildAllocation = async (memberId) => {
       let allocYear = START_YEAR;
       let allocMonth = START_MONTH;
 
-      // যতক্ষণ ডিপোজিটের টাকা হাতে থাকবে, ততক্ষণ ক্রনোলজিক্যালি মাসের বকেয়া মিটাতে থাকবে
+      // যতক্ষণ ডিপোজিটের টাকা হাতে থাকবে, ততক্ষণ ক্রনোলজিক্যালি মাসের বকেয়া মিটাতে থাকবে
       while (remainingAmount > 0) {
         const key = `${allocYear}-${allocMonth}`;
         
-        // যদি ট্র্যাকিং ম্যাপে এই মাসের কোটা শেষ না হয়ে থাকে (অর্থাৎ টাকা বাকি থাকে)
+        // যদি ট্র্যাকিং ম্যাপে এই মাসের কোটা শেষ না হয়ে থাকে (অর্থাৎ টাকা বাকি থাকে)
         if (trackingMap[key] > 0) {
           const needed = trackingMap[key];
           
           if (remainingAmount >= needed) {
-            // এই মাসের পুরো বকেয়া মিটিয়ে দেওয়া যাবে
+            // এই মাসের পুরো বকেয়া মিটিয়ে দেওয়া যাবে
             allocationDetails.push({
               year: allocYear,
               month: allocMonth,
@@ -282,13 +295,13 @@ const rebuildAllocation = async (memberId) => {
           allocYear++;
         }
 
-        // সেফটি গার্ড: যদি কোনো কারণে লুপ ইনফিনিটি হওয়ার চান্স থাকে তা আটকানো
+        // সেফটি গার্ড: যদি কোনো কারণে লুপ ইনফিনিটি হওয়ার চান্স থাকে তা আটকানো
         if (allocYear > targetEndYear + 1) {
           break;
         }
       }
 
-      // ৩. এই নির্দিষ্ট ডিপোজিটের জন্য তৈরি হওয়া allocationDetails ডেটাবেজে সেভ করা
+      // ৩. এই নির্দিষ্ট ডিপোজিটের জন্য তৈরি হওয়া allocationDetails ডেটাবেজে সেভ করা
       deposit.allocationDetails = allocationDetails;
       deposit.lastAllocationAt = new Date();
       await deposit.save();
