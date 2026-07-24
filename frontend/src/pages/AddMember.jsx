@@ -84,6 +84,14 @@ function AddMember() {
 
       setLoading(true);
 
+      const token = localStorage.getItem("token") || localStorage.getItem("authToken") || localStorage.getItem("accessToken");
+
+      if (!token) {
+        toast.error("Authentication token not found. Please login again.");
+        setLoading(false);
+        return;
+      }
+
       const data = new FormData();
 
       Object.keys(formData).forEach((key) => {
@@ -102,6 +110,7 @@ function AddMember() {
         {
           headers: {
             "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
           },
         }
       );
