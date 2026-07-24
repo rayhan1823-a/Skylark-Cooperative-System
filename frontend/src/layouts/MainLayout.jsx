@@ -8,6 +8,8 @@ import {
   Clock,
   LogOut,
   UserCircle2,
+  Menu,
+  X
 } from "lucide-react";
 
 function MainLayout({ children }) {
@@ -18,6 +20,7 @@ function MainLayout({ children }) {
 
   const [currentTime, setCurrentTime] = useState(new Date());
   const [showMenu, setShowMenu] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -26,6 +29,11 @@ function MainLayout({ children }) {
 
     return () => clearInterval(timer);
   }, []);
+
+  // লোকেশন পরিবর্তন হলে মোবাইল সাইডবার স্বয়ংক্রিয়ভাবে বন্ধ হয়ে যাবে
+  useEffect(() => {
+    setIsMobileSidebarOpen(false);
+  }, [location.pathname]);
 
   const logout = () => {
     if (window.confirm("Are you sure you want to logout?")) {
@@ -39,25 +47,59 @@ function MainLayout({ children }) {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-100">
-      {/* Sidebar */}
-      <Sidebar />
+    <div className="flex min-h-screen bg-slate-100 relative overflow-x-hidden">
+      
+      {/* =========================
+          MOBILE OVERLAY (Background shadow when mobile menu is open)
+      ========================= */}
+      {isMobileSidebarOpen && (
+        <div 
+          onClick={() => setIsMobileSidebarOpen(false)}
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden transition-opacity"
+        />
+      )}
 
-      {/* Main Area */}
-      <div className="flex-1 flex flex-col">
+      {/* =========================
+          SIDEBAR (Responsive for Mobile & Desktop)
+      ========================= */}
+      <div className={`
+        fixed lg:static inset-y-0 left-0 z-50 transform 
+        ${isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"}
+        lg:translate-x-0 transition-transform duration-300 ease-in-out
+        flex-shrink-0
+      `}>
+        <Sidebar />
+      </div>
+
+      {/* =========================
+          MAIN AREA
+      ========================= */}
+      <div className="flex-1 flex flex-col min-w-0">
         {/* =========================
             HEADER
         ========================= */}
-        <header className="bg-white shadow-md border-b sticky top-0 z-40">
-          <div className="flex justify-between items-center px-8 py-4">
+        <header className="bg-white shadow-md border-b sticky top-0 z-30">
+          <div className="flex justify-between items-center px-4 lg:px-8 py-4">
+            
             {/* Left */}
-            <div>
-              <h1 className="text-3xl font-bold text-blue-700">
-                Skylark Cooperative Society
-              </h1>
-              <p className="text-gray-500 text-sm">
-                Digital Cooperative Management System
-              </p>
+            <div className="flex items-center gap-3">
+              {/* Mobile Menu Toggle Button */}
+              <button 
+                onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
+                className="lg:hidden p-2 rounded-lg hover:bg-gray-100 text-gray-700 transition"
+                aria-label="Toggle Menu"
+              >
+                {isMobileSidebarOpen ? <X size={24} /> : <Menu size={24} />}
+              </button>
+
+              <div>
+                <h1 className="text-xl lg:text-3xl font-bold text-blue-700 truncate">
+                  Skylark Cooperative Society
+                </h1>
+                <p className="text-gray-500 text-xs lg:text-sm hidden sm:block">
+                  Digital Cooperative Management System
+                </p>
+              </div>
             </div>
 
             {/* Center */}
@@ -87,12 +129,12 @@ function MainLayout({ children }) {
             </div>
 
             {/* Right */}
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-4 lg:gap-6">
               {/* Notification */}
               <button className="relative hover:scale-110 duration-300">
                 <Bell
-                  size={24}
-                  className="text-gray-700"
+                  size={22}
+                  className="text-gray-700 lg:w-6 lg:h-6"
                 />
                 <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                   3
@@ -103,15 +145,15 @@ function MainLayout({ children }) {
               <div className="relative">
                 <button
                   onClick={() => setShowMenu(!showMenu)}
-                  className="flex items-center gap-3"
+                  className="flex items-center gap-2 lg:gap-3 focus:outline-none"
                 >
-                  <div className="w-12 h-12 rounded-full bg-blue-700 text-white flex items-center justify-center text-xl font-bold">
+                  <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-blue-700 text-white flex items-center justify-center text-lg lg:text-xl font-bold">
                     {user?.name
                       ? user.name.charAt(0).toUpperCase()
                       : "A"}
                   </div>
-                  <div className="text-left">
-                    <h3 className="font-semibold">
+                  <div className="text-left hidden md:block">
+                    <h3 className="font-semibold text-sm lg:text-base">
                       {user?.name || "Administrator"}
                     </h3>
                     <p className="text-xs text-gray-500">
@@ -142,7 +184,7 @@ function MainLayout({ children }) {
                         👤 My Profile
                       </button>
                       
-                      {/* ✅ Change Password লিঙ্কে রূপান্তর করা হলো */}
+                      {/* Change Password লিঙ্ক */}
                       <Link
                         to="/change-password"
                         onClick={() => setShowMenu(false)}
@@ -169,7 +211,7 @@ function MainLayout({ children }) {
         {/* =========================
             PAGE CONTENT
         ========================= */}
-        <main className="flex-1 p-8 overflow-auto">
+        <main className="flex-1 p-4 lg:p-8 overflow-auto">
           {children}
         </main>
       </div>
