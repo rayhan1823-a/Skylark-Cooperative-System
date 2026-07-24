@@ -12,6 +12,7 @@ import {
   FaExchangeAlt,
   FaMinusCircle,
   FaExclamationTriangle,
+  FaUserShield, // ✅ ইউজার লিস্টের জন্য নতুন আইকন ইম্পোর্ট করা হলো
 } from "react-icons/fa";
 
 function Sidebar() {
@@ -31,6 +32,12 @@ function Sidebar() {
       title: "Members",
       path: "/members",
       icon: <FaUsers />,
+    },
+    {
+      title: "Users List",
+      path: "/users-list",
+      icon: <FaUserShield />, // ✅ এখানে আইকনটি আপডেট করা হলো যাতে Members থেকে আলাদা বোঝায়
+      roles: ["SUPER_ADMIN", "ADMIN"], // ✅ শুধুমাত্র অ্যাডমিন ও সুপার অ্যাডমিন দেখতে পাবে
     },
     {
       title: "Add Member",

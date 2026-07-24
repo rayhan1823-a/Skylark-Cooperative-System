@@ -12,17 +12,18 @@ import ProtectedRoute from "./components/ProtectedRoute";
 // Dashboard
 import Dashboard from "./pages/Dashboard";
 
-// Members
+// Members & Users List
 import Members from "./pages/Members";
 import AddMember from "./pages/AddMember";
 import EditMember from "./pages/EditMember";
 import MemberProfile from "./pages/MemberProfile";
 import MemberIDCard from "./pages/MemberIDCard";
+import UsersList from "./pages/UsersList"; // ✅ নতুন রেজিস্টার্ড ইউজার্স লিস্ট পেজ ইম্পোর্ট করা হলো
 
 // Print Receipt
 import PrintReceipt from "./pages/PrintReceipt";
 import LoanReceipt from "./pages/LoanReceipt"; 
-import PenaltyReceipt from "./pages/PenaltyReceipt"; // ✅ নতুন পেনাল্টি রিসিট পেজ ইম্পোর্ট করা হলো
+import PenaltyReceipt from "./pages/PenaltyReceipt";
 
 // Transactions & Withdrawals
 import Deposits from "./pages/Deposits";
@@ -30,7 +31,7 @@ import DepositWithdrawal from "./pages/DepositWithdrawal";
 import Payments from "./pages/Payments";
 import Loans from "./pages/Loans";
 import Funds from "./pages/Funds"; 
-import Penalties from "./pages/Penalties"; // ✅ নতুন পেনাল্টি ম্যানেজমেন্ট পেজ ইম্পোর্ট করা হলো
+import Penalties from "./pages/Penalties";
 
 // Reports
 import Reports from "./pages/Reports";
@@ -115,7 +116,7 @@ function App() {
         />
 
         {/* ==========================
-            Members
+            Members & Users
         ========================== */}
 
         <Route
@@ -123,6 +124,16 @@ function App() {
           element={
             <ProtectedRoute>
               <Members />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ✅ নতুন ইউজার্স লিস্ট রাউট যুক্ত করা হলো */}
+        <Route
+          path="/users-list"
+          element={
+            <ProtectedRoute>
+              <UsersList />
             </ProtectedRoute>
           }
         />
@@ -185,7 +196,6 @@ function App() {
           }
         />
 
-        {/* ✅ নতুন পেনাল্টি রিসিট রাউট যুক্ত করা হলো */}
         <Route
           path="/penalties/receipt/:id"
           element={
@@ -244,7 +254,6 @@ function App() {
           }
         />
 
-        {/* ✅ নতুন পেনাল্টি ম্যানেজমেন্ট রাউট যুক্ত করা হলো */}
         <Route
           path="/penalties"
           element={
