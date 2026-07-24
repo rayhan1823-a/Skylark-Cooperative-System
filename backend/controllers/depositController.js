@@ -389,14 +389,25 @@ const updateDeposit = async (req, res) => {
 };
 
 // ======================================
-// Delete Deposit
+// Delete Deposit (Safely handled)
 // ======================================
 const deleteDeposit = async (req, res) => {
     const session = await mongoose.startSession();
     session.startTransaction();
 
     try {
-        const deposit = await Deposit.findById(req.params.id).session(session);
+        const depositId = req.params.id;
+
+        if (!mongoose.Types.ObjectId.isValid(depositId)) {
+            await session.abortTransaction();
+            session.endSession();
+            return res.status(400).json({
+                success: false,
+                message: "Invalid Deposit ID format",
+            });
+        }
+
+        const deposit = await Deposit.findById(depositId).session(session);
 
         if (!deposit) {
             await session.abortTransaction();
@@ -407,6 +418,8 @@ const deleteDeposit = async (req, res) => {
                 message: "Deposit not found",
             });
         }
+
+        const memberId = deposit.memberId;
 
         // ==========================
         // Delete Transaction
@@ -424,12 +437,19 @@ const deleteDeposit = async (req, res) => {
         // ==========================
         // Delete Deposit
         // ==========================
-        await deposit.deleteOne({ session });
+        await Deposit.findByIdAndDelete(depositId).session(session);
 
         // ==========================
-        // Rebuild Allocation
+        // Rebuild Allocation (Safe handling)
         // ==========================
-        const allocationResult = await rebuildAllocation(deposit.memberId);
+        let allocationResult = null;
+        try {
+            if (typeof rebuildAllocation === "function") {
+                allocationResult = await rebuildAllocation(memberId);
+            }
+        } catch (allocError) {
+            console.log("Allocation Rebuild Warning during delete:", allocError.message);
+        }
 
         await session.commitTransaction();
         session.endSession();
