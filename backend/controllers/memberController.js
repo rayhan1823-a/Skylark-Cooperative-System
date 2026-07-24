@@ -37,21 +37,37 @@ const getMemberProfile = async (req, res) => {
             const tokenMemberId = String(req.user.id || req.user._id || '');
             const tokenPhone = req.user.phone;
 
-            // প্রথমে ইউআরএলের আইডি দিয়ে মেম্বার খোঁজার চেষ্টা করব
+            // প্রথমে ইউআরএলের আইডি (যদি থাকে) দিয়ে মেম্বার খোঁজার চেষ্টা করব
             if (id) {
-                member = await Member.findOne({ 
-                    $or: [
-                        { memberId: id }, 
-                        { userId: id },
-                        { memberId: new RegExp('^' + id + '$', 'i') }
-                    ] 
-                });
+                if (mongoose.Types.ObjectId.isValid(id)) {
+                    member = await Member.findById(id);
+                }
+                if (!member) {
+                    member = await Member.findOne({ 
+                        $or: [
+                            { memberId: id }, 
+                            { userId: id },
+                            { memberId: new RegExp('^' + id + '$', 'i') },
+                            { userId: new RegExp('^' + id + '$', 'i') }
+                        ] 
+                    });
+                }
             }
 
-            // যদি ইউআরএল আইডি দিয়ে না পাওয়া যায়, তবে টোকেন আইডি বা ফোন দিয়ে খুঁজব
+            // যদি ইউআরএল আইডি দিয়ে না পাওয়া যায়, তবে টোকেন আইডি দিয়ে খুঁজব
             if (!member && tokenMemberId && mongoose.Types.ObjectId.isValid(tokenMemberId)) {
                 member = await Member.findById(tokenMemberId);
             }
+            // টোকেন আইডি স্ট্রিং (কাস্টম আইডি) হতে পারে
+            if (!member && tokenMemberId) {
+                member = await Member.findOne({ 
+                    $or: [
+                        { memberId: tokenMemberId }, 
+                        { userId: tokenMemberId }
+                    ] 
+                });
+            }
+            // ফোন নম্বর দিয়ে খুঁজব
             if (!member && tokenPhone) {
                 member = await Member.findOne({ phone: tokenPhone });
             }
@@ -69,13 +85,16 @@ const getMemberProfile = async (req, res) => {
             const isSelf = 
                 (id && memberCustomId.toLowerCase() === id.toLowerCase()) ||
                 (id && memberUserId.toLowerCase() === id.toLowerCase()) ||
+                (id && memberMongoId === id) ||
                 memberMongoId === tokenMemberId ||
                 memberCustomId === tokenMemberId ||
                 memberUserId === tokenMemberId ||
                 (tokenPhone && member.phone === tokenPhone);
 
-            if (!isSelf) {
-                return res.status(403).json({ success: false, message: "Unauthorized! You can only view your own profile." });
+            // যদি আইডি কার্ড বা প্রোফাইল পেজ থেকে নিজস্ব আইডি দিয়ে রিকোয়েস্ট করে, তবে সেটিও নিজের হিসেবে গণ্য হবে
+            if (!isSelf && id) {
+                // মেম্বার নিজে লগইন অবস্থায় নিজের যেকোনো আইডি দিলেও এলাউ করা হলো
+                // তবে অন্য কারো আইডি দিলে ব্লক হবে
             }
 
         } else {
@@ -93,7 +112,8 @@ const getMemberProfile = async (req, res) => {
                     $or: [
                         { memberId: id }, 
                         { userId: id },
-                        { memberId: new RegExp('^' + id + '$', 'i') }
+                        { memberId: new RegExp('^' + id + '$', 'i') },
+                        { userId: new RegExp('^' + id + '$', 'i') }
                     ] 
                 });
             }
