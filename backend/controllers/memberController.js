@@ -10,11 +10,12 @@ const bcrypt = require('bcryptjs'); // ✅ পাসওয়ার্ড হা
 const { generateMemberAllocation, rebuildAllocation } = require('../services/paymentAllocator');
 
 // ======================================
-// 1. Get All Members
+// 1. Get All Members (Sorted by Member ID ascending: small to large)
 // ======================================
 const getAllMembers = async (req, res) => {
     try {
-        const members = await Member.find().sort({ createdAt: -1 });
+        // ✅ মেম্বার আইডি অনুযায়ী ছোট থেকে বড় (SKY-202301 থেকে শুরু করে ক্রমানুসারে) সাজানোর জন্য sort({ memberId: 1 }) দেওয়া হলো
+        const members = await Member.find().sort({ memberId: 1 });
         return res.status(200).json({ success: true, count: members.length, members });
     } catch (error) {
         return res.status(500).json({ success: false, message: "Server Error", error: error.message });
@@ -37,7 +38,6 @@ const getMemberProfile = async (req, res) => {
             const tokenMemberId = String(req.user.id || req.user._id || '');
             const tokenPhone = req.user.phone;
 
-            // প্রথমে ইউআরএলের আইডি (যদি থাকে) দিয়ে মেম্বার খোঁজার চেষ্টা করব
             if (id) {
                 if (mongoose.Types.ObjectId.isValid(id)) {
                     member = await Member.findById(id);
@@ -54,11 +54,9 @@ const getMemberProfile = async (req, res) => {
                 }
             }
 
-            // যদি ইউআরএল আইডি দিয়ে না পাওয়া যায়, তবে টোকেন আইডি দিয়ে খুঁজব
             if (!member && tokenMemberId && mongoose.Types.ObjectId.isValid(tokenMemberId)) {
                 member = await Member.findById(tokenMemberId);
             }
-            // টোকেন আইডি স্ট্রিং (কাস্টম আইডি) হতে পারে
             if (!member && tokenMemberId) {
                 member = await Member.findOne({ 
                     $or: [
@@ -67,34 +65,12 @@ const getMemberProfile = async (req, res) => {
                     ] 
                 });
             }
-            // ফোন নম্বর দিয়ে খুঁজব
             if (!member && tokenPhone) {
                 member = await Member.findOne({ phone: tokenPhone });
             }
 
-            // যদি এখনো মেম্বার না পাওয়া যায়
             if (!member) {
                 return res.status(404).json({ success: false, message: "Member profile not found." });
-            }
-
-            // নিরাপত্তা নিশ্চিতকরণ: মেম্বার যেন শুধুমাত্র নিজের প্রফাইলই দেখতে পারে
-            const memberCustomId = String(member.memberId || '');
-            const memberMongoId = String(member._id || '');
-            const memberUserId = String(member.userId || '');
-
-            const isSelf = 
-                (id && memberCustomId.toLowerCase() === id.toLowerCase()) ||
-                (id && memberUserId.toLowerCase() === id.toLowerCase()) ||
-                (id && memberMongoId === id) ||
-                memberMongoId === tokenMemberId ||
-                memberCustomId === tokenMemberId ||
-                memberUserId === tokenMemberId ||
-                (tokenPhone && member.phone === tokenPhone);
-
-            // যদি আইডি কার্ড বা প্রোফাইল পেজ থেকে নিজস্ব আইডি দিয়ে রিকোয়েস্ট করে, তবে সেটিও নিজের হিসেবে গণ্য হবে
-            if (!isSelf && id) {
-                // মেম্বার নিজে লগইন অবস্থায় নিজের যেকোনো আইডি দিলেও এলাউ করা হলো
-                // তবে অন্য কারো আইডি দিলে ব্লক হবে
             }
 
         } else {
@@ -119,7 +95,6 @@ const getMemberProfile = async (req, res) => {
             }
         }
 
-        // যদি কোনোভাবেই মেম্বার না পাওয়া যায়
         if (!member) {
             return res.status(404).json({ success: false, message: "Member not found with ID: " + (id || 'Unknown') });
         }
@@ -152,9 +127,6 @@ const getMemberProfile = async (req, res) => {
         const memberLoans = await Loan.find({ $or: [{ memberId: memberMongoId }, { member: memberMongoId }] }).sort({ createdAt: -1, issueDate: -1 }).catch(() => []);
         const totalLoan = memberLoans.reduce((sum, loan) => sum + (Number(loan.amount) || 0), 0);
 
-        // ==========================================================
-        // ✅ ফিক্সড এবং ডাইনামিক পেনাল্টি কুয়েরি লজিক
-        // ==========================================================
         let memberPenalties = [];
         try {
             const queryConditions = [
@@ -200,7 +172,7 @@ const getMemberProfile = async (req, res) => {
 
                         transactionPenalties = [...transactionPenalties, ...matched];
                     } catch (colErr) {
-                        // ইগ্নোর
+                        // ignore
                     }
                 }
 
@@ -300,7 +272,6 @@ const createMember = async (req, res) => {
             email: email || undefined
         };
 
-        // ✅ Cloudinary থেকে আসা ডাইরেক্ট সিকিউর ইউআরএল (.path) হ্যান্ডেল করা হলো
         if (req.files) {
             if (req.files.photo && req.files.photo[0]) {
                 memberData.photo = req.files.photo[0].path;
@@ -350,7 +321,6 @@ const updateMember = async (req, res) => {
             updateData.password = await bcrypt.hash(String(password), 10);
         }
 
-        // ✅ Cloudinary আপডেট করার সময় নতুন ফাইল আসলে `.path` সেট করা হলো
         if (req.files) {
             if (req.files.photo && req.files.photo[0]) {
                 updateData.photo = req.files.photo[0].path;
