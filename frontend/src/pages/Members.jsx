@@ -29,12 +29,18 @@ function Members() {
   }, []);
 
   // ==========================
-  // Fetch Members (Updated with Token Header)
+  // Fetch Members (Updated with Secure Token Handling)
   // ==========================
   const fetchMembers = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("token") || localStorage.getItem("authToken") || localStorage.getItem("accessToken");
+
+      if (!token) {
+        toast.error("Authentication token not found. Please login again.");
+        setLoading(false);
+        return;
+      }
 
       const res = await axios.get(`${API_URL}/api/members`, {
         headers: {
@@ -64,7 +70,7 @@ function Members() {
     if (!ok) return;
 
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("token") || localStorage.getItem("authToken") || localStorage.getItem("accessToken");
 
       await axios.delete(`${API_URL}/api/members/${id}`, {
         headers: {
