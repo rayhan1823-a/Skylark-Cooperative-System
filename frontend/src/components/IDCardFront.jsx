@@ -5,41 +5,47 @@ function IDCardFront({ member }) {
   if (!member) return null;
 
   // ==========================================
-  // Base URL
+  // Base URL (라이ভ এবং লোকাল দুইটার জন্যই সুরক্ষিত)
   // ==========================================
 
-  const BASE_URL = "http://localhost:5000";
+  const BASE_URL = "https://skylark-cooperative-system.onrender.com";
 
   // ==========================================
-  // Image URL Builder
+  // Image URL Builder (সংশোধিত ও শক্তিশালী ক্লিনিং লজিক)
   // ==========================================
 
   const buildImageUrl = (file, folder = "") => {
     if (!file) return "";
 
-    // Full URL
+    // যদি অলরেডি সম্পূর্ণ Http লিংক হয়
     if (file.startsWith("http")) {
       return file;
     }
 
-    // Already /uploads/...
-    if (file.startsWith("/uploads")) {
-      return `${BASE_URL}${file}`;
+    // ব্যাকস্ল্যাশ বা উইন্ডোজ পাথ ফিক্স এবং অতিরিক্ত স্লাশ দূর করা
+    let cleanFile = file.replace(/\\/g, "/");
+    
+    // যদি অলরে디 /uploads/... থাকে
+    if (cleanFile.startsWith("/uploads")) {
+      return `${BASE_URL}${cleanFile}`;
     }
 
-    // Already folder included
+    // যদি ফোল্ডারের নাম অলরেডি যুক্ত থাকে
     if (
-      file.startsWith("photos/") ||
-      file.startsWith("signatures/") ||
-      file.startsWith("nid/") ||
-      file.startsWith("nominee/") ||
-      file.startsWith("nominee-nid/")
+      cleanFile.startsWith("photos/") ||
+      cleanFile.startsWith("signatures/") ||
+      cleanFile.startsWith("nid/") ||
+      cleanFile.startsWith("nominee/") ||
+      cleanFile.startsWith("nominee-nid/")
     ) {
-      return `${BASE_URL}/uploads/${file}`;
+      // যদি শুরুতে স্লাশ না থাকে একটি স্লাশ যুক্ত করা
+      const formattedFile = cleanFile.startsWith("/") ? cleanFile : `/${cleanFile}`;
+      return `${BASE_URL}/uploads${formattedFile}`;
     }
 
-    // Only filename
-    return `${BASE_URL}/uploads/${folder}/${file}`;
+    // শুধুমাত্র ফাইলের নাম থাকলে ফোল্ডারসহ পাথ তৈরি
+    const cleanFileName = cleanFile.split("/").pop();
+    return `${BASE_URL}/uploads/${folder}/${cleanFileName}`;
   };
 
   // ==========================================
