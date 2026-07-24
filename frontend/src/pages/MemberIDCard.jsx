@@ -17,23 +17,25 @@ function MemberIDCard() {
       try {
         const token = localStorage.getItem("token");
 
-        // এখানে লোকালহোস্টের বদলে রেন্ডারের লাইভ ব্যাকএন্ড ইউআরএল যুক্ত করা হয়েছে
-        const res = await axios.get(
-          `https://skylark-cooperative-system.onrender.com/api/members/${id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        // ✅ ফিক্সড: যদি ইউআরএলে id না থাকে বা রেন্ডারের সময় প্রবলেম হয়, তবে টোকেন বেসড প্রোফাইল রাউট কল হবে
+        const endpoint = id 
+          ? `https://skylark-cooperative-system.onrender.com/api/members/${id}`
+          : `https://skylark-cooperative-system.onrender.com/api/members/profile`;
+
+        const res = await axios.get(endpoint, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         console.log("Member API Response:", res.data);
 
         if (res.data.success) {
-          console.log("Member Object:", res.data.member);
-          console.log("Photo:", res.data.member.photo);
+          const memberData = res.data.member || res.data;
+          console.log("Member Object:", memberData);
+          console.log("Photo:", memberData.photo);
 
-          setMember(res.data.member);
+          setMember(memberData);
         } else {
           setMember(null);
         }
