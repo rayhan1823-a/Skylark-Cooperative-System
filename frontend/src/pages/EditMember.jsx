@@ -18,8 +18,12 @@ function EditMember() {
 
   const loadMember = async () => {
     try {
+      const token = localStorage.getItem("token") || localStorage.getItem("authToken");
       const res = await axios.get(
-        `https://skylark-cooperative-system.onrender.com/api/members/profile/${id}`
+        `https://skylark-cooperative-system.onrender.com/api/members/profile/${id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
       );
       setFormData(res.data.member);
     } catch (error) {
@@ -49,9 +53,16 @@ function EditMember() {
 
   const updateMember = async () => {
     try {
+      const token = localStorage.getItem("token") || localStorage.getItem("authToken");
       const data = new FormData();
+      
       Object.keys(formData).forEach((key) => {
-        if (key !== '_id' && key !== '__v' && formData[key] !== null && typeof formData[key] !== 'object') {
+        if (
+          key !== '_id' && 
+          key !== '__v' && 
+          formData[key] !== null && 
+          typeof formData[key] !== 'object'
+        ) {
           data.append(key, formData[key]);
         }
       });
@@ -65,7 +76,12 @@ function EditMember() {
       await axios.put(
         `https://skylark-cooperative-system.onrender.com/api/members/${id}`,
         data,
-        { headers: { "Content-Type": "multipart/form-data" } }
+        { 
+          headers: { 
+            "Content-Type": "multipart/form-data",
+            "Authorization": `Bearer ${token}` // টোকেন যুক্ত করা হলো যাতে 401 এরর না আসে
+          } 
+        }
       );
 
       alert("✅ Member Updated Successfully");
