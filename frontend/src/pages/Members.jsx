@@ -170,9 +170,6 @@ function Members() {
                   }
                 }
 
-                // আইডি সিলেকশন: কাস্টম memberId থাকলে সেটি পাস হবে, না থাকলে _id পাস হবে
-                const targetId = member.memberId || member._id;
-
                 return (
                   <tr key={member._id} className="hover:bg-gray-50 transition">
                     <td className="p-4 text-center text-gray-700">{index + 1}</td>
@@ -227,9 +224,9 @@ function Members() {
                     
                     <td className="p-4">
                       <div className="flex flex-wrap justify-center gap-2">
-                        {/* View Button (সবাই দেখতে পাবে) */}
+                        {/* View Button (সবাই দেখতে পাবে - এখন সঠিক _id পাস করবে) */}
                         <Link
-                          to={`/member/${targetId}`}
+                          to={`/member/${member._id}`}
                           className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-sm font-medium transition"
                         >
                           View
