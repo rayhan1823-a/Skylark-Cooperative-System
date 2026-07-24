@@ -1,46 +1,43 @@
 const multer = require("multer");
 const path = require("path");
-const fs = require("fs");
+const cloudinary = require("cloudinary").v2;
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
 
 // ======================================
-// Upload Directories
+// Cloudinary Configuration
 // ======================================
 
-const uploadDirs = {
-  photo: path.join(__dirname, "../uploads/photos"),
-  nidFile: path.join(__dirname, "../uploads/nid"),
-  signature: path.join(__dirname, "../uploads/signatures"),
-  nomineePhoto: path.join(__dirname, "../uploads/nominee"),
-  nomineeNid: path.join(__dirname, "../uploads/nominee-nid"),
-};
-
-// Create folders if not exists
-Object.values(uploadDirs).forEach((dir) => {
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 // ======================================
-// Multer Storage
+// Cloudinary Storage Setup (Replacing diskStorage)
 // ======================================
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(
-      null,
-      uploadDirs[file.fieldname] || uploadDirs.photo
-    );
-  },
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: async (req, file) => {
+    // আগের ফোল্ডার স্ট্রাকচারের নাম অনুযায়ী ক্লাউডিনারিতে ফোল্ডার নির্ধারণ
+    let folderName = "skylark-cooperative/photos";
 
-  filename: (req, file, cb) => {
+    if (file.fieldname === "nidFile") folderName = "skylark-cooperative/nid";
+    else if (file.fieldname === "signature") folderName = "skylark-cooperative/signatures";
+    else if (file.fieldname === "nomineePhoto") folderName = "skylark-cooperative/nominee";
+    else if (file.fieldname === "nomineeNid") folderName = "skylark-cooperative/nominee-nid";
+
     const uniqueName =
       Date.now() +
       "-" +
-      Math.round(Math.random() * 1000000000) +
-      path.extname(file.originalname);
+      Math.round(Math.random() * 1000000000);
 
-    cb(null, uniqueName);
+    return {
+      folder: folderName,
+      allowed_formats: ["jpg", "jpeg", "png", "webp", "pdf"],
+      public_id: uniqueName,
+    };
   },
 });
 

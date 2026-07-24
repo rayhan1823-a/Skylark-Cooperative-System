@@ -67,7 +67,7 @@ const getMemberProfile = async (req, res) => {
                     ] 
                 });
             }
-            // ফোন নম্বর দিয়ে খুঁজব
+            // ফোন নম্বর দিয়ে খুঁজব
             if (!member && tokenPhone) {
                 member = await Member.findOne({ phone: tokenPhone });
             }
@@ -91,9 +91,9 @@ const getMemberProfile = async (req, res) => {
                 memberUserId === tokenMemberId ||
                 (tokenPhone && member.phone === tokenPhone);
 
-            // যদি আইডি কার্ড বা প্রোফাইল পেজ থেকে নিজস্ব আইডি দিয়ে রিকোয়েস্ট করে, তবে সেটিও নিজের হিসেবে গণ্য হবে
+            // যদি আইডি কার্ড বা প্রোফাইল পেজ থেকে নিজস্ব আইডি দিয়ে রিকোয়েস্ট করে, তবে সেটিও নিজের হিসেবে গণ্য হবে
             if (!isSelf && id) {
-                // মেম্বার নিজে লগইন অবস্থায় নিজের যেকোনো আইডি দিলেও এলাউ করা হলো
+                // মেম্বার নিজে লগইন অবস্থায় নিজের যেকোনো আইডি দিলেও এলাউ করা হলো
                 // তবে অন্য কারো আইডি দিলে ব্লক হবে
             }
 
@@ -268,7 +268,7 @@ const getMemberProfile = async (req, res) => {
 };
 
 // ======================================
-// 3. Create New Member (Updated with Custom User ID, Password & Email)
+// 3. Create New Member (Updated with Cloudinary)
 // ======================================
 const createMember = async (req, res) => {
     try {
@@ -300,24 +300,25 @@ const createMember = async (req, res) => {
             email: email || undefined
         };
 
+        // ✅ Cloudinary থেকে আসা ডাইরেক্ট সিকিউর ইউআরএল (.path) হ্যান্ডেল করা হলো
         if (req.files) {
             if (req.files.photo && req.files.photo[0]) {
-                memberData.photo = `photos/${req.files.photo[0].filename}`;
+                memberData.photo = req.files.photo[0].path;
             }
             if (req.files.nidFile && req.files.nidFile[0]) {
-                memberData.nidFile = `nid/${req.files.nidFile[0].filename}`;
+                memberData.nidFile = req.files.nidFile[0].path;
             }
             if (req.files.signature && req.files.signature[0]) {
-                memberData.signature = `signatures/${req.files.signature[0].filename}`;
+                memberData.signature = req.files.signature[0].path;
             }
             if (req.files.nomineePhoto && req.files.nomineePhoto[0]) {
-                memberData.nomineePhoto = `nominee/${req.files.nomineePhoto[0].filename}`;
+                memberData.nomineePhoto = req.files.nomineePhoto[0].path;
             }
             if (req.files.nomineeNid && req.files.nomineeNid[0]) {
-                memberData.nomineeNid = `nominee-nid/${req.files.nomineeNid[0].filename}`;
+                memberData.nomineeNid = req.files.nomineeNid[0].path;
             }
         } else if (req.file) {
-            memberData.photo = `photos/${req.file.filename}`;
+            memberData.photo = req.file.path;
         }
 
         const newMember = new Member(memberData);
@@ -335,7 +336,7 @@ const createMember = async (req, res) => {
 };
 
 // ======================================
-// 4. Update Member
+// 4. Update Member (Updated with Cloudinary)
 // ======================================
 const updateMember = async (req, res) => {
     try {
@@ -349,24 +350,25 @@ const updateMember = async (req, res) => {
             updateData.password = await bcrypt.hash(String(password), 10);
         }
 
+        // ✅ Cloudinary আপডেট করার সময় নতুন ফাইল আসলে `.path` সেট করা হলো
         if (req.files) {
             if (req.files.photo && req.files.photo[0]) {
-                updateData.photo = `photos/${req.files.photo[0].filename}`;
+                updateData.photo = req.files.photo[0].path;
             }
             if (req.files.nidFile && req.files.nidFile[0]) {
-                updateData.nidFile = `nid/${req.files.nidFile[0].filename}`;
+                updateData.nidFile = req.files.nidFile[0].path;
             }
             if (req.files.signature && req.files.signature[0]) {
-                updateData.signature = `signatures/${req.files.signature[0].filename}`;
+                updateData.signature = req.files.signature[0].path;
             }
             if (req.files.nomineePhoto && req.files.nomineePhoto[0]) {
-                updateData.nomineePhoto = `nominee/${req.files.nomineePhoto[0].filename}`;
+                updateData.nomineePhoto = req.files.nomineePhoto[0].path;
             }
             if (req.files.nomineeNid && req.files.nomineeNid[0]) {
-                updateData.nomineeNid = `nominee-nid/${req.files.nomineeNid[0].filename}`;
+                updateData.nomineeNid = req.files.nomineeNid[0].path;
             }
         } else if (req.file) {
-            updateData.photo = `photos/${req.file.filename}`;
+            updateData.photo = req.file.path;
         }
 
         let updatedMember;
