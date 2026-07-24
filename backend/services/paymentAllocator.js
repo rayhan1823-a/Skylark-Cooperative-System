@@ -8,7 +8,7 @@
 // ======================================
 
 const Deposit = require("../models/Deposit");
-const Withdrawal = require("../models/Withdrawal"); // ✅ উইথড্রয়াল মডেল যুক্ত করা হলো
+const Withdrawal = require("../models/Withdrawal"); // ✅ উইথড্রয়াল মডেল যুক্ত
 
 // ======================================
 // Configuration
@@ -192,14 +192,14 @@ const generateMemberAllocation = async (memberId) => {
       }
     }
 
-    // ✅ সঠিক লজিক: উত্তোলিত টাকা বকেয়ার সাথে যোগ না করে বা ভুলভাবে না দেখিয়ে 
-    // যদি মেম্বারের বকেয়া হিসাব করতে হয়, তবে স্বাভাবিক নিয়ম বজায় রাখা হলো। 
-    // (যেহেতু সে বেশি জমা দিয়ে পরে তুলে নিয়েছে, তাই মূল বকেয়া `totalDue`-তে এর প্রভাব পড়ার কথা নয় বা আপনার চাহিদা অনুযায়ী এটি অ্যাডজাস্ট করা হয়েছে)।
-    
+    // ✅ মূল সংশোধনী: যেহেতু সদস্য জমানো টাকা থেকে ২৬,০০০ টাকা তুলে নিয়েছে, 
+    // তাই বকেয়া হিসাব করার সময় ওই উত্তোলিত টাকা যোগ হবে (কারণ টাকা তুলে নেওয়ায় আগের পরিশোধ করা মাসগুলো পুনরায় বকেয়া হিসেবে গণ্য হবে)।
+    let adjustedTotalDue = totalDue + totalWithdrawal;
+
     return {
       totalPaid,
-      totalDue, // নিয়মিত মাসিক বকেয়া সঠিকভাবে এখানে দেখাবে
-      totalWithdrawal, // উইথড্রর হিসাব আলাদাভাবে সেভ থাকবে
+      totalDue: adjustedTotalDue, // ✅ এখন সঠিক বকেয়া দেখাবে (মাসিক বকেয়া + উত্তোলিত টাকার সমন্বয়)
+      totalWithdrawal, 
       monthlyDetails,
     };
   } catch (error) {
@@ -231,7 +231,6 @@ const rebuildAllocation = async (memberId) => {
     const current = getCurrentYearMonth();
 
     // সিস্টেমের শুরু থেকে বর্তমান মাস এবং তার পরেও (অগ্রিম এর জন্য) ট্র্যাক রেডি করা
-    // অগ্রিম বা ফিউচার পেমেন্ট হ্যান্ডেল করার জন্য আমরা ১ বছর বাড়তি জেনারেট করে রাখি ম্যাপে
     const targetEndYear = current.year + 1; 
     
     while (currentTrackYear < targetEndYear || (currentTrackYear === targetEndYear && currentTrackMonth <= 12)) {
