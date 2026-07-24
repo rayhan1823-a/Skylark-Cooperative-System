@@ -19,14 +19,13 @@ function MemberProfile() {
   const [loading, setLoading] = useState(true);
   const [loanAmount, setLoanAmount] = useState(0);
 
-  // ── সাধারণ সদস্য হলে সে কেবল নিজের প্রোফাইল দেখবে তা নিশ্চিত করা ──
+  // ── সাধারণ সদস্য হলে সে কেবল নিজের প্রোফাইল দেখবে তা নিশ্চিত করা (ফিক্সড) ──
   useEffect(() => {
-    const role = localStorage.getItem("role");
-    const loggedInMemberId = localStorage.getItem("memberId");
+    const role = (localStorage.getItem("role") || "").toLowerCase();
+    const loggedInMemberId = localStorage.getItem("memberId") || localStorage.getItem("userId") || localStorage.getItem("id");
 
-    // যদি ইউজার 'member' হয় এবং ইউআরএল-এর id যদি তার নিজের id-এর সাথে না মেলে
+    // যদি ইউজার 'member' হয় এবং ইউআরএল-এর id তার নিজের id-এর সাথে না মেলে
     if (role === "member" && loggedInMemberId && id !== loggedInMemberId) {
-      // তাকে সরাসরি তার নিজের প্রোফাইল পেজে পাঠিয়ে দেওয়া হবে
       navigate(`/members/${loggedInMemberId}`, { replace: true });
       return;
     }

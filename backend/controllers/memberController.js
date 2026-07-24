@@ -27,64 +27,81 @@ const getAllMembers = async (req, res) => {
 const getMemberProfile = async (req, res) => {
     try {
         let { id } = req.params;
-
-        // ✅ নিরাপত্তা চেক এবং অটো-রিডাইরেক্ট: 
-        // যদি ইউজার সাধারণ মেম্বার হয় এবং সে যদি নিজের আইডি বা ড্যাশবোর্ড থেকে রিকোয়েস্ট করে,
-        // অথবা রাউটে আইডি হিসেবে 'me' বা নিজের আইডি না পাঠিয়ে থাকে, তবে তাকে তার নিজস্ব আইডিতে রূপান্তর করে নেওয়া হবে।
-        if (req.user && req.user.role === 'MEMBER') {
-            if (!id || id === 'me' || id === 'profile') {
-                id = req.user.id || req.user._id;
-            }
-        }
-
-        if (!id) {
-            return res.status(400).json({ success: false, message: "Member ID is required" });
-        }
-        id = String(id).trim();
+        if (id) id = String(id).trim();
 
         let member = null;
+        const userRole = req.user && req.user.role ? String(req.user.role).toUpperCase() : '';
 
-        if (mongoose.Types.ObjectId.isValid(id)) {
-            member = await Member.findById(id);
-        }
+        // ✅ ১. যদি ইউজার সাধারণ মেম্বার হয় (MEMBER)
+        if (userRole === 'MEMBER') {
+            const tokenMemberId = String(req.user.id || req.user._id || '');
+            const tokenPhone = req.user.phone;
 
-        if (!member) {
-            member = await Member.findOne({ memberId: id });
-        }
-
-        if (!member) {
-            member = await Member.findOne({ memberId: new RegExp('^' + id + '$', 'i') });
-        }
-
-        // ইউজার আইডি দিয়েও প্রোফাইল খোঁজার সুবিধা যুক্ত করা হলো
-        if (!member) {
-            member = await Member.findOne({ userId: id });
-        }
-
-        // যদি টোকেনের আইডি দিয়ে সরাসরি পাওয়া না যায়, তবে টোকেনের ভেতর থাকা আইডি বা ফোন দিয়ে ফাইনাল খোঁজা
-        if (!member && req.user && req.user.role === 'MEMBER') {
-            if (mongoose.Types.ObjectId.isValid(req.user.id)) {
-                member = await Member.findById(req.user.id);
+            // প্রথমে ইউআরএলের আইডি দিয়ে মেম্বার খোঁজার চেষ্টা করব
+            if (id) {
+                member = await Member.findOne({ 
+                    $or: [
+                        { memberId: id }, 
+                        { userId: id },
+                        { memberId: new RegExp('^' + id + '$', 'i') }
+                    ] 
+                });
             }
-            if (!member && req.user.phone) {
-                member = await Member.findOne({ phone: req.user.phone });
+
+            // যদি ইউআরএল আইডি দিয়ে না পাওয়া যায়, তবে টোকেন আইডি বা ফোন দিয়ে খুঁজব
+            if (!member && tokenMemberId && mongoose.Types.ObjectId.isValid(tokenMemberId)) {
+                member = await Member.findById(tokenMemberId);
             }
-        }
+            if (!member && tokenPhone) {
+                member = await Member.findOne({ phone: tokenPhone });
+            }
 
-        if (!member) {
-            return res.status(404).json({ success: false, message: "Member not found with ID: " + id });
-        }
+            // যদি এখনো মেম্বার না পাওয়া যায়
+            if (!member) {
+                return res.status(404).json({ success: false, message: "Member profile not found." });
+            }
 
-        // নিরাপত্তা চেক: সাধারণ মেম্বার হলে সে কেবল নিজের প্রোফাইলই দেখতে পারবে, অন্যের নয়
-        if (req.user && req.user.role === 'MEMBER') {
+            // নিরাপত্তা নিশ্চিতকরণ: মেম্বার যেন শুধুমাত্র নিজের প্রফাইলই দেখতে পারে
+            const memberCustomId = String(member.memberId || '');
+            const memberMongoId = String(member._id || '');
+            const memberUserId = String(member.userId || '');
+
             const isSelf = 
-                String(member._id) === String(req.user.id || req.user._id) || 
-                String(member.userId) === String(req.user.id || req.user._id) || 
-                (req.user.phone && member.phone === req.user.phone);
+                (id && memberCustomId.toLowerCase() === id.toLowerCase()) ||
+                (id && memberUserId.toLowerCase() === id.toLowerCase()) ||
+                memberMongoId === tokenMemberId ||
+                memberCustomId === tokenMemberId ||
+                memberUserId === tokenMemberId ||
+                (tokenPhone && member.phone === tokenPhone);
 
             if (!isSelf) {
                 return res.status(403).json({ success: false, message: "Unauthorized! You can only view your own profile." });
             }
+
+        } else {
+            // ✅ ২. যদি অ্যাডমিন বা সুপার অ্যাডমিন বা স্টাফ হয়
+            if (!id) {
+                return res.status(400).json({ success: false, message: "Member ID is required" });
+            }
+
+            if (mongoose.Types.ObjectId.isValid(id)) {
+                member = await Member.findById(id);
+            }
+
+            if (!member) {
+                member = await Member.findOne({ 
+                    $or: [
+                        { memberId: id }, 
+                        { userId: id },
+                        { memberId: new RegExp('^' + id + '$', 'i') }
+                    ] 
+                });
+            }
+        }
+
+        // যদি কোনোভাবেই মেম্বার না পাওয়া যায়
+        if (!member) {
+            return res.status(404).json({ success: false, message: "Member not found with ID: " + (id || 'Unknown') });
         }
 
         const memberMongoId = member._id;
@@ -246,14 +263,12 @@ const createMember = async (req, res) => {
             return res.status(400).json({ success: false, message: "Member ID already exists!" });
         }
 
-        // যদি ইউজার আইডি দেওয়া হয়, তবে তা ডুপ্লিকেট কি না চেক করা
         const finalUserId = userId ? userId.trim() : memberId;
         const existingUser = await Member.findOne({ userId: finalUserId });
         if (existingUser) {
             return res.status(400).json({ success: false, message: "User ID already exists!" });
         }
 
-        // পাসওয়ার্ড হ্যান্ডলিং: অ্যাডমিন পাসওয়ার্ড দিলে সেটাই হাশ হবে, না দিলে মোবাইল নম্বর বা ডিফল্ট পাসওয়ার্ড
         const memberPhone = mobile || phone;
         const rawPassword = password ? String(password) : (memberPhone ? String(memberPhone) : "123456");
         const hashedPassword = await bcrypt.hash(rawPassword, 10);
@@ -265,7 +280,6 @@ const createMember = async (req, res) => {
             email: email || undefined
         };
 
-        // ✅ ফোল্ডারের নামসহ সঠিক পাথ সেভ করার লজিক
         if (req.files) {
             if (req.files.photo && req.files.photo[0]) {
                 memberData.photo = `photos/${req.files.photo[0].filename}`;
@@ -311,12 +325,10 @@ const updateMember = async (req, res) => {
         const { _id, memberId, password, ...restData } = req.body;
         let updateData = { ...restData };
 
-        // যদি আপডেট করার সময় নতুন পাসওয়ার্ড দেওয়া হয়, তবে তা হাশ করে আপডেট করা
         if (password) {
             updateData.password = await bcrypt.hash(String(password), 10);
         }
 
-        // ✅ আপডেট করার সময় ফোল্ডারের নামসহ সঠিক পাথ সেভ করার লজিক
         if (req.files) {
             if (req.files.photo && req.files.photo[0]) {
                 updateData.photo = `photos/${req.files.photo[0].filename}`;

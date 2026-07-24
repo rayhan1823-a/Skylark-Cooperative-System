@@ -2,20 +2,20 @@ const express = require("express");
 const router = express.Router();
 
 const {
-  createMember,
-  getAllMembers,
-  getMemberProfile,
-  updateMember,
-  deleteMember,
-  getDashboardStats,
+    createMember,
+    getAllMembers,
+    getMemberProfile,
+    updateMember,
+    deleteMember,
+    getDashboardStats,
 } = require("../controllers/memberController");
 
 // ✅ সঠিক `uploadMemberFiles` ইম্পোর্ট
 const {
-  uploadMemberFiles,
+    uploadMemberFiles,
 } = require("../middlewares/upload");
 
-// ✅ অথেন্টিকেশন ও রোল মিডলওয়্যার ইম্পোর্ট
+// ✅ অথেন্টিকেশন ও রোল মিডলওয়্যার ইম্পোর্ট
 const authMiddleware = require("../middlewares/authMiddleware");
 const roleMiddleware = require("../middlewares/roleMiddleware");
 
@@ -27,8 +27,9 @@ router.get("/", authMiddleware, getAllMembers);
 // নতুন মেম্বার তৈরি শুধু Super Admin বা Staff করতে পারবে
 router.post("/", authMiddleware, roleMiddleware("SUPER_ADMIN", "STAFF"), uploadMemberFiles, createMember);
 
-// ৩. ডায়নামিক আইডি রাউট (সবার নিচে থাকবে)
-router.get("/:id", authMiddleware, getMemberProfile);
+// ৩. ডায়নামিক আইডি রাউট (সবার নিচে থাকবে) - সাধারণ মেম্বাররাও যেন নিজের প্রোফাইল দেখতে পারে সেজন্য 'MEMBER' রোল যুক্ত করা হলো
+router.get("/:id", authMiddleware, roleMiddleware("SUPER_ADMIN", "STAFF", "MEMBER"), getMemberProfile);
+
 // মেম্বার আপডেট শুধু Super Admin বা Staff করতে পারবে
 router.put("/:id", authMiddleware, roleMiddleware("SUPER_ADMIN", "STAFF"), uploadMemberFiles, updateMember);
 // মেম্বার ডিলিট শুধু Super Admin করতে পারবে
