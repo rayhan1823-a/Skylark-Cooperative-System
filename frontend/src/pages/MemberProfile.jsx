@@ -98,11 +98,15 @@ function MemberProfile() {
     );
   }
 
-  // ইমেজের সঠিক পাথ তৈরি করার জন্য লজিক
-  let profileImageUrl = "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/icons/person-circle.svg";
+  // ইমেজের সঠিক পাথ তৈরি করার লজিক
+  let profileImageUrl = "";
   if (member.photo) {
-    if (member.photo.startsWith("http")) {
+    if (member.photo.startsWith("http") || member.photo.startsWith("blob")) {
       profileImageUrl = member.photo;
+    } else if (member.photo.startsWith("/uploads")) {
+      profileImageUrl = `${BASE_URL}${member.photo}`;
+    } else if (member.photo.startsWith("uploads")) {
+      profileImageUrl = `${BASE_URL}/${member.photo}`;
     } else {
       const cleanFileName = member.photo.replace(/\\/g, '/').split('/').pop();
       profileImageUrl = `${BASE_URL}/uploads/photos/${cleanFileName}`;
@@ -132,15 +136,31 @@ function MemberProfile() {
               </div>
           </div>
           <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
-            <img 
-              src={profileImageUrl} 
-              className="w-40 h-40 rounded-full object-cover border-4 border-gray-100 shadow-md bg-gray-100" 
-              alt={member.name}
-              onError={(e) => {
-                e.target.onerror = null; 
-                e.target.src = "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/icons/person-circle.svg";
-              }}
-            />
+            
+            {/* Profile Image & Fallback Initial Letter Avatar */}
+            <div className="relative">
+              {profileImageUrl ? (
+                <img 
+                  src={profileImageUrl} 
+                  className="w-40 h-40 rounded-full object-cover border-4 border-gray-100 shadow-md bg-gray-100" 
+                  alt={member.name}
+                  onError={(e) => {
+                    e.target.onerror = null; 
+                    e.target.style.display = "none";
+                    const fallbackEl = document.getElementById("fallback-avatar");
+                    if (fallbackEl) fallbackEl.style.display = "flex";
+                  }}
+                />
+              ) : null}
+
+              <div 
+                id="fallback-avatar" 
+                className={`w-40 h-40 rounded-full bg-blue-100 text-blue-600 font-extrabold items-center justify-center text-5xl border-4 border-gray-100 shadow-md ${profileImageUrl ? 'hidden' : 'flex'}`}
+              >
+                {member.name ? member.name.charAt(0).toUpperCase() : "U"}
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-6 flex-1 w-full">
               <div><p className="text-gray-500 text-sm">Member ID</p><p className="font-bold text-lg text-blue-600">{member.memberId}</p></div>
               <div><p className="text-gray-500 text-sm">Name</p><p className="font-bold text-lg">{member.name}</p></div>
