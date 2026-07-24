@@ -147,8 +147,7 @@ const login = async (req, res) => {
 const changePassword = async (req, res) => {
   try {
     const { oldPassword, newPassword } = req.body;
-
-    const userId = req.user.id;
+    const userId = req.user.id; // টোকেন থেকে ইউজারের আইডি নেওয়া হচ্ছে
 
     if (!oldPassword || !newPassword) {
       return res.status(400).json({
@@ -166,10 +165,8 @@ const changePassword = async (req, res) => {
       });
     }
 
-    const isMatch = await bcrypt.compare(
-      oldPassword,
-      user.password
-    );
+    // পুরনো পাসওয়ার্ড ম্যাচ করছে কিনা চেক করা
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
 
     if (!isMatch) {
       return res.status(401).json({
@@ -178,11 +175,8 @@ const changePassword = async (req, res) => {
       });
     }
 
-    user.password = await bcrypt.hash(
-      newPassword,
-      10
-    );
-
+    // নতুন পাসওয়ার্ড এনক্রিপ্ট করে সেভ করা
+    user.password = await bcrypt.hash(newPassword, 10);
     await user.save();
 
     return res.status(200).json({
@@ -191,9 +185,11 @@ const changePassword = async (req, res) => {
     });
   } catch (error) {
     return res.status(500).json({
-      success: false,
-      message: "Server Error",
-      error: error.message,
+      success: {
+        success: false,
+        message: "Server Error",
+        error: error.message,
+      },
     });
   }
 };
@@ -201,5 +197,5 @@ const changePassword = async (req, res) => {
 module.exports = {
   register,
   login,
-  changePassword,
+  changePassword, // ✅ এক্সপোর্ট করা হলো
 };

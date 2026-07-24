@@ -136,15 +136,21 @@ function MainLayout({ children }) {
                         </div>
                       </div>
                       <button
-                        className="w-full text-left px-5 py-3 hover:bg-gray-100 transition"
+                        onClick={() => setShowMenu(false)}
+                        className="w-full text-left px-5 py-3 hover:bg-gray-100 transition block"
                       >
                         👤 My Profile
                       </button>
-                      <button
-                        className="w-full text-left px-5 py-3 hover:bg-gray-100 transition"
+                      
+                      {/* ✅ Change Password লিঙ্কে রূপান্তর করা হলো */}
+                      <Link
+                        to="/change-password"
+                        onClick={() => setShowMenu(false)}
+                        className="w-full text-left px-5 py-3 hover:bg-gray-100 transition block text-gray-800"
                       >
                         🔑 Change Password
-                      </button>
+                      </Link>
+
                       <button
                         onClick={logout}
                         className="w-full text-left px-5 py-3 text-red-600 hover:bg-red-50 transition flex items-center gap-2"

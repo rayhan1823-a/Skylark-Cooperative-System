@@ -7,6 +7,7 @@ import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 import VerifyOTP from "./pages/VerifyOTP";
 import ResetPassword from "./pages/ResetPassword";
+import ChangePassword from "./pages/ChangePassword"; // ✅ পাসওয়ার্ড পরিবর্তনের পেজ ইম্পোর্ট করা হলো
 import ProtectedRoute from "./components/ProtectedRoute";
 
 // Dashboard
@@ -18,7 +19,7 @@ import AddMember from "./pages/AddMember";
 import EditMember from "./pages/EditMember";
 import MemberProfile from "./pages/MemberProfile";
 import MemberIDCard from "./pages/MemberIDCard";
-import UsersList from "./pages/UsersList"; // ✅ নতুন রেজিস্টার্ড ইউজার্স লিস্ট পেজ ইম্পোর্ট করা হলো
+import UsersList from "./pages/UsersList"; 
 
 // Print Receipt
 import PrintReceipt from "./pages/PrintReceipt";
@@ -128,7 +129,6 @@ function App() {
           }
         />
 
-        {/* ✅ নতুন ইউজার্স লিস্ট রাউট যুক্ত করা হলো */}
         <Route
           path="/users-list"
           element={
@@ -170,6 +170,18 @@ function App() {
           element={
             <ProtectedRoute>
               <MemberIDCard />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ==========================
+            Change Password (ProtectedRoute সহ)
+        ========================== */}
+        <Route
+          path="/change-password"
+          element={
+            <ProtectedRoute>
+              <ChangePassword />
             </ProtectedRoute>
           }
         />

@@ -12,6 +12,7 @@ const {
   getUser,
   updateUser,
   deleteUser,
+  changePassword, // ✅ পাসওয়ার্ড পরিবর্তনের কন্ট্রোলার ইমপোর্ট করা হলো
 } = require("../controllers/userController");
 
 // ✅ Fixed Path
@@ -24,6 +25,15 @@ const roleMiddleware = require("../middlewares/roleMiddleware");
 // ======================================
 
 router.use(authMiddleware);
+
+// ======================================
+// Change Password (Any logged-in user can change their password)
+// PUT /api/users/change-password
+// ======================================
+router.put(
+  "/change-password",
+  changePassword
+);
 
 // ======================================
 // Get All Users
