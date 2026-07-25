@@ -7,7 +7,7 @@ import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 import VerifyOTP from "./pages/VerifyOTP";
 import ResetPassword from "./pages/ResetPassword";
-import ChangePassword from "./pages/ChangePassword"; // ✅ পাসওয়ার্ড পরিবর্তনের পেজ ইম্পোর্ট করা হলো
+import ChangePassword from "./pages/ChangePassword"; // ✅ পাসওয়ার্ড পরিবর্তনের পেজ ইম্পোর্ট করা হলো
 import ProtectedRoute from "./components/ProtectedRoute";
 
 // Dashboard
@@ -63,6 +63,8 @@ function NotFound() {
 
 function App() {
   const token = localStorage.getItem("token");
+  // ইউজার অবজেক্ট থেকে রোল বের করা হচ্ছে রাউট প্রটেক্ট করার জন্য
+  const user = JSON.parse(localStorage.getItem("user")) || {};
 
   return (
     <BrowserRouter>
@@ -129,11 +131,12 @@ function App() {
           }
         />
 
+        {/* ✅ Users List Route Protected for SUPER_ADMIN only */}
         <Route
           path="/users-list"
           element={
             <ProtectedRoute>
-              <UsersList />
+              {user.role === "SUPER_ADMIN" ? <UsersList /> : <Navigate to="/" replace />}
             </ProtectedRoute>
           }
         />

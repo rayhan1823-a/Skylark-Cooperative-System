@@ -12,6 +12,14 @@ const bcrypt = require("bcryptjs");
 
 const getUsers = async (req, res) => {
   try {
+    // 🔒 অতিরিক্ত সিকিউরিটি চেক: রিকোয়েস্টকারী সুপার অ্যাডমিন না হলে ব্লক করা হবে
+    if (req.user && req.user.role !== "SUPER_ADMIN") {
+      return res.status(403).json({
+        success: false,
+        message: "Access Denied! Only Super Admin can view users list.",
+      });
+    }
+
     const users = await User.find()
       .select("-password")
       .sort({ createdAt: -1 });

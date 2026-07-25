@@ -36,8 +36,8 @@ function Sidebar() {
     {
       title: "Users List",
       path: "/users-list",
-      icon: <FaUserShield />, // ✅ এখানে আইকনটি আপডেট করা হলো যাতে Members থেকে আলাদা বোঝায়
-      roles: ["SUPER_ADMIN", "ADMIN"], // ✅ শুধুমাত্র অ্যাডমিন ও সুপার অ্যাডমিন দেখতে পাবে
+      icon: <FaUserShield />, // ✅ এখানে আইকনটি আপডেট করা হলো যাতে Members থেকে আলাদা বোঝায়
+      roles: ["SUPER_ADMIN"], // ✅ শুধুমাত্র SUPER_ADMIN দেখতে পাবে (ADMIN ও STAFF বাদ দেওয়া হয়েছে)
     },
     {
       title: "Add Member",
