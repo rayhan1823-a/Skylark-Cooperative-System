@@ -3,21 +3,20 @@ const Deposit = require('../models/Deposit');
 const Withdrawal = require('../models/Withdrawal');
 const Loan = require('../models/Loan');
 const Payment = require('../models/Payment');
-const Penalty = require('../models/Penalty'); // ✅ পেনাল্টি মডেল যুক্ত করা হলো
+const Penalty = require('../models/Penalty');
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs'); // ✅ পাসওয়ার্ড হাশ করার জন্য bcryptjs যুক্ত করা হলো
+const bcrypt = require('bcryptjs');
 
 const { generateMemberAllocation, rebuildAllocation } = require('../services/paymentAllocator');
 
-// ======================================
-// 1. Get All Members (Role-based restriction implemented)
-// ======================================
+// ==========================================
+// 1. Get All Members (Role-based Restriction)
+// ==========================================
 const getAllMembers = async (req, res) => {
     try {
-        const userRole = req.user && req.user.role ? String(req.user.role).toUpperCase() : '';
+        const userRole = req.user?.role ? String(req.user.role).toUpperCase() : '';
         let members = [];
 
-        // যদি ইউজার সাধারণ মেম্বার হয়, তবে সে শুধু নিজের ডাটাটাই দেখতে পাবে
         if (userRole === 'MEMBER') {
             const tokenMemberId = String(req.user.id || req.user._id || '');
             const tokenPhone = req.user.phone;
@@ -34,28 +33,34 @@ const getAllMembers = async (req, res) => {
             const selfMember = await Member.findOne(query);
             members = selfMember ? [selfMember] : [];
         } else {
-            // অ্যাডমিন, সুপার অ্যাডমিন বা স্টাফ হলে সবাই দেখতে পারবে (ছোট থেকে বড় ক্রমানুসারে সাজানো)
             members = await Member.find().sort({ memberId: 1 });
         }
 
-        return res.status(200).json({ success: true, count: members.length, members });
+        return res.status(200).json({ 
+            success: true, 
+            count: members.length, 
+            members 
+        });
     } catch (error) {
-        return res.status(500).json({ success: false, message: "Server Error", error: error.message });
+        return res.status(500).json({ 
+            success: false, 
+            message: "Server Error", 
+            error: error.message 
+        });
     }
 };
 
-// ======================================
-// 2. Get Single Member Profile with Full Summary & History
-// ======================================
+// ==========================================
+// 2. Get Single Member Profile with Summary
+// ==========================================
 const getMemberProfile = async (req, res) => {
     try {
         let { id } = req.params;
         if (id) id = String(id).trim();
 
         let member = null;
-        const userRole = req.user && req.user.role ? String(req.user.role).toUpperCase() : '';
+        const userRole = req.user?.role ? String(req.user.role).toUpperCase() : '';
 
-        // ✅ ১. যদি ইউজার সাধারণ মেম্বার হয় (MEMBER)
         if (userRole === 'MEMBER') {
             const tokenMemberId = String(req.user.id || req.user._id || '');
             const tokenPhone = req.user.phone;
@@ -94,9 +99,7 @@ const getMemberProfile = async (req, res) => {
             if (!member) {
                 return res.status(404).json({ success: false, message: "Member profile not found." });
             }
-
         } else {
-            // ✅ ২. যদি অ্যাডমিন বা সুপার অ্যাডমিন বা স্টাফ হয়
             if (!id) {
                 return res.status(400).json({ success: false, message: "Member ID is required" });
             }
@@ -118,20 +121,16 @@ const getMemberProfile = async (req, res) => {
         }
 
         if (!member) {
-            return res.status(404).json({ success: false, message: "Member not found with ID: " + (id || 'Unknown') });
+            return res.status(404).json({ success: false, message: `Member not found with ID: ${id || 'Unknown'}` });
         }
 
         const memberMongoId = member._id;
         const customMemberId = member.memberId;
         const memberName = member.name || '';
 
-        let queryMongoId = memberMongoId; 
-
+        // Fetch Deposits
         let deposits = await Deposit.find({
-            $or: [
-                { memberId: queryMongoId },
-                { member: queryMongoId }
-            ]
+            $or: [{ memberId: memberMongoId }, { member: memberMongoId }]
         }).sort({ createdAt: -1, depositDate: -1 }).catch(() => []);
 
         if ((!deposits || deposits.length === 0) && customMemberId) {
@@ -146,22 +145,22 @@ const getMemberProfile = async (req, res) => {
 
         const totalDeposit = deposits.reduce((sum, d) => sum + (Number(d.amount) || Number(d.paidAmount) || 0), 0);
 
-        const memberLoans = await Loan.find({ $or: [{ memberId: memberMongoId }, { member: memberMongoId }] }).sort({ createdAt: -1, issueDate: -1 }).catch(() => []);
+        // Fetch Loans
+        const memberLoans = await Loan.find({ 
+            $or: [{ memberId: memberMongoId }, { member: memberMongoId }] 
+        }).sort({ createdAt: -1, issueDate: -1 }).catch(() => []);
+        
         const totalLoan = memberLoans.reduce((sum, loan) => sum + (Number(loan.amount) || 0), 0);
 
+        // Fetch Penalties
         let memberPenalties = [];
         try {
             const queryConditions = [
-                { member: memberMongoId },
-                { memberId: memberMongoId },
-                { member: customMemberId },
-                { memberId: customMemberId },
-                { member: String(memberMongoId) },
-                { memberId: String(memberMongoId) },
-                { 'member._id': memberMongoId },
-                { 'memberId._id': memberMongoId },
-                { 'member.memberId': customMemberId },
-                { 'memberId.memberId': customMemberId }
+                { member: memberMongoId }, { memberId: memberMongoId },
+                { member: customMemberId }, { memberId: customMemberId },
+                { member: String(memberMongoId) }, { memberId: String(memberMongoId) },
+                { 'member._id': memberMongoId }, { 'memberId._id': memberMongoId },
+                { 'member.memberId': customMemberId }, { 'memberId.memberId': customMemberId }
             ];
 
             memberPenalties = await Penalty.find({ $or: queryConditions }).lean().catch(() => []);
@@ -174,10 +173,8 @@ const getMemberProfile = async (req, res) => {
                 for (const col of collections) {
                     try {
                         const results = await db.collection(col.name).find({}).toArray();
-                        
                         const matched = results.filter(item => {
                             const itemStr = JSON.stringify(item).toLowerCase();
-                            
                             const matchMember = 
                                 String(item.memberId || '') === String(memberMongoId) ||
                                 String(item.member || '') === String(memberMongoId) ||
@@ -191,10 +188,9 @@ const getMemberProfile = async (req, res) => {
                             
                             return matchMember && matchCategory;
                         });
-
                         transactionPenalties = [...transactionPenalties, ...matched];
                     } catch (colErr) {
-                        // ignore
+                        // Ignore individual collection errors
                     }
                 }
 
@@ -205,7 +201,6 @@ const getMemberProfile = async (req, res) => {
                 });
                 memberPenalties = Array.from(combinedMap.values());
             }
-
         } catch (err) {
             console.error("Penalty fetch major error:", err);
             memberPenalties = [];
@@ -213,11 +208,18 @@ const getMemberProfile = async (req, res) => {
 
         const totalPenalty = memberPenalties.reduce((sum, p) => sum + (Number(p.amount) || Number(p.fineAmount) || Number(p.total) || Number(p.penaltyAmount) || 0), 0);
 
-        const withdrawals = await Withdrawal.find({ $or: [{ memberId: memberMongoId }, { member: memberMongoId }] }).sort({ date: -1, createdAt: -1 }).catch(() => []);
+        // Fetch Withdrawals & Payments
+        const withdrawals = await Withdrawal.find({ 
+            $or: [{ memberId: memberMongoId }, { member: memberMongoId }] 
+        }).sort({ date: -1, createdAt: -1 }).catch(() => []);
+        
         const totalWithdrawal = withdrawals.reduce((sum, w) => sum + (Number(w.amount) || 0), 0);
 
-        const payments = await Payment.find({ $or: [{ memberId: memberMongoId }, { member: memberMongoId }] }).sort({ paymentDate: -1 }).catch(() => []);
+        const payments = await Payment.find({ 
+            $or: [{ memberId: memberMongoId }, { member: memberMongoId }] 
+        }).sort({ paymentDate: -1 }).catch(() => []);
         
+        // Allocation Calculation
         let allocationResult = { totalPaid: 0, totalDue: 0, monthlyDetails: [] };
         try {
             await rebuildAllocation(memberMongoId);
@@ -232,11 +234,11 @@ const getMemberProfile = async (req, res) => {
         }
 
         const summary = {
-            totalDeposit: totalDeposit,
-            totalWithdrawal: totalWithdrawal,
-            totalLoan: totalLoan,
+            totalDeposit,
+            totalWithdrawal,
+            totalLoan,
             totalDue: allocationResult.totalDue || 0,
-            totalPenalty: totalPenalty, 
+            totalPenalty,
             advanceBalance: 0
         };
 
@@ -261,12 +263,12 @@ const getMemberProfile = async (req, res) => {
     }
 };
 
-// ======================================
-// 3. Create New Member (Only SUPER_ADMIN)
-// ======================================
+// ==========================================
+// 3. Create New Member (Super Admin Only)
+// ==========================================
 const createMember = async (req, res) => {
     try {
-        if (req.user && req.user.role !== 'SUPER_ADMIN') {
+        if (req.user?.role !== 'SUPER_ADMIN') {
             return res.status(403).json({
                 success: false,
                 message: "Access Denied! Only SUPER_ADMIN can create members.",
@@ -302,21 +304,11 @@ const createMember = async (req, res) => {
         };
 
         if (req.files) {
-            if (req.files.photo && req.files.photo[0]) {
-                memberData.photo = req.files.photo[0].path;
-            }
-            if (req.files.nidFile && req.files.nidFile[0]) {
-                memberData.nidFile = req.files.nidFile[0].path;
-            }
-            if (req.files.signature && req.files.signature[0]) {
-                memberData.signature = req.files.signature[0].path;
-            }
-            if (req.files.nomineePhoto && req.files.nomineePhoto[0]) {
-                memberData.nomineePhoto = req.files.nomineePhoto[0].path;
-            }
-            if (req.files.nomineeNid && req.files.nomineeNid[0]) {
-                memberData.nomineeNid = req.files.nomineeNid[0].path;
-            }
+            if (req.files.photo?.[0]) memberData.photo = req.files.photo[0].path;
+            if (req.files.nidFile?.[0]) memberData.nidFile = req.files.nidFile[0].path;
+            if (req.files.signature?.[0]) memberData.signature = req.files.signature[0].path;
+            if (req.files.nomineePhoto?.[0]) memberData.nomineePhoto = req.files.nomineePhoto[0].path;
+            if (req.files.nomineeNid?.[0]) memberData.nomineeNid = req.files.nomineeNid[0].path;
         } else if (req.file) {
             memberData.photo = req.file.path;
         }
@@ -335,12 +327,12 @@ const createMember = async (req, res) => {
     }
 };
 
-// ======================================
-// 4. Update Member (Only SUPER_ADMIN)
-// ======================================
+// ==========================================
+// 4. Update Member (Super Admin Only)
+// ==========================================
 const updateMember = async (req, res) => {
     try {
-        if (req.user && req.user.role !== 'SUPER_ADMIN') {
+        if (req.user?.role !== 'SUPER_ADMIN') {
             return res.status(403).json({
                 success: false,
                 message: "Access Denied! Only SUPER_ADMIN can update members.",
@@ -358,21 +350,11 @@ const updateMember = async (req, res) => {
         }
 
         if (req.files) {
-            if (req.files.photo && req.files.photo[0]) {
-                updateData.photo = req.files.photo[0].path;
-            }
-            if (req.files.nidFile && req.files.nidFile[0]) {
-                updateData.nidFile = req.files.nidFile[0].path;
-            }
-            if (req.files.signature && req.files.signature[0]) {
-                updateData.signature = req.files.signature[0].path;
-            }
-            if (req.files.nomineePhoto && req.files.nomineePhoto[0]) {
-                updateData.nomineePhoto = req.files.nomineePhoto[0].path;
-            }
-            if (req.files.nomineeNid && req.files.nomineeNid[0]) {
-                updateData.nomineeNid = req.files.nomineeNid[0].path;
-            }
+            if (req.files.photo?.[0]) updateData.photo = req.files.photo[0].path;
+            if (req.files.nidFile?.[0]) updateData.nidFile = req.files.nidFile[0].path;
+            if (req.files.signature?.[0]) updateData.signature = req.files.signature[0].path;
+            if (req.files.nomineePhoto?.[0]) updateData.nomineePhoto = req.files.nomineePhoto[0].path;
+            if (req.files.nomineeNid?.[0]) updateData.nomineeNid = req.files.nomineeNid[0].path;
         } else if (req.file) {
             updateData.photo = req.file.path;
         }
@@ -406,12 +388,12 @@ const updateMember = async (req, res) => {
     }
 };
 
-// ======================================
-// 5. Delete Member (Only SUPER_ADMIN)
-// ======================================
+// ==========================================
+// 5. Delete Member (Super Admin Only)
+// ==========================================
 const deleteMember = async (req, res) => {
     try {
-        if (req.user && req.user.role !== 'SUPER_ADMIN') {
+        if (req.user?.role !== 'SUPER_ADMIN') {
             return res.status(403).json({
                 success: false,
                 message: "Access Denied! Only SUPER_ADMIN can delete members.",
@@ -438,9 +420,9 @@ const deleteMember = async (req, res) => {
     }
 };
 
-// ======================================
+// ==========================================
 // 6. Get Dashboard Stats
-// ======================================
+// ==========================================
 const getDashboardStats = async (req, res) => {
     try {
         const totalMembers = await Member.countDocuments();
