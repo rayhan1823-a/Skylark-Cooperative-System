@@ -19,7 +19,7 @@ const getAllMembers = async (req, res) => {
 
         if (userRole === 'MEMBER') {
             const tokenMemberId = String(req.user.id || req.user._id || '');
-            const tokenPhone = req.user.phone;
+            const tokenPhone = req.user.phone || req.user.mobile || '';
 
             let query = {};
             if (tokenMemberId && mongoose.Types.ObjectId.isValid(tokenMemberId)) {
@@ -27,7 +27,7 @@ const getAllMembers = async (req, res) => {
             } else if (tokenMemberId) {
                 query = { $or: [{ memberId: tokenMemberId }, { userId: tokenMemberId }] };
             } else if (tokenPhone) {
-                query = { phone: tokenPhone };
+                query = { $or: [{ phone: tokenPhone }, { mobile: tokenPhone }] };
             }
 
             const selfMember = await Member.findOne(query);
@@ -63,7 +63,7 @@ const getMemberProfile = async (req, res) => {
 
         if (userRole === 'MEMBER') {
             const tokenMemberId = String(req.user.id || req.user._id || '');
-            const tokenPhone = req.user.phone;
+            const tokenPhone = req.user.phone || req.user.mobile || '';
 
             if (id) {
                 if (mongoose.Types.ObjectId.isValid(id)) {
@@ -93,7 +93,9 @@ const getMemberProfile = async (req, res) => {
                 });
             }
             if (!member && tokenPhone) {
-                member = await Member.findOne({ phone: tokenPhone });
+                member = await Member.findOne({ 
+                    $or: [{ phone: tokenPhone }, { mobile: tokenPhone }] 
+                });
             }
 
             if (!member) {
