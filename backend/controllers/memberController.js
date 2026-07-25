@@ -19,7 +19,7 @@ const getAllMembers = async (req, res) => {
 
         if (userRole === 'MEMBER') {
             const tokenMemberId = String(req.user.id || req.user._id || '');
-            const tokenPhone = req.user.phone || req.user.mobile || '';
+            const tokenPhone = String(req.user.phone || req.user.mobile || '').trim();
 
             let query = {};
             if (tokenMemberId && mongoose.Types.ObjectId.isValid(tokenMemberId)) {
@@ -27,11 +27,28 @@ const getAllMembers = async (req, res) => {
             } else if (tokenMemberId) {
                 query = { $or: [{ memberId: tokenMemberId }, { userId: tokenMemberId }] };
             } else if (tokenPhone) {
-                query = { $or: [{ phone: tokenPhone }, { mobile: tokenPhone }] };
+                query = { 
+                    $or: [
+                        { phone: tokenPhone }, 
+                        { mobile: tokenPhone },
+                        { phone: { $regex: new RegExp(tokenPhone, 'i') } },
+                        { mobile: { $regex: new RegExp(tokenPhone, 'i') } }
+                    ] 
+                };
             }
 
             const selfMember = await Member.findOne(query);
-            members = selfMember ? [selfMember] : [];
+            
+            if (!selfMember && tokenPhone) {
+                const allMembersList = await Member.find({});
+                const matched = allMembersList.find(m => {
+                    const mPhone = String(m.phone || m.mobile || '').trim();
+                    return mPhone && (mPhone.includes(tokenPhone) || tokenPhone.includes(mPhone));
+                });
+                members = matched ? [matched] : [];
+            } else {
+                members = selfMember ? [selfMember] : [];
+            }
         } else {
             members = await Member.find().sort({ memberId: 1 });
         }
