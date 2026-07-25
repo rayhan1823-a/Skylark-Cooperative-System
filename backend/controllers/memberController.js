@@ -17,7 +17,7 @@ const getAllMembers = async (req, res) => {
         const userRole = req.user && req.user.role ? String(req.user.role).toUpperCase() : '';
         let members = [];
 
-        // যদি ইউজার সাধারণ মেম্বার হয়, তবে সে শুধু নিজের ডাটাটাই দেখতে পাবে
+        // যদি ইউজার সাধারণ মেম্বার হয়, তবে সে শুধু নিজের ডাটাটাই দেখতে পাবে
         if (userRole === 'MEMBER') {
             const tokenMemberId = String(req.user.id || req.user._id || '');
             const tokenPhone = req.user.phone;
@@ -34,7 +34,7 @@ const getAllMembers = async (req, res) => {
             const selfMember = await Member.findOne(query);
             members = selfMember ? [selfMember] : [];
         } else {
-            // অ্যাডমিন, সুপার অ্যাডমিন বা স্টাফ হলে সবাই দেখতে পারবে (ছোট থেকে বড় ক্রমানুসারে সাজানো)
+            // অ্যাডমিন, সুপার অ্যাডমিন বা স্টাফ হলে সবাই দেখতে পারবে (ছোট থেকে বড় ক্রমানুসারে সাজানো)
             members = await Member.find().sort({ memberId: 1 });
         }
 
@@ -262,10 +262,17 @@ const getMemberProfile = async (req, res) => {
 };
 
 // ======================================
-// 3. Create New Member (Updated with Cloudinary)
+// 3. Create New Member (Only SUPER_ADMIN)
 // ======================================
 const createMember = async (req, res) => {
     try {
+        if (req.user && req.user.role !== 'SUPER_ADMIN') {
+            return res.status(403).json({
+                success: false,
+                message: "Access Denied! Only SUPER_ADMIN can create members.",
+            });
+        }
+
         const { memberId, userId, password, mobile, phone, email } = req.body;
         
         if (!memberId) {
@@ -329,10 +336,17 @@ const createMember = async (req, res) => {
 };
 
 // ======================================
-// 4. Update Member (Updated with Cloudinary)
+// 4. Update Member (Only SUPER_ADMIN)
 // ======================================
 const updateMember = async (req, res) => {
     try {
+        if (req.user && req.user.role !== 'SUPER_ADMIN') {
+            return res.status(403).json({
+                success: false,
+                message: "Access Denied! Only SUPER_ADMIN can update members.",
+            });
+        }
+
         let { id } = req.params;
         if (id) id = id.trim();
 
@@ -393,10 +407,17 @@ const updateMember = async (req, res) => {
 };
 
 // ======================================
-// 5. Delete Member
+// 5. Delete Member (Only SUPER_ADMIN)
 // ======================================
 const deleteMember = async (req, res) => {
     try {
+        if (req.user && req.user.role !== 'SUPER_ADMIN') {
+            return res.status(403).json({
+                success: false,
+                message: "Access Denied! Only SUPER_ADMIN can delete members.",
+            });
+        }
+
         let { id } = req.params;
         if (id) id = id.trim();
         let deletedMember;

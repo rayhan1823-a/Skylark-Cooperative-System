@@ -11,6 +11,8 @@ function Loans() {
   const [loans, setLoans] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [search, setSearch] = useState("");
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+
   const [formData, setFormData] = useState({
     member: "",
     amount: "",
@@ -32,7 +34,23 @@ function Loans() {
   useEffect(() => {
     fetchMembers();
     fetchLoans();
+    checkUserRole();
   }, []);
+
+  const checkUserRole = () => {
+    try {
+      // ইউজার রোল লোকালস্টোরেজ থেকে চেক করা হচ্ছে
+      const userStr = localStorage.getItem("user");
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        if (user.role === "SUPER_ADMIN" || user.isSuperAdmin === true) {
+          setIsSuperAdmin(true);
+        }
+      }
+    } catch (err) {
+      console.error("Role check error:", err);
+    }
+  };
 
   const fetchMembers = async () => {
     try {
@@ -61,6 +79,10 @@ function Loans() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!isSuperAdmin && editingId) {
+      alert("Only Super Admin can update loans.");
+      return;
+    }
     try {
       if (editingId) {
         await axios.put(`${API}/loans/${editingId}`, formData, getAuthHeader());
@@ -86,6 +108,10 @@ function Loans() {
   };
 
   const handleEdit = (loan) => {
+    if (!isSuperAdmin) {
+      alert("Access Denied: Only Super Admin can edit loan records.");
+      return;
+    }
     setEditingId(loan._id);
     setFormData({
       member: loan.member?._id || "",
@@ -184,7 +210,18 @@ function Loans() {
                       </span>
                     </td>
                     <td className="border p-2">
-                      <button onClick={() => handleEdit(loan)} className="bg-yellow-500 text-white px-3 py-1 rounded mr-2">Edit</button>
+                      <button 
+                        onClick={() => handleEdit(loan)} 
+                        disabled={!isSuperAdmin}
+                        className={`px-3 py-1 rounded mr-2 text-white ${
+                          isSuperAdmin 
+                            ? "bg-yellow-500 hover:bg-yellow-600 cursor-pointer" 
+                            : "bg-gray-400 cursor-not-allowed opacity-60"
+                        }`}
+                        title={!isSuperAdmin ? "Only Super Admin can edit loans" : ""}
+                      >
+                        Edit
+                      </button>
                       <button onClick={() => handleDelete(loan._id)} className="bg-red-600 text-white px-3 py-1 rounded">Delete</button>
                     </td>
                   </tr>

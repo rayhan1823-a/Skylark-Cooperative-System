@@ -17,6 +17,9 @@ function Penalties() {
   const limit = 10;
   const navigate = useNavigate();
 
+  // ✅ লোকাল স্টোরেজ বা ইউজার রোল চেক করার জন্য স্টেট (ধরে নিচ্ছি টোকেন বা ইউজার ডাটা সেভ করা আছে)
+  const [userRole, setUserRole] = useState("");
+
   const initialForm = {
     memberId: "",
     amount: "",
@@ -24,6 +27,19 @@ function Penalties() {
     status: "Paid",
   };
   const [form, setForm] = useState(initialForm);
+
+  // ইউজার রোল ডিকোড বা সেট করার জন্য
+  useEffect(() => {
+    try {
+      const userStr = localStorage.getItem("user");
+      if (userStr) {
+        const userObj = JSON.parse(userStr);
+        setUserRole(userObj.role ? String(userObj.role).toUpperCase() : "");
+      }
+    } catch (err) {
+      console.error("Error reading user role:", err);
+    }
+  }, []);
 
   const fetchPenalties = async () => {
     try {
@@ -76,6 +92,13 @@ function Penalties() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // ✅ ফ্রন্টএন্ডে সুপার অ্যাডমিন চেক
+    if (userRole !== "SUPER_ADMIN") {
+      toast.error("Access Denied! Only SUPER_ADMIN can perform this action.");
+      return;
+    }
+
     try {
       const token = localStorage.getItem("token");
       const payload = {
@@ -101,11 +124,17 @@ function Penalties() {
       handleCancel();
     } catch (error) {
       console.error("Error saving penalty:", error);
-      toast.error("Failed to save penalty");
+      toast.error(error.response?.data?.message || "Failed to save penalty");
     }
   };
 
   const editPenalty = (item) => {
+    // ✅ এডিট করার সময় সুপার অ্যাডমিন চেক
+    if (userRole !== "SUPER_ADMIN") {
+      toast.error("Access Denied! Only SUPER_ADMIN can edit penalties.");
+      return;
+    }
+
     setEditingId(item._id);
     setForm({
       memberId: item.member?._id || item.memberId?._id || item.member || item.memberId || "",
@@ -117,6 +146,12 @@ function Penalties() {
   };
 
   const deletePenalty = async (id) => {
+    // ✅ ডিলিট করার সময় সুপার অ্যাডমিন চেক
+    if (userRole !== "SUPER_ADMIN") {
+      toast.error("Access Denied! Only SUPER_ADMIN can delete penalties.");
+      return;
+    }
+
     if (window.confirm("Are you sure you want to delete this penalty?")) {
       try {
         const token = localStorage.getItem("token");
@@ -127,7 +162,7 @@ function Penalties() {
         fetchPenalties();
       } catch (error) {
         console.error("Error deleting:", error);
-        toast.error("Failed to delete");
+        toast.error(error.response?.data?.message || "Failed to delete");
       }
     }
   };
@@ -160,8 +195,16 @@ function Penalties() {
             <p className="text-blue-100 mt-1.5 text-sm font-medium">Efficiently track member fines, rule violations, and payment records.</p>
           </div>
           <button
-            onClick={() => { setEditingId(null); setForm(initialForm); setShowModal(true); }}
-            className="relative z-10 flex items-center gap-2 bg-white text-blue-700 hover:bg-blue-50 font-bold px-6 py-3 rounded-xl shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+            onClick={() => {
+              if (userRole !== "SUPER_ADMIN") {
+                toast.error("Access Denied! Only SUPER_ADMIN can add penalties.");
+                return;
+              }
+              setEditingId(null); 
+              setForm(initialForm); 
+              setShowModal(true);
+            }}
+            className={`relative z-10 flex items-center gap-2 bg-white text-blue-700 hover:bg-blue-50 font-bold px-6 py-3 rounded-xl shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0 ${userRole !== "SUPER_ADMIN" ? "opacity-70 cursor-not-allowed" : ""}`}
           >
             <Plus size={20} className="text-blue-600" /> Add Penalty
           </button>
@@ -246,10 +289,18 @@ function Penalties() {
                         </td>
                         <td className="px-5 py-4">
                           <div className="flex justify-center gap-2">
-                            <button onClick={() => editPenalty(item)} title="Edit" className="bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-xl shadow-sm transition transform hover:scale-105">
+                            <button 
+                              onClick={() => editPenalty(item)} 
+                              title="Edit" 
+                              className={`bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-xl shadow-sm transition transform hover:scale-105 ${userRole !== "SUPER_ADMIN" ? "opacity-60 cursor-not-allowed" : ""}`}
+                            >
                               <Pencil size={15} />
                             </button>
-                            <button onClick={() => deletePenalty(item._id)} title="Delete" className="bg-rose-600 hover:bg-rose-700 text-white p-2 rounded-xl shadow-sm transition transform hover:scale-105">
+                            <button 
+                              onClick={() => deletePenalty(item._id)} 
+                              title="Delete" 
+                              className={`bg-rose-600 hover:bg-rose-700 text-white p-2 rounded-xl shadow-sm transition transform hover:scale-105 ${userRole !== "SUPER_ADMIN" ? "opacity-60 cursor-not-allowed" : ""}`}
+                            >
                               <Trash2 size={15} />
                             </button>
                           </div>

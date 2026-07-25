@@ -7,6 +7,7 @@ function DepositWithdrawal() {
   const [members, setMembers] = useState([]);
   const [withdrawals, setWithdrawals] = useState([]);
   const [totalWithdrawn, setTotalWithdrawn] = useState(0);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
   // Form states
   const [selectedMember, setSelectedMember] = useState("");
@@ -15,11 +16,34 @@ function DepositWithdrawal() {
   const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Fetch initial data
+  // Fetch initial data & Check Role
   useEffect(() => {
     fetchMembers();
     fetchWithdrawals();
+    checkUserRole();
   }, []);
+
+  const checkUserRole = () => {
+    try {
+      // লোকালস্টোরেজ থেকে ইউজার রোল চেক করা হচ্ছে
+      const userStr = localStorage.getItem("user");
+      const roleStr = localStorage.getItem("role");
+
+      if (roleStr === "SUPER_ADMIN") {
+        setIsSuperAdmin(true);
+        return;
+      }
+
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        if (user.role === "SUPER_ADMIN" || user.isSuperAdmin === true) {
+          setIsSuperAdmin(true);
+        }
+      }
+    } catch (err) {
+      console.error("Role check error:", err);
+    }
+  };
 
   const fetchMembers = async () => {
     try {
@@ -52,6 +76,13 @@ function DepositWithdrawal() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // সুপার অ্যাডমিন না হলে উইথড্র বা এডিট সাবমিশনে বাধা দেওয়া
+    if (!isSuperAdmin) {
+      alert("Access Denied: Only Super Admin can process or modify withdrawals.");
+      return;
+    }
+
     if (!selectedMember || !amount) {
       alert("Please select a member and enter an amount.");
       return;
@@ -88,6 +119,11 @@ function DepositWithdrawal() {
 
   // Delete withdrawal (Super Admin only)
   const handleDelete = async (id) => {
+    if (!isSuperAdmin) {
+      alert("Access Denied: Only Super Admin can delete records.");
+      return;
+    }
+
     if (window.confirm("Are you sure you want to delete this withdrawal?")) {
       try {
         const token = localStorage.getItem("token");
@@ -104,8 +140,6 @@ function DepositWithdrawal() {
       }
     }
   };
-
-  const userRole = localStorage.getItem("role") || "SUPER_ADMIN";
 
   return (
     <MainLayout>
@@ -190,12 +224,23 @@ function DepositWithdrawal() {
               />
             </div>
 
-            {/* Submit Button */}
+            {/* Submit Button with Role Restriction */}
             <div className="md:col-span-3">
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-pink-600 to-rose-600 text-white font-bold py-3.5 rounded-xl shadow-lg hover:from-pink-700 hover:to-rose-700 transition duration-200"
+                onClick={(e) => {
+                  if (!isSuperAdmin) {
+                    e.preventDefault();
+                    alert("Access Denied: Only Super Admin can process withdrawals.");
+                  }
+                }}
+                className={`w-full text-white font-bold py-3.5 rounded-xl shadow-lg transition duration-200 ${
+                  isSuperAdmin
+                    ? "bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 cursor-pointer"
+                    : "bg-gray-400 cursor-not-allowed opacity-70"
+                }`}
+                title={!isSuperAdmin ? "Only Super Admin can perform this action" : ""}
               >
                 {loading ? "Processing..." : "Confirm & Withdraw Money"}
               </button>
@@ -219,7 +264,7 @@ function DepositWithdrawal() {
                   <th className="py-3 px-4 font-semibold">Member Name</th>
                   <th className="py-3 px-4 font-semibold">Amount</th>
                   <th className="py-3 px-4 font-semibold">Note</th>
-                  {userRole === "SUPER_ADMIN" && (
+                  {isSuperAdmin && (
                     <th className="py-3 px-4 font-semibold text-center">Action</th>
                   )}
                 </tr>
@@ -339,12 +384,12 @@ function DepositWithdrawal() {
                         {item.note || "No note provided"}
                       </td>
 
-                      {/* Delete button visible ONLY for Super Admin */}
-                      {userRole === "SUPER_ADMIN" && (
+                      {/* Delete button visible & controlled for Super Admin */}
+                      {isSuperAdmin && (
                         <td className="py-4 px-4 text-center">
                           <button
                             onClick={() => handleDelete(item._id)}
-                            className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 mx-auto shadow"
+                            className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 mx-auto shadow cursor-pointer"
                           >
                             <FaTrash /> Delete
                           </button>
@@ -354,7 +399,7 @@ function DepositWithdrawal() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={userRole === "SUPER_ADMIN" ? "6" : "5"} className="text-center py-8 text-gray-400">
+                    <td colSpan={isSuperAdmin ? "6" : "5"} className="text-center py-8 text-gray-400">
                       No withdrawal records found.
                     </td>
                   </tr>

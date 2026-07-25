@@ -1,30 +1,42 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import MainLayout from "../layouts/MainLayout";
 
 const API_URL = "https://skylark-cooperative-system.onrender.com";
 
 function Members() {
+  const navigate = useNavigate();
   const [members, setMembers] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // ইউজারের রোল এবং পরিচয় ট্র্যাক করার স্টেট
+  // ইউজারের রোল এবং পরিচয় ট্র্যাক করার স্টেট
   const [userRole, setUserRole] = useState("");
   const [userPhone, setUserPhone] = useState("");
   const [currentUserId, setCurrentUserId] = useState("");
   const [currentUserMemberId, setCurrentUserMemberId] = useState("");
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
   useEffect(() => {
     // লোকাল স্টোরেজ থেকে লগইন করা ইউজারের তথ্য নিরাপদে বের করা
     try {
       const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-      setUserRole(storedUser.role || localStorage.getItem("role") || "MEMBER");
+      const r = storedUser.role || localStorage.getItem("role") || "MEMBER";
+      setUserRole(r);
       setUserPhone(storedUser.phone || storedUser.phoneNumber || localStorage.getItem("phone") || "");
       setCurrentUserId(storedUser.id || storedUser._id || localStorage.getItem("userId") || "");
       setCurrentUserMemberId(storedUser.memberId || localStorage.getItem("memberId") || "");
+
+      // Super Admin চেক
+      if (
+        r === "SUPER_ADMIN" || 
+        storedUser.isSuperAdmin === true || 
+        localStorage.getItem("isSuperAdmin") === "true"
+      ) {
+        setIsSuperAdmin(true);
+      }
     } catch (e) {
       setUserRole("MEMBER");
     }
@@ -33,7 +45,7 @@ function Members() {
   }, []);
 
   // ==========================
-  // Fetch Members (Updated with Secure Token Handling)
+  // Fetch Members
   // ==========================
   const fetchMembers = async () => {
     try {
@@ -67,9 +79,14 @@ function Members() {
   };
 
   // ==========================
-  // Delete Member (Updated with Token Header)
+  // Delete Member (Secured for Super Admin)
   // ==========================
   const deleteMember = async (id) => {
+    if (!isSuperAdmin) {
+      toast.error("Access Denied: Only Super Admin can delete members.");
+      return;
+    }
+
     const ok = window.confirm("Are you sure you want to delete this member?");
     if (!ok) return;
 
@@ -91,12 +108,33 @@ function Members() {
   };
 
   // ==========================
-  // Role & Search Filtering Logic (Secured for Members)
+  // Protected Add Click Handler
+  // ==========================
+  const handleAddClick = (e) => {
+    if (!isSuperAdmin) {
+      e.preventDefault();
+      toast.error("Access Denied: Only Super Admin can add members.");
+    }
+  };
+
+  // ==========================
+  // Protected Edit Click Handler
+  // ==========================
+  const handleEditClick = (e, memberId) => {
+    if (!isSuperAdmin) {
+      e.preventDefault();
+      toast.error("Access Denied: Only Super Admin can edit members.");
+      return;
+    }
+    navigate(`/edit-member/${memberId}`);
+  };
+
+  // ==========================
+  // Role & Search Filtering Logic
   // ==========================
   const isAdmin = userRole === "SUPER_ADMIN" || userRole === "ADMIN";
 
   const filteredMembers = members.filter((member) => {
-    // যদি ইউজার সাধারণ মেম্বার হয়, তবে সে শুধু নিজের ডাটাটাই দেখতে পাবে (আইডি বা ফোন নম্বর মিলিয়ে)
     if (!isAdmin) {
       const cleanMemberPhone = (member.phone || "").trim();
       const cleanUserPhone = (userPhone || "").trim();
@@ -128,15 +166,17 @@ function Members() {
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Members</h1>
         
-        {/* শুধুমাত্র অ্যাডমিন হলে Add Member বাটন দেখাবে */}
-        {isAdmin && (
-          <Link
-            to="/add-member"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-center shadow transition-colors"
-          >
-            + Add Member
-          </Link>
-        )}
+        {/* Add Member বাটন (সুপার অ্যাডমিন না হলে ক্লিক করলে টাস্ট মেসেজ ও বাধা দেবে) */}
+        <Link
+          to="/add-member"
+          onClick={handleAddClick}
+          className={`px-5 py-2 rounded-lg text-center shadow transition-colors text-white ${
+            isSuperAdmin ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-400 hover:bg-gray-500"
+          }`}
+          title={!isSuperAdmin ? "Only Super Admin can add members" : ""}
+        >
+          + Add Member
+        </Link>
       </div>
 
       {/* Search Input */}
@@ -172,7 +212,6 @@ function Members() {
               </tr>
             ) : filteredMembers.length > 0 ? (
               filteredMembers.map((member, index) => {
-                // ✅ আপনার আগের নিখুঁত ইমেজ পাথ হ্যান্ডলিং লজিক
                 let imageUrl = "";
                 if (member.photo) {
                   if (member.photo.startsWith("http")) {
@@ -203,7 +242,6 @@ function Members() {
                           />
                         ) : null}
                         
-                        {/* ফলব্যাক ইনিশিয়াল */}
                         <div 
                           className="w-12 h-12 rounded-full bg-blue-100 text-blue-700 font-bold items-center justify-center shadow-sm absolute inset-0"
                           style={{ display: imageUrl ? 'none' : 'flex' }}
@@ -253,24 +291,27 @@ function Members() {
                           ID Card
                         </Link>
 
-                        {/* Edit এবং Delete বাটন শুধুমাত্র Admin / Super Admin দেখতে পাবে */}
-                        {isAdmin && (
-                          <>
-                            <Link
-                              to={`/edit-member/${member._id}`}
-                              className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1.5 rounded text-sm font-medium transition"
-                            >
-                              Edit
-                            </Link>
-                            
-                            <button
-                              onClick={() => deleteMember(member._id)}
-                              className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-sm font-medium transition"
-                            >
-                              Delete
-                            </button>
-                          </>
-                        )}
+                        {/* Edit Button (নন-সুপার অ্যাডমিন ক্লিক করলে টাস্ট মেসেজ দিয়ে বাধা দেবে) */}
+                        <button
+                          onClick={(e) => handleEditClick(e, member._id)}
+                          className={`px-3 py-1.5 rounded text-sm font-medium transition text-white ${
+                            isSuperAdmin ? "bg-yellow-500 hover:bg-yellow-600 cursor-pointer" : "bg-gray-400 hover:bg-gray-500 cursor-pointer"
+                          }`}
+                          title={!isSuperAdmin ? "Only Super Admin can edit members" : ""}
+                        >
+                          Edit
+                        </button>
+                        
+                        {/* Delete Button (নন-সুপার অ্যাডমিন ক্লিক করলে টাস্ট মেসেজ দিয়ে বাধা দেবে) */}
+                        <button
+                          onClick={() => deleteMember(member._id)}
+                          className={`px-3 py-1.5 rounded text-sm font-medium transition text-white ${
+                            isSuperAdmin ? "bg-red-600 hover:bg-red-700 cursor-pointer" : "bg-gray-400 hover:bg-gray-500 cursor-pointer"
+                          }`}
+                          title={!isSuperAdmin ? "Only Super Admin can delete members" : ""}
+                        >
+                          Delete
+                        </button>
                       </div>
                     </td>
                   </tr>

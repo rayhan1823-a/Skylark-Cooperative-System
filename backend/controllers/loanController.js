@@ -2,11 +2,17 @@ const Loan = require("../models/Loan");
 const Member = require("../models/Member");
 
 // ======================================
-// Add Loan (Receipt No সহ আপডেট করা হলো)
+// Add Loan (Only SUPER_ADMIN)
 // ======================================
-
 const createLoan = async (req, res) => {
   try {
+    if (req.user && req.user.role !== 'SUPER_ADMIN') {
+      return res.status(403).json({
+        success: false,
+        message: "Access Denied! Only SUPER_ADMIN can add loans.",
+      });
+    }
+
     const {
       member,
       amount,
@@ -70,7 +76,6 @@ const createLoan = async (req, res) => {
 // ======================================
 // Get All Loans
 // ======================================
-
 const getLoans = async (req, res) => {
   try {
     const loans = await Loan.find()
@@ -94,7 +99,6 @@ const getLoans = async (req, res) => {
 // ======================================
 // Get Single Loan
 // ======================================
-
 const getLoan = async (req, res) => {
   try {
     const loan = await Loan.findById(req.params.id)
@@ -121,9 +125,8 @@ const getLoan = async (req, res) => {
 };
 
 // ======================================
-// Get Single Loan Receipt (নতুন যোগ করা হলো)
+// Get Single Loan Receipt
 // ======================================
-
 const getLoanReceipt = async (req, res) => {
   try {
     const loan = await Loan.findById(req.params.id)
@@ -150,11 +153,17 @@ const getLoanReceipt = async (req, res) => {
 };
 
 // ======================================
-// Update Loan
+// Update Loan (Only SUPER_ADMIN)
 // ======================================
-
 const updateLoan = async (req, res) => {
   try {
+    if (req.user && req.user.role !== 'SUPER_ADMIN') {
+      return res.status(403).json({
+        success: false,
+        message: "Access Denied! Only SUPER_ADMIN can update loans.",
+      });
+    }
+
     const loan = await Loan.findById(req.params.id);
 
     if (!loan) {
@@ -164,11 +173,11 @@ const updateLoan = async (req, res) => {
       });
     }
 
-    loan.amount = req.body.amount;
-    loan.issueDate = req.body.issueDate;
-    loan.dueDate = req.body.dueDate;
-    loan.status = req.body.status;
-    loan.remarks = req.body.remarks;
+    loan.amount = req.body.amount || loan.amount;
+    loan.issueDate = req.body.issueDate || loan.issueDate;
+    loan.dueDate = req.body.dueDate || loan.dueDate;
+    loan.status = req.body.status || loan.status;
+    loan.remarks = req.body.remarks || loan.remarks;
 
     await loan.save();
 
@@ -186,11 +195,17 @@ const updateLoan = async (req, res) => {
 };
 
 // ======================================
-// Delete Loan
+// Delete Loan (Only SUPER_ADMIN)
 // ======================================
-
 const deleteLoan = async (req, res) => {
   try {
+    if (req.user && req.user.role !== 'SUPER_ADMIN') {
+      return res.status(403).json({
+        success: false,
+        message: "Access Denied! Only SUPER_ADMIN can delete loans.",
+      });
+    }
+
     const loan = await Loan.findById(req.params.id);
 
     if (!loan) {
@@ -218,7 +233,6 @@ const deleteLoan = async (req, res) => {
 // ======================================
 // Member Loan History
 // ======================================
-
 const getMemberLoans = async (req, res) => {
   try {
     const loans = await Loan.find({
@@ -245,7 +259,7 @@ module.exports = {
   createLoan,
   getLoans,
   getLoan,
-  getLoanReceipt, // এক্সপোর্ট করা হলো
+  getLoanReceipt,
   updateLoan,
   deleteLoan,
   getMemberLoans,

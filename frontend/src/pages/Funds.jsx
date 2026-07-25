@@ -181,10 +181,21 @@ function Funds() {
     const item = safeTransactions.find((t) => t && t._id === id);
     if (item) {
       setEditingId(id);
+      
+      // Safely resolve member ID whether populated or raw string/ID
+      let resolvedMemberId = "";
+      if (typeof item.memberId === "string") {
+        resolvedMemberId = item.memberId;
+      } else if (item.memberId && item.memberId._id) {
+        resolvedMemberId = item.memberId._id;
+      } else if (item.member && item.member._id) {
+        resolvedMemberId = item.member._id;
+      }
+
       setForm({
         type: item.type || "INCOME",
         category: item.category || "",
-        memberId: item.memberId || item.member?._id || "",
+        memberId: resolvedMemberId,
         amount: item.amount || "",
         paymentMethod: item.paymentMethod || "Cash",
         description: item.description || "",
@@ -206,6 +217,8 @@ function Funds() {
         if (data && data.success) {
           toast.success("Deleted successfully!");
           fetchTransactions();
+        } else {
+          toast.error(data.message || "Failed to delete transaction");
         }
       } catch (error) {
         console.error("Error deleting transaction:", error);
@@ -219,12 +232,15 @@ function Funds() {
     if (!item) return false;
     const categoryStr = item.category ? String(item.category).toLowerCase() : "";
     const descStr = item.description ? String(item.description).toLowerCase() : "";
-    const memberNameStr = item.memberName ? String(item.memberName).toLowerCase() : "";
+    
+    // Safely retrieve member name for search filtration
+    const memberNameStr = item.memberName || item.member?.name || item.member?.fullName || "";
+    const matchMemberName = String(memberNameStr).toLowerCase();
     
     const matchesSearch =
       categoryStr.includes(search.toLowerCase()) ||
       descStr.includes(search.toLowerCase()) ||
-      memberNameStr.includes(search.toLowerCase());
+      matchMemberName.includes(search.toLowerCase());
     
     const matchesType = filterType === "ALL" || item.type === filterType;
     const matchesMethod = filterMethod === "ALL" || item.paymentMethod === filterMethod;
@@ -364,32 +380,35 @@ function Funds() {
                     <td colSpan="9" className="text-center py-10 font-medium text-gray-400">No transactions found.</td>
                   </tr>
                 ) : (
-                  currentData.map((item, index) => (
-                    <tr key={item ? item._id : index} className="hover:bg-gray-50 transition">
-                      <td className="px-4 py-3 text-center font-medium">{(page - 1) * limit + index + 1}</td>
-                      <td className="px-4 py-3">
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-bold tracking-wide ${item && item.type === "INCOME" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
-                          {item ? item.type : ""}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 font-medium">{item ? item.category : ""}</td>
-                      <td className="px-4 py-3 text-blue-600 font-medium">{item?.memberName || item?.member?.name || "-"}</td>
-                      <td className="px-4 py-3 text-right font-bold">৳ {Number(item ? item.amount : 0).toLocaleString()}</td>
-                      <td className="px-4 py-3">{item ? item.paymentMethod : ""}</td>
-                      <td className="px-4 py-3">{item && item.description ? item.description : "-"}</td>
-                      <td className="px-4 py-3">{item && item.createdAt ? new Date(item.createdAt).toLocaleDateString() : "-"}</td>
-                      <td className="px-4 py-3">
-                        <div className="flex justify-center gap-2">
-                          <button onClick={() => editTransaction(item._id)} className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition">
-                            <Pencil size={16} />
-                          </button>
-                          <button onClick={() => deleteTransaction(item._id)} className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition">
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
+                  currentData.map((item, index) => {
+                    const rowMemberName = item?.memberName || item?.member?.name || item?.member?.fullName || "-";
+                    return (
+                      <tr key={item ? item._id : index} className="hover:bg-gray-50 transition">
+                        <td className="px-4 py-3 text-center font-medium">{(page - 1) * limit + index + 1}</td>
+                        <td className="px-4 py-3">
+                          <span className={`px-2.5 py-1 rounded-full text-xs font-bold tracking-wide ${item && item.type === "INCOME" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+                            {item ? item.type : ""}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 font-medium">{item ? item.category : ""}</td>
+                        <td className="px-4 py-3 text-blue-600 font-medium">{rowMemberName}</td>
+                        <td className="px-4 py-3 text-right font-bold">৳ {Number(item ? item.amount : 0).toLocaleString()}</td>
+                        <td className="px-4 py-3">{item ? item.paymentMethod : ""}</td>
+                        <td className="px-4 py-3">{item && item.description ? item.description : "-"}</td>
+                        <td className="px-4 py-3">{item && item.createdAt ? new Date(item.createdAt).toLocaleDateString() : "-"}</td>
+                        <td className="px-4 py-3">
+                          <div className="flex justify-center gap-2">
+                            <button onClick={() => editTransaction(item._id)} className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition">
+                              <Pencil size={16} />
+                            </button>
+                            <button onClick={() => deleteTransaction(item._id)} className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition">
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>

@@ -19,6 +19,7 @@ function Deposits() {
   const [deposits, setDeposits] = useState([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
   const [formData, setFormData] = useState({
     memberId: "",
@@ -27,7 +28,7 @@ function Deposits() {
       month: "long",
     }),
     year: new Date().getFullYear(),
-    depositDate: getTodayDate(), // নতুন স্টেট: ডিফল্ট আজকের তারিখ বসবে
+    depositDate: getTodayDate(),
     paymentMethod: "Cash",
     note: "Monthly Deposit",
   });
@@ -50,7 +51,32 @@ function Deposits() {
   useEffect(() => {
     fetchMembers();
     fetchDeposits();
+    checkUserRole();
   }, []);
+
+  // ============================
+  // Check User Role (SUPER_ADMIN)
+  // ============================
+  const checkUserRole = () => {
+    try {
+      const userStr = localStorage.getItem("user");
+      const roleStr = localStorage.getItem("role");
+
+      if (roleStr === "SUPER_ADMIN") {
+        setIsSuperAdmin(true);
+        return;
+      }
+
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        if (user.role === "SUPER_ADMIN" || user.isSuperAdmin === true) {
+          setIsSuperAdmin(true);
+        }
+      }
+    } catch (err) {
+      console.error("Role check error:", err);
+    }
+  };
 
   // ============================
   // Fetch Members
@@ -107,6 +133,11 @@ function Deposits() {
   // Save Deposit
   // ============================
   const saveDeposit = async () => {
+    if (!isSuperAdmin) {
+      toast.error("Access Denied: Only Super Admin can add deposits.");
+      return;
+    }
+
     if (!formData.memberId) {
       toast.error("Please Select Member");
       return;
@@ -132,7 +163,7 @@ function Deposits() {
           amount: Number(formData.amount),
           month: formData.month,
           year: Number(formData.year),
-          depositDate: formData.depositDate, // ব্যাকএন্ডে হাত দিয়ে বসানো তারিখটি পাঠানো হচ্ছে
+          depositDate: formData.depositDate,
           paymentMethod: formData.paymentMethod,
           note: formData.note,
         },
@@ -148,7 +179,7 @@ function Deposits() {
           month: "long",
         }),
         year: new Date().getFullYear(),
-        depositDate: getTodayDate(), // সাবমিট হওয়ার পর আবার আজকের তারিখ রিসেট হবে
+        depositDate: getTodayDate(),
         paymentMethod: "Cash",
         note: "Monthly Deposit",
       });
@@ -166,6 +197,11 @@ function Deposits() {
   // Delete Deposit
   // ============================
   const deleteDeposit = async (id) => {
+    if (!isSuperAdmin) {
+      toast.error("Access Denied: Only Super Admin can delete records.");
+      return;
+    }
+
     if (!window.confirm("Delete this Deposit?")) return;
 
     try {
@@ -260,7 +296,7 @@ function Deposits() {
             />
           </div>
 
-          {/* Deposit Date (নতুন যুক্ত করা ইনপুট ফিল্ড) */}
+          {/* Deposit Date */}
           <div>
             <label className="font-semibold text-blue-600">Deposit Date</label>
             <input
@@ -275,8 +311,13 @@ function Deposits() {
 
         <button
           onClick={saveDeposit}
-          disabled={loading}
-          className="mt-6 bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg disabled:bg-gray-400"
+          disabled={loading || !isSuperAdmin}
+          title={!isSuperAdmin ? "Only Super Admin can add deposits" : ""}
+          className={`mt-6 px-8 py-3 rounded-lg text-white font-semibold transition ${
+            isSuperAdmin
+              ? "bg-blue-600 hover:bg-blue-700 cursor-pointer"
+              : "bg-gray-400 cursor-not-allowed opacity-70"
+          }`}
         >
           {loading ? "Saving..." : "💾 Save Deposit"}
         </button>
@@ -340,7 +381,12 @@ function Deposits() {
                     <td>
                       <button
                         onClick={() => deleteDeposit(deposit._id)}
-                        className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
+                        className={`px-3 py-1 rounded text-white ${
+                          isSuperAdmin
+                            ? "bg-red-600 hover:bg-red-700 cursor-pointer"
+                            : "bg-gray-400 cursor-not-allowed opacity-70"
+                        }`}
+                        title={!isSuperAdmin ? "Only Super Admin can delete deposits" : ""}
                       >
                         Delete
                       </button>

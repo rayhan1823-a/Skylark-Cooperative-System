@@ -1,9 +1,16 @@
 const Penalty = require('../models/Penalty');
 const Member = require('../models/Member');
 
-// Create Penalty
+// Create Penalty (Only SUPER_ADMIN)
 const createPenalty = async (req, res) => {
     try {
+        if (req.user && req.user.role !== 'SUPER_ADMIN') {
+            return res.status(403).json({
+                success: false,
+                message: "Access Denied! Only SUPER_ADMIN can add penalties.",
+            });
+        }
+
         const { memberId, member, amount, date, reason, note, status } = req.body;
         const selectedMember = memberId || member;
         const penaltyReason = reason || note;
@@ -34,7 +41,7 @@ const createPenalty = async (req, res) => {
             receiptNo,
             reason: penaltyReason,
             note: penaltyReason,
-            status: status || "Paid" // ডিফল্ট স্ট্যাটাস Paid করা হলো
+            status: status || "Paid"
         });
 
         res.status(201).json({
@@ -48,9 +55,16 @@ const createPenalty = async (req, res) => {
     }
 };
 
-// Update Penalty
+// Update Penalty (Only SUPER_ADMIN)
 const updatePenalty = async (req, res) => {
     try {
+        if (req.user && req.user.role !== 'SUPER_ADMIN') {
+            return res.status(403).json({
+                success: false,
+                message: "Access Denied! Only SUPER_ADMIN can update penalties.",
+            });
+        }
+
         const { memberId, member, amount, date, reason, note, status } = req.body;
         const selectedMember = memberId || member;
         const penaltyReason = reason || note;
@@ -80,7 +94,7 @@ const updatePenalty = async (req, res) => {
     }
 };
 
-// Get All Penalties
+// Get All Penalties (Viewable by all roles)
 const getPenalties = async (req, res) => {
     try {
         const penalties = await Penalty.find()
@@ -105,7 +119,7 @@ const getMemberPenalties = async (req, res) => {
     }
 };
 
-// Get Single Penalty Receipt (রিসিট প্রিন্ট করার জন্য নতুন যোগ করা হলো)
+// Get Single Penalty Receipt
 const getPenaltyReceipt = async (req, res) => {
     try {
         const penalty = await Penalty.findById(req.params.id)
@@ -122,9 +136,16 @@ const getPenaltyReceipt = async (req, res) => {
     }
 };
 
-// Delete Penalty
+// Delete Penalty (Only SUPER_ADMIN)
 const deletePenalty = async (req, res) => {
     try {
+        if (req.user && req.user.role !== 'SUPER_ADMIN') {
+            return res.status(403).json({
+                success: false,
+                message: "Access Denied! Only SUPER_ADMIN can delete penalties.",
+            });
+        }
+
         const penalty = await Penalty.findById(req.params.id);
         if (!penalty) {
             return res.status(404).json({ success: false, message: "Penalty not found" });

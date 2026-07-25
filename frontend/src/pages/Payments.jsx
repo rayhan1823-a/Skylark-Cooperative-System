@@ -21,6 +21,8 @@ function Payments() {
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
+  const [editingId, setEditingId] = useState(null);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
   const [formData, setFormData] = useState({
     member: "",
@@ -33,13 +35,28 @@ function Payments() {
   });
 
   // ===============================
-  // Load Data
+  // Load Data & Check Role
   // ===============================
 
   useEffect(() => {
     fetchMembers();
     fetchPayments();
+    checkUserRole();
   }, []);
+
+  const checkUserRole = () => {
+    try {
+      const userStr = localStorage.getItem("user");
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        if (user.role === "SUPER_ADMIN" || user.isSuperAdmin === true) {
+          setIsSuperAdmin(true);
+        }
+      }
+    } catch (err) {
+      console.error("Role check error:", err);
+    }
+  };
 
   // ===============================
   // Fetch Members
@@ -74,10 +91,6 @@ function Payments() {
       const res = await axios.get(
         `${API}/payments`,
         axiosConfig
-      );
-
-      console.log(
-        res.data
       );
 
       setPayments(
@@ -115,11 +128,16 @@ function Payments() {
   };
 
   // ===============================
-  // Add Payment
+  // Save / Update Payment
   // ===============================
 
   const savePayment = async (e) => {
     e.preventDefault();
+
+    if (!isSuperAdmin && editingId) {
+      alert("Access Denied: Only Super Admin can update payments.");
+      return;
+    }
 
     try {
       if (
@@ -132,16 +150,23 @@ function Payments() {
         return;
       }
 
-      await axios.post(
-        `${API}/payments`,
-        formData,
-        axiosConfig
-      );
+      if (editingId) {
+        await axios.put(
+          `${API}/payments/${editingId}`,
+          formData,
+          axiosConfig
+        );
+        alert("Payment Updated Successfully");
+      } else {
+        await axios.post(
+          `${API}/payments`,
+          formData,
+          axiosConfig
+        );
+        alert("Payment Added Successfully");
+      }
 
-      alert(
-        "Payment Added Successfully"
-      );
-
+      setEditingId(null);
       setFormData({
         member: "",
         amount: "",
@@ -157,9 +182,31 @@ function Payments() {
       console.log(error);
       alert(
         error.response?.data?.message ||
-        "Payment Failed"
+        "Operation Failed"
       );
     }
+  };
+
+  // ===============================
+  // Edit Payment Handler
+  // ===============================
+
+  const handleEdit = (payment) => {
+    if (!isSuperAdmin) {
+      alert("Access Denied: Only Super Admin can edit payment records.");
+      return;
+    }
+
+    setEditingId(payment._id);
+    setFormData({
+      member: payment.member?._id || "",
+      amount: payment.amount,
+      paymentDate: payment.paymentDate ? payment.paymentDate.split("T")[0] : "",
+      paymentMethod: payment.paymentMethod || "Cash",
+      remarks: payment.remarks || "",
+      penaltyWaiver: payment.penaltyWaiver || false,
+      receivedBy: payment.receivedBy || "Admin"
+    });
   };
 
   // ===============================
@@ -351,7 +398,7 @@ function Payments() {
               type="submit"
               className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg"
             >
-              Save Payment
+              {editingId ? "Update Payment" : "Save Payment"}
             </button>
           </div>
         </form>
@@ -421,7 +468,19 @@ function Payments() {
                       <td>
                         {payment.receivedBy}
                       </td>
-                      <td>
+                      <td className="p-2 space-x-2">
+                        <button
+                          onClick={() => handleEdit(payment)}
+                          disabled={!isSuperAdmin}
+                          className={`px-3 py-1 rounded text-white ${
+                            isSuperAdmin
+                              ? "bg-yellow-500 hover:bg-yellow-600 cursor-pointer"
+                              : "bg-gray-400 cursor-not-allowed opacity-60"
+                          }`}
+                          title={!isSuperAdmin ? "Only Super Admin can edit payments" : ""}
+                        >
+                          Edit
+                        </button>
                         <button
                           onClick={() => deletePayment(payment._id)}
                           className="bg-red-600 text-white px-3 py-1 rounded"

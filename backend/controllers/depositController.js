@@ -45,9 +45,16 @@ const generateReceiptNo = async () => {
 };
 
 // ======================================
-// Create Deposit
+// Create Deposit (Only SUPER_ADMIN)
 // ======================================
 const createDeposit = async (req, res) => {
+    if (req.user && req.user.role !== 'SUPER_ADMIN') {
+        return res.status(403).json({
+            success: false,
+            message: "Access Denied! Only SUPER_ADMIN can add deposits.",
+        });
+    }
+
     const session = await mongoose.startSession();
     session.startTransaction();
 
@@ -304,9 +311,16 @@ const getDeposit = async (req, res) => {
 };
 
 // ======================================
-// Update Deposit
+// Update Deposit (Only SUPER_ADMIN)
 // ======================================
 const updateDeposit = async (req, res) => {
+    if (req.user && req.user.role !== 'SUPER_ADMIN') {
+        return res.status(403).json({
+            success: false,
+            message: "Access Denied! Only SUPER_ADMIN can update deposits.",
+        });
+    }
+
     const session = await mongoose.startSession();
     session.startTransaction();
 
@@ -389,9 +403,16 @@ const updateDeposit = async (req, res) => {
 };
 
 // ======================================
-// Delete Deposit (Safely handled)
+// Delete Deposit (Only SUPER_ADMIN)
 // ======================================
 const deleteDeposit = async (req, res) => {
+    if (req.user && req.user.role !== 'SUPER_ADMIN') {
+        return res.status(403).json({
+            success: false,
+            message: "Access Denied! Only SUPER_ADMIN can delete deposits.",
+        });
+    }
+
     try {
         const depositId = req.params.id;
 
