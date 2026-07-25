@@ -113,7 +113,7 @@ const getMemberProfile = async (req, res) => {
         const memberMongoId = member._id;
         const customMemberId = member.memberId;
 
-        // Robust Deposit Fetching with Fallback
+        // FIXED: Universal Deposit Fetching using flexible conditions & fallback
         let deposits = [];
         try {
             deposits = await Deposit.find({
@@ -129,6 +129,7 @@ const getMemberProfile = async (req, res) => {
                 ]
             }).sort({ createdAt: -1, depositDate: -1 }).lean();
 
+            // যদি উপরন্তু কোনো কারণে কুয়েরিতে না আসে, তবে সব ডিপোজিট এনে ডিপ ফিল্টার করা হবে
             if (!deposits || deposits.length === 0) {
                 const allDeposits = await Deposit.find({}).lean();
                 deposits = allDeposits.filter(d => {
@@ -312,7 +313,7 @@ const updateMember = async (req, res) => {
             message: "Member updated successfully", 
             member: updatedMember 
         });
-    } catch (error) {
+    }catch (error) {
         return res.status(500).json({ success: false, message: "Server Error", error: error.message });
     }
 };
