@@ -1,11 +1,35 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import MainLayout from "../layouts/MainLayout";
 
 function AddMember() {
-
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+
+  useEffect(() => {
+    // লোকাল স্টোরেজ থেকে লগইন করা ইউজারের রোল চেক করা
+    try {
+      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+      const r = storedUser.role || localStorage.getItem("role") || "MEMBER";
+
+      if (
+        r === "SUPER_ADMIN" || 
+        storedUser.isSuperAdmin === true || 
+        localStorage.getItem("isSuperAdmin") === "true"
+      ) {
+        setIsSuperAdmin(true);
+      } else {
+        toast.error("Access Denied: Only Super Admin can access this page.");
+        navigate("/members");
+      }
+    } catch (e) {
+      setIsSuperAdmin(false);
+      navigate("/members");
+    }
+  }, [navigate]);
 
   // ======================================
   // Initial Form State
@@ -50,12 +74,10 @@ function AddMember() {
   // ======================================
 
   const handleChange = (e) => {
-
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
     }));
-
   };
 
   // ======================================
@@ -63,15 +85,12 @@ function AddMember() {
   // ======================================
 
   const resetForm = () => {
-
     setFormData(initialState);
-
     setPhoto(null);
     setNidFile(null);
     setSignature(null);
     setNomineePhoto(null);
     setNomineeNid(null);
-
   };
 
   // ======================================
@@ -79,9 +98,12 @@ function AddMember() {
   // ======================================
 
   const saveMember = async () => {
+    if (!isSuperAdmin) {
+      toast.error("Access Denied: Only Super Admin can add members.");
+      return;
+    }
 
     try {
-
       setLoading(true);
 
       const token = localStorage.getItem("token") || localStorage.getItem("authToken") || localStorage.getItem("accessToken");
@@ -120,7 +142,6 @@ function AddMember() {
       resetForm();
 
     } catch (error) {
-
       console.log(error);
 
       toast.error(
@@ -130,11 +151,8 @@ function AddMember() {
       );
 
     } finally {
-
       setLoading(false);
-
     }
-
   };
 
   // ======================================
@@ -142,15 +160,12 @@ function AddMember() {
   // ======================================
 
   return (
-
     <MainLayout>
-
       <h1 className="text-3xl font-bold mb-6">
         Add New Member
       </h1>
 
       <div className="bg-white rounded-xl shadow p-6">
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
           {/* =========================== */}
@@ -158,11 +173,9 @@ function AddMember() {
           {/* =========================== */}
 
           <div>
-
             <label className="block mb-2 font-semibold">
               Member ID
             </label>
-
             <input
               type="text"
               name="memberId"
@@ -171,7 +184,6 @@ function AddMember() {
               placeholder="SKY-0001"
               className="w-full border rounded-lg p-3"
             />
-
           </div>
 
           {/* =========================== */}
@@ -179,11 +191,9 @@ function AddMember() {
           {/* =========================== */}
 
           <div>
-
             <label className="block mb-2 font-semibold">
               User ID / Login ID
             </label>
-
             <input
               type="text"
               name="userId"
@@ -192,7 +202,6 @@ function AddMember() {
               placeholder="Enter User ID (Optional)"
               className="w-full border rounded-lg p-3"
             />
-
           </div>
 
           {/* =========================== */}
@@ -200,11 +209,9 @@ function AddMember() {
           {/* =========================== */}
 
           <div>
-
             <label className="block mb-2 font-semibold">
               Email Address
             </label>
-
             <input
               type="email"
               name="email"
@@ -213,7 +220,6 @@ function AddMember() {
               placeholder="Enter Email (Optional)"
               className="w-full border rounded-lg p-3"
             />
-
           </div>
 
           {/* =========================== */}
@@ -221,11 +227,9 @@ function AddMember() {
           {/* =========================== */}
 
           <div>
-
             <label className="block mb-2 font-semibold">
               Password
             </label>
-
             <input
               type="password"
               name="password"
@@ -234,7 +238,6 @@ function AddMember() {
               placeholder="Enter Password (Optional)"
               className="w-full border rounded-lg p-3"
             />
-
           </div>
 
           {/* =========================== */}
@@ -242,11 +245,9 @@ function AddMember() {
           {/* =========================== */}
 
           <div>
-
             <label className="block mb-2 font-semibold">
               Full Name
             </label>
-
             <input
               type="text"
               name="name"
@@ -255,7 +256,6 @@ function AddMember() {
               placeholder="Enter Full Name"
               className="w-full border rounded-lg p-3"
             />
-
           </div>
 
           {/* =========================== */}
@@ -263,11 +263,9 @@ function AddMember() {
           {/* =========================== */}
 
           <div>
-
             <label className="block mb-2 font-semibold">
               Father Name
             </label>
-
             <input
               type="text"
               name="fatherName"
@@ -276,7 +274,6 @@ function AddMember() {
               placeholder="Father Name"
               className="w-full border rounded-lg p-3"
             />
-
           </div>
 
           {/* =========================== */}
@@ -284,11 +281,9 @@ function AddMember() {
           {/* =========================== */}
 
           <div>
-
             <label className="block mb-2 font-semibold">
               Mother Name
             </label>
-
             <input
               type="text"
               name="motherName"
@@ -297,7 +292,6 @@ function AddMember() {
               placeholder="Mother Name"
               className="w-full border rounded-lg p-3"
             />
-
           </div>
 
           {/* =========================== */}
@@ -305,11 +299,9 @@ function AddMember() {
           {/* =========================== */}
 
           <div>
-
             <label className="block mb-2 font-semibold">
               Mobile Number
             </label>
-
             <input
               type="text"
               name="phone"
@@ -318,7 +310,6 @@ function AddMember() {
               placeholder="01XXXXXXXXX"
               className="w-full border rounded-lg p-3"
             />
-
           </div>
 
           {/* =========================== */}
@@ -326,11 +317,9 @@ function AddMember() {
           {/* =========================== */}
 
           <div>
-
             <label className="block mb-2 font-semibold">
               Emergency Contact
             </label>
-
             <input
               type="text"
               name="emergencyContact"
@@ -339,7 +328,6 @@ function AddMember() {
               placeholder="Emergency Contact"
               className="w-full border rounded-lg p-3"
             />
-
           </div>
 
           {/* =========================== */}
@@ -347,11 +335,9 @@ function AddMember() {
           {/* =========================== */}
 
           <div>
-
             <label className="block mb-2 font-semibold">
               Blood Group
             </label>
-
             <select
               name="bloodGroup"
               value={formData.bloodGroup}
@@ -368,7 +354,6 @@ function AddMember() {
               <option value="O+">O+</option>
               <option value="O-">O-</option>
             </select>
-
           </div>
 
           {/* =========================== */}
@@ -376,11 +361,9 @@ function AddMember() {
           {/* =========================== */}
 
           <div>
-
             <label className="block mb-2 font-semibold">
               NID Number
             </label>
-
             <input
               type="text"
               name="nid"
@@ -389,7 +372,6 @@ function AddMember() {
               placeholder="National ID Number"
               className="w-full border rounded-lg p-3"
             />
-
           </div>
 
           {/* =========================== */}
@@ -397,11 +379,9 @@ function AddMember() {
           {/* =========================== */}
 
           <div>
-
             <label className="block mb-2 font-semibold">
               Date of Birth
             </label>
-
             <input
               type="date"
               name="dateOfBirth"
@@ -409,7 +389,6 @@ function AddMember() {
               onChange={handleChange}
               className="w-full border rounded-lg p-3"
             />
-
           </div>
 
           {/* =========================== */}
@@ -417,11 +396,9 @@ function AddMember() {
           {/* =========================== */}
 
           <div>
-
             <label className="block mb-2 font-semibold">
               Joining Date
             </label>
-
             <input
               type="date"
               name="joiningDate"
@@ -429,7 +406,6 @@ function AddMember() {
               onChange={handleChange}
               className="w-full border rounded-lg p-3"
             />
-
           </div>
 
           {/* =========================== */}
@@ -437,11 +413,9 @@ function AddMember() {
           {/* =========================== */}
 
           <div>
-
             <label className="block mb-2 font-semibold">
               Status
             </label>
-
             <select
               name="status"
               value={formData.status}
@@ -451,7 +425,6 @@ function AddMember() {
               <option value="Active">Active</option>
               <option value="Inactive">Inactive</option>
             </select>
-
           </div>
 
           {/* =========================== */}
@@ -459,11 +432,9 @@ function AddMember() {
           {/* =========================== */}
 
           <div className="md:col-span-2">
-
             <label className="block mb-2 font-semibold">
               Present Address
             </label>
-
             <textarea
               rows="3"
               name="presentAddress"
@@ -471,7 +442,6 @@ function AddMember() {
               onChange={handleChange}
               className="w-full border rounded-lg p-3"
             />
-
           </div>
 
           {/* =========================== */}
@@ -479,11 +449,9 @@ function AddMember() {
           {/* =========================== */}
 
           <div className="md:col-span-2">
-
             <label className="block mb-2 font-semibold">
               Permanent Address
             </label>
-
             <textarea
               rows="3"
               name="permanentAddress"
@@ -491,7 +459,6 @@ function AddMember() {
               onChange={handleChange}
               className="w-full border rounded-lg p-3"
             />
-
           </div>
 
           {/* =========================== */}
@@ -499,11 +466,9 @@ function AddMember() {
           {/* =========================== */}
 
           <div>
-
             <label className="block mb-2 font-semibold">
               📷 Member Photo
             </label>
-
             <input
               type="file"
               accept="image/*"
@@ -518,7 +483,6 @@ function AddMember() {
                 className="mt-3 w-32 h-32 rounded-lg border object-cover"
               />
             )}
-
           </div>
 
           {/* =========================== */}
@@ -526,11 +490,9 @@ function AddMember() {
           {/* =========================== */}
 
           <div>
-
             <label className="block mb-2 font-semibold">
               🪪 Member NID Copy
             </label>
-
             <input
               type="file"
               accept=".jpg,.jpeg,.png,.webp,.pdf"
@@ -543,7 +505,6 @@ function AddMember() {
                 {nidFile.name}
               </p>
             )}
-
           </div>
 
           {/* =========================== */}
@@ -551,11 +512,9 @@ function AddMember() {
           {/* =========================== */}
 
           <div>
-
             <label className="block mb-2 font-semibold">
               ✍ Member Signature
             </label>
-
             <input
               type="file"
               accept="image/*"
@@ -570,7 +529,6 @@ function AddMember() {
                 className="mt-3 h-20 border rounded bg-white object-contain p-2"
               />
             )}
-
           </div>
 
           {/* =========================== */}
@@ -578,11 +536,9 @@ function AddMember() {
           {/* =========================== */}
 
           <div>
-
             <label className="block mb-2 font-semibold">
               Nominee Name
             </label>
-
             <input
               type="text"
               name="nomineeName"
@@ -591,7 +547,6 @@ function AddMember() {
               placeholder="Enter Nominee Name"
               className="w-full border rounded-lg p-3"
             />
-
           </div>
 
           {/* =========================== */}
@@ -599,11 +554,9 @@ function AddMember() {
           {/* =========================== */}
 
           <div>
-
             <label className="block mb-2 font-semibold">
               Relationship with Member
             </label>
-
             <input
               type="text"
               name="nomineeRelation"
@@ -612,7 +565,6 @@ function AddMember() {
               placeholder="Father / Mother / Wife / Husband / Son / Daughter"
               className="w-full border rounded-lg p-3"
             />
-
           </div>
 
           {/* =========================== */}
@@ -620,11 +572,9 @@ function AddMember() {
           {/* =========================== */}
 
           <div>
-
             <label className="block mb-2 font-semibold">
               📷 Nominee Photo
             </label>
-
             <input
               type="file"
               accept="image/*"
@@ -639,7 +589,6 @@ function AddMember() {
                 className="mt-3 w-32 h-32 rounded-lg border object-cover"
               />
             )}
-
           </div>
 
           {/* =========================== */}
@@ -647,11 +596,9 @@ function AddMember() {
           {/* =========================== */}
 
           <div>
-
             <label className="block mb-2 font-semibold">
               🪪 Nominee NID Copy
             </label>
-
             <input
               type="file"
               accept=".jpg,.jpeg,.png,.webp,.pdf"
@@ -664,7 +611,6 @@ function AddMember() {
                 {nomineeNid.name}
               </p>
             )}
-
           </div>
 
         </div>
@@ -674,12 +620,16 @@ function AddMember() {
         {/* =========================== */}
 
         <div className="flex gap-4 mt-8">
-
           <button
             type="button"
             onClick={saveMember}
-            disabled={loading}
-            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-8 py-3 rounded-lg font-semibold transition"
+            disabled={loading || !isSuperAdmin}
+            className={`px-8 py-3 rounded-lg font-semibold transition text-white ${
+              isSuperAdmin 
+                ? "bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400" 
+                : "bg-gray-400 cursor-not-allowed"
+            }`}
+            title={!isSuperAdmin ? "Only Super Admin can add members" : ""}
           >
             {loading ? "Saving Member..." : "💾 Save Member"}
           </button>
@@ -692,15 +642,11 @@ function AddMember() {
           >
             🔄 Reset
           </button>
-
         </div>
 
       </div>
-
     </MainLayout>
-
   );
-
 }
 
 export default AddMember;

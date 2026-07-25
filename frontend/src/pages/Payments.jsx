@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import MainLayout from "../layouts/MainLayout";
+import { toast } from "react-hot-toast";
 
 function Payments() {
   const API = "https://skylark-cooperative-system.onrender.com/api";
@@ -47,14 +48,23 @@ function Payments() {
   const checkUserRole = () => {
     try {
       const userStr = localStorage.getItem("user");
+      const r = localStorage.getItem("role");
+
       if (userStr) {
         const user = JSON.parse(userStr);
-        if (user.role === "SUPER_ADMIN" || user.isSuperAdmin === true) {
+        if (user.role === "SUPER_ADMIN" || user.isSuperAdmin === true || r === "SUPER_ADMIN" || localStorage.getItem("isSuperAdmin") === "true") {
           setIsSuperAdmin(true);
+        } else {
+          setIsSuperAdmin(false);
         }
+      } else if (r === "SUPER_ADMIN" || localStorage.getItem("isSuperAdmin") === "true") {
+        setIsSuperAdmin(true);
+      } else {
+        setIsSuperAdmin(false);
       }
     } catch (err) {
       console.error("Role check error:", err);
+      setIsSuperAdmin(false);
     }
   };
 
@@ -134,8 +144,8 @@ function Payments() {
   const savePayment = async (e) => {
     e.preventDefault();
 
-    if (!isSuperAdmin && editingId) {
-      alert("Access Denied: Only Super Admin can update payments.");
+    if (!isSuperAdmin) {
+      toast.error(editingId ? "Access Denied: Only Super Admin can update payments." : "Access Denied: Only Super Admin can add payments.");
       return;
     }
 
@@ -144,9 +154,7 @@ function Payments() {
         !formData.member ||
         !formData.amount
       ) {
-        alert(
-          "Member and Amount Required"
-        );
+        toast.error("Member and Amount Required");
         return;
       }
 
@@ -156,14 +164,14 @@ function Payments() {
           formData,
           axiosConfig
         );
-        alert("Payment Updated Successfully");
+        toast.success("Payment Updated Successfully");
       } else {
         await axios.post(
           `${API}/payments`,
           formData,
           axiosConfig
         );
-        alert("Payment Added Successfully");
+        toast.success("Payment Added Successfully");
       }
 
       setEditingId(null);
@@ -180,7 +188,7 @@ function Payments() {
       fetchPayments();
     } catch (error) {
       console.log(error);
-      alert(
+      toast.error(
         error.response?.data?.message ||
         "Operation Failed"
       );
@@ -193,7 +201,7 @@ function Payments() {
 
   const handleEdit = (payment) => {
     if (!isSuperAdmin) {
-      alert("Access Denied: Only Super Admin can edit payment records.");
+      toast.error("Access Denied: Only Super Admin can edit payment records.");
       return;
     }
 
@@ -214,6 +222,11 @@ function Payments() {
   // ===============================
 
   const deletePayment = async (id) => {
+    if (!isSuperAdmin) {
+      toast.error("Access Denied: Only Super Admin can delete payments.");
+      return;
+    }
+
     if (
       !window.confirm(
         "Delete this payment?"
@@ -227,14 +240,14 @@ function Payments() {
         axiosConfig
       );
 
-      alert(
+      toast.success(
         "Payment Deleted"
       );
 
       fetchPayments();
     } catch (error) {
       console.log(error);
-      alert(
+      toast.error(
         "Delete Failed"
       );
     }
@@ -396,7 +409,13 @@ function Payments() {
           <div className="md:col-span-2">
             <button
               type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg"
+              disabled={!isSuperAdmin}
+              className={`px-8 py-3 rounded-lg text-white font-semibold transition ${
+                isSuperAdmin
+                  ? "bg-blue-600 hover:bg-blue-700 cursor-pointer"
+                  : "bg-gray-400 cursor-not-allowed opacity-60"
+              }`}
+              title={!isSuperAdmin ? "Only Super Admin can add/update payments" : ""}
             >
               {editingId ? "Update Payment" : "Save Payment"}
             </button>
@@ -483,7 +502,13 @@ function Payments() {
                         </button>
                         <button
                           onClick={() => deletePayment(payment._id)}
-                          className="bg-red-600 text-white px-3 py-1 rounded"
+                          disabled={!isSuperAdmin}
+                          className={`px-3 py-1 rounded text-white ${
+                            isSuperAdmin
+                              ? "bg-red-600 hover:bg-red-700 cursor-pointer"
+                              : "bg-gray-400 cursor-not-allowed opacity-60"
+                          }`}
+                          title={!isSuperAdmin ? "Only Super Admin can delete payments" : ""}
                         >
                           Delete
                         </button>

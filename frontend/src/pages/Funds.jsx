@@ -10,6 +10,7 @@ function Funds() {
   const [members, setMembers] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   
   // Search & Filter
   const [search, setSearch] = useState("");
@@ -30,6 +31,26 @@ function Funds() {
     description: "",
   };
   const [form, setForm] = useState(initialForm);
+
+  // ================= Super Admin Check =================
+  useEffect(() => {
+    try {
+      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+      const r = storedUser.role || localStorage.getItem("role") || "MEMBER";
+
+      if (
+        r === "SUPER_ADMIN" || 
+        storedUser.isSuperAdmin === true || 
+        localStorage.getItem("isSuperAdmin") === "true"
+      ) {
+        setIsSuperAdmin(true);
+      } else {
+        setIsSuperAdmin(false);
+      }
+    } catch (e) {
+      setIsSuperAdmin(false);
+    }
+  }, []);
 
   // ================= Fetch Data =================
   const fetchTransactions = async () => {
@@ -137,6 +158,10 @@ function Funds() {
   };
 
   const openAddModal = () => {
+    if (!isSuperAdmin) {
+      toast.error("Access Denied: Only Super Admin can add transactions.");
+      return;
+    }
     setEditingId(null);
     setForm(initialForm);
     setShowModal(true);
@@ -145,6 +170,11 @@ function Funds() {
   // Submit Form (Add or Edit)
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!isSuperAdmin) {
+      toast.error("Access Denied: Only Super Admin can perform this action.");
+      return;
+    }
+
     try {
       const token = localStorage.getItem("token");
       const url = editingId
@@ -178,6 +208,11 @@ function Funds() {
 
   // Edit Trigger
   const editTransaction = (id) => {
+    if (!isSuperAdmin) {
+      toast.error("Access Denied: Only Super Admin can edit transactions.");
+      return;
+    }
+
     const item = safeTransactions.find((t) => t && t._id === id);
     if (item) {
       setEditingId(id);
@@ -206,6 +241,11 @@ function Funds() {
 
   // Delete Trigger
   const deleteTransaction = async (id) => {
+    if (!isSuperAdmin) {
+      toast.error("Access Denied: Only Super Admin can delete transactions.");
+      return;
+    }
+
     if (window.confirm("Are you sure you want to delete this transaction?")) {
       try {
         const token = localStorage.getItem("token");
@@ -264,7 +304,11 @@ function Funds() {
           </div>
           <button
             onClick={openAddModal}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-3 rounded-lg shadow transition duration-200"
+            disabled={!isSuperAdmin}
+            className={`flex items-center gap-2 font-semibold px-5 py-3 rounded-lg shadow transition duration-200 text-white ${
+              isSuperAdmin ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-400 cursor-not-allowed"
+            }`}
+            title={!isSuperAdmin ? "Only Super Admin can add transactions" : ""}
           >
             <Plus size={20} /> Add Transaction
           </button>
@@ -398,10 +442,20 @@ function Funds() {
                         <td className="px-4 py-3">{item && item.createdAt ? new Date(item.createdAt).toLocaleDateString() : "-"}</td>
                         <td className="px-4 py-3">
                           <div className="flex justify-center gap-2">
-                            <button onClick={() => editTransaction(item._id)} className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition">
+                            <button 
+                              onClick={() => editTransaction(item._id)} 
+                              disabled={!isSuperAdmin}
+                              className={`p-2 rounded-lg transition text-white ${isSuperAdmin ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-400 cursor-not-allowed"}`}
+                              title={!isSuperAdmin ? "Only Super Admin can edit" : ""}
+                            >
                               <Pencil size={16} />
                             </button>
-                            <button onClick={() => deleteTransaction(item._id)} className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition">
+                            <button 
+                              onClick={() => deleteTransaction(item._id)} 
+                              disabled={!isSuperAdmin}
+                              className={`p-2 rounded-lg transition text-white ${isSuperAdmin ? "bg-red-600 hover:bg-red-700" : "bg-gray-400 cursor-not-allowed"}`}
+                              title={!isSuperAdmin ? "Only Super Admin can delete" : ""}
+                            >
                               <Trash2 size={16} />
                             </button>
                           </div>
@@ -533,7 +587,14 @@ function Funds() {
 
                 <div className="flex justify-end gap-3 pt-4 border-t">
                   <button type="button" onClick={handleCancel} className="px-6 py-2.5 rounded-lg bg-gray-200 text-gray-700 font-medium">Cancel</button>
-                  <button type="submit" className="px-6 py-2.5 rounded-lg bg-blue-600 text-white font-medium">Save Transaction</button>
+                  <button 
+                    type="submit" 
+                    disabled={!isSuperAdmin}
+                    className={`px-6 py-2.5 rounded-lg text-white font-medium ${isSuperAdmin ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-400 cursor-not-allowed"}`}
+                    title={!isSuperAdmin ? "Only Super Admin can save transactions" : ""}
+                  >
+                    Save Transaction
+                  </button>
                 </div>
               </form>
             </div>

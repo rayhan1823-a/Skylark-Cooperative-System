@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
+import { toast } from "react-hot-toast";
 
 function Loans() {
   const API = "https://skylark-cooperative-system.onrender.com/api";
@@ -39,16 +40,24 @@ function Loans() {
 
   const checkUserRole = () => {
     try {
-      // ইউজার রোল লোকালস্টোরেজ থেকে চেক করা হচ্ছে
       const userStr = localStorage.getItem("user");
+      const r = localStorage.getItem("role");
+      
       if (userStr) {
         const user = JSON.parse(userStr);
-        if (user.role === "SUPER_ADMIN" || user.isSuperAdmin === true) {
+        if (user.role === "SUPER_ADMIN" || user.isSuperAdmin === true || r === "SUPER_ADMIN" || localStorage.getItem("isSuperAdmin") === "true") {
           setIsSuperAdmin(true);
+        } else {
+          setIsSuperAdmin(false);
         }
+      } else if (r === "SUPER_ADMIN" || localStorage.getItem("isSuperAdmin") === "true") {
+        setIsSuperAdmin(true);
+      } else {
+        setIsSuperAdmin(false);
       }
     } catch (err) {
       console.error("Role check error:", err);
+      setIsSuperAdmin(false);
     }
   };
 
@@ -79,17 +88,17 @@ function Loans() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!isSuperAdmin && editingId) {
-      alert("Only Super Admin can update loans.");
+    if (!isSuperAdmin) {
+      toast.error(editingId ? "Access Denied: Only Super Admin can update loans." : "Access Denied: Only Super Admin can add loans.");
       return;
     }
     try {
       if (editingId) {
         await axios.put(`${API}/loans/${editingId}`, formData, getAuthHeader());
-        alert("Loan Updated Successfully");
+        toast.success("Loan Updated Successfully");
       } else {
         await axios.post(`${API}/loans`, formData, getAuthHeader());
-        alert("Loan Added Successfully");
+        toast.success("Loan Added Successfully");
       }
       setEditingId(null);
       setFormData({
@@ -103,13 +112,13 @@ function Loans() {
       fetchLoans();
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || "Operation Failed");
+      toast.error(err.response?.data?.message || "Operation Failed");
     }
   };
 
   const handleEdit = (loan) => {
     if (!isSuperAdmin) {
-      alert("Access Denied: Only Super Admin can edit loan records.");
+      toast.error("Access Denied: Only Super Admin can edit loan records.");
       return;
     }
     setEditingId(loan._id);
@@ -124,14 +133,18 @@ function Loans() {
   };
 
   const handleDelete = async (id) => {
+    if (!isSuperAdmin) {
+      toast.error("Access Denied: Only Super Admin can delete loans.");
+      return;
+    }
     if (!window.confirm("Delete this loan?")) return;
     try {
       await axios.delete(`${API}/loans/${id}`, getAuthHeader());
-      alert("Loan Deleted");
+      toast.success("Loan Deleted");
       fetchLoans();
     } catch (err) {
       console.error(err);
-      alert("Delete failed");
+      toast.error("Delete failed");
     }
   };
 
@@ -164,7 +177,16 @@ function Loans() {
           </select>
           <input type="text" name="remarks" placeholder="Remarks" value={formData.remarks} onChange={handleChange} className="border rounded-lg p-3" />
           <div className="md:col-span-2">
-            <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg">
+            <button 
+              type="submit" 
+              disabled={!isSuperAdmin}
+              className={`px-8 py-3 rounded-lg text-white font-semibold transition ${
+                isSuperAdmin 
+                  ? "bg-blue-600 hover:bg-blue-700 cursor-pointer" 
+                  : "bg-gray-400 cursor-not-allowed opacity-60"
+              }`}
+              title={!isSuperAdmin ? "Only Super Admin can add/update loans" : ""}
+            >
               {editingId ? "Update Loan" : "Add Loan"}
             </button>
           </div>
@@ -222,7 +244,18 @@ function Loans() {
                       >
                         Edit
                       </button>
-                      <button onClick={() => handleDelete(loan._id)} className="bg-red-600 text-white px-3 py-1 rounded">Delete</button>
+                      <button 
+                        onClick={() => handleDelete(loan._id)} 
+                        disabled={!isSuperAdmin}
+                        className={`px-3 py-1 rounded text-white ${
+                          isSuperAdmin 
+                            ? "bg-red-600 hover:bg-red-700 cursor-pointer" 
+                            : "bg-gray-400 cursor-not-allowed opacity-60"
+                        }`}
+                        title={!isSuperAdmin ? "Only Super Admin can delete loans" : ""}
+                      >
+                        Delete
+                      </button>
                     </td>
                   </tr>
                 );
