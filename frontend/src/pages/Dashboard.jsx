@@ -10,7 +10,6 @@ const API = "https://skylark-cooperative-system.onrender.com/api";
 function Dashboard() {
   const navigate = useNavigate();
 
-  // ইউজারের রোল চেক করার জন্য কোড
   const user = JSON.parse(localStorage.getItem("user")) || {};
   const role = user.role || "";
   const isAdmin = role === "SUPER_ADMIN" || role === "ADMIN" || role === "STAFF";
@@ -25,7 +24,6 @@ function Dashboard() {
   const [totalLoanGiven, setTotalLoanGiven] = useState(0);
   const [fundTransactions, setFundTransactions] = useState([]);
   const [totalDepositBalance, setTotalDepositBalance] = useState(0);
-  const [totalDue, setTotalDue] = useState(0); 
   const [totalWithdrawal, setTotalWithdrawal] = useState(0);
   const [totalPenaltyAmount, setTotalPenaltyAmount] = useState(0);
   
@@ -42,22 +40,24 @@ function Dashboard() {
           }
         };
 
+        let calculatedTotalMembers = 5;
+
         // ১. মেইন ড্যাশবোর্ড ডাটা ফেচ
         try {
           const dashRes = await axios.get(`${API}/dashboard`, config);
           if (dashRes.data && dashRes.data.success) {
             const data = dashRes.data.data;
             
+            calculatedTotalMembers = data.totalMembers || 5;
             setStats(prev => ({
               ...prev,
-              totalMembers: data.totalMembers || 0,
-              activeMembers: data.activeMembers || 0,
+              totalMembers: calculatedTotalMembers,
+              activeMembers: data.activeMembers || calculatedTotalMembers,
               inactiveMembers: data.inactiveMembers || 0,
               bankProfit: data.totalProfit || 0,
             }));
 
             setTotalDepositBalance(data.totalDeposit || 0);
-            setTotalDue(data.totalDue || 0);
             setTotalWithdrawal(data.totalWithdrawal || 0);
             setTotalLoanGiven(data.totalLoan || 0);
 
@@ -100,27 +100,27 @@ function Dashboard() {
           const reportRes = await axios.get(`${API}/reports/members`, config);
           if (reportRes.data && reportRes.data.success) {
             const reportList = reportRes.data.report || [];
-            
-            const calculatedTotalDue = reportList.reduce((sum, item) => sum + Number(item.totalDue || 0), 0);
-            if (totalDue === 0) setTotalDue(calculatedTotalDue);
+            if (reportList.length > 0) {
+              calculatedTotalMembers = reportList.length;
+            }
 
             const calculatedTotalDep = reportList.reduce((sum, item) => sum + Number(item.totalDeposit || 0), 0);
-            if (totalDepositBalance === 0) setTotalDepositBalance(calculatedTotalDep);
+            if (calculatedTotalDep > 0) {
+              setTotalDepositBalance(calculatedTotalDep);
+            }
 
             const calculatedTotalWithdrawal = reportList.reduce((sum, item) => sum + Number(item.totalWithdrawal || item.withdrawn || 0), 0);
-            if (totalWithdrawal === 0 && calculatedTotalWithdrawal > 0) {
+            if (calculatedTotalWithdrawal > 0) {
               setTotalWithdrawal(calculatedTotalWithdrawal);
             }
 
             const activeCount = reportList.filter(item => item.status === "Active" || item.isActive).length;
-            if (stats.totalMembers === 0) {
-              setStats(prev => ({
-                ...prev,
-                totalMembers: reportList.length,
-                activeMembers: activeCount,
-                inactiveMembers: reportList.length - activeCount,
-              }));
-            }
+            setStats(prev => ({
+              ...prev,
+              totalMembers: calculatedTotalMembers,
+              activeMembers: activeCount > 0 ? activeCount : calculatedTotalMembers,
+              inactiveMembers: calculatedTotalMembers - (activeCount > 0 ? activeCount : calculatedTotalMembers),
+            }));
           }
         } catch (reportErr) {
           console.error("Error fetching reports API in dashboard:", reportErr);
@@ -130,13 +130,8 @@ function Dashboard() {
         try {
           const loanRes = await axios.get(`${API}/loans`, config);
           const loans = loanRes.data?.loans || loanRes.data?.data || loanRes.data || [];
-          
-          const totalLoan = loans.reduce((sum, l) => {
-            const val = Number(l.amount || l.loanAmount || 0);
-            return sum + val;
-          }, 0);
-
-          if (totalLoanGiven === 0) setTotalLoanGiven(totalLoan);
+          const totalLoan = loans.reduce((sum, l) => sum + Number(l.amount || l.loanAmount || 0), 0);
+          if (totalLoan > 0) setTotalLoanGiven(totalLoan);
         } catch (err) {
           console.error("Error fetching loans API:", err);
         }
@@ -152,7 +147,7 @@ function Dashboard() {
             .filter(t => t && (t.type === "WITHDRAWAL" || t.category === "Withdrawal"))
             .reduce((sum, t) => sum + Number(t.amount || 0), 0);
           
-          if (fundWithdrawal > 0 && totalWithdrawal === 0) {
+          if (fundWithdrawal > 0) {
             setTotalWithdrawal(fundWithdrawal);
           }
         } catch (err) {
@@ -196,6 +191,12 @@ function Dashboard() {
     .filter(t => t && t.type === "EXPENSE")
     .reduce((sum, t) => sum + Number(t.amount || 0), 0);
 
+  // অটোমেটিক ডাইনামিক ক্যালকুলেশন (ডাটা পরিবর্তনে নিজে থেকেই আপডেট হবে)
+  const memberCountForTarget = stats.totalMembers > 0 ? stats.totalMembers : 5;
+  const targetPerMember = 38000;
+  const totalTargetDeposit = memberCountForTarget * targetPerMember;
+  const calculatedTotalDue = Math.max(0, (totalTargetDeposit - Number(totalDepositBalance)) + Number(totalWithdrawal));
+
   const currentMainCashBalance = (Number(totalDepositBalance) + Number(totalFundIncome) + Number(totalPenaltyAmount) + Number(stats.bankProfit || 0)) - Number(totalLoanGiven) - Number(totalExpense) - Number(totalWithdrawal);
   const totalProfit = Number(stats.bankProfit || 0) + Number(totalFundIncome || 0) + Number(totalPenaltyAmount || 0) - Number(totalExpense);
 
@@ -236,7 +237,7 @@ function Dashboard() {
           </div>
         </div>
 
-        {/* Top Navigation / Quick Action Cards (Only for Admin/Staff) */}
+        {/* Top Navigation / Quick Action Cards */}
         {isAdmin && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div 
@@ -352,10 +353,11 @@ function Dashboard() {
             </div>
           </div>
 
+          {/* Total Due Card (Automatically calculated via Target, Deposit and Withdrawal) */}
           <div className="bg-gradient-to-br from-rose-950 via-red-950 to-slate-900 border border-rose-800/50 text-white p-6 rounded-3xl shadow-[0_10px_35px_rgba(159,18,57,0.4)] hover:shadow-2xl transition-all duration-300 flex justify-between items-center group transform hover:-translate-y-1">
             <div>
               <p className="text-[11px] font-black text-rose-300 tracking-wider uppercase">Total Due</p>
-              <h3 className="text-2xl font-black mt-2 text-white">৳ {totalDue.toLocaleString()}</h3>
+              <h3 className="text-2xl font-black mt-2 text-white">৳ {calculatedTotalDue.toLocaleString()}</h3>
             </div>
             <div className="p-4 bg-white/10 text-white rounded-2xl backdrop-blur-xl group-hover:scale-110 transition duration-300 shadow-inner border border-white/20">
               <TrendingDown size={24} />
