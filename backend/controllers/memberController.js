@@ -38,7 +38,6 @@ const getAllMembers = async (req, res) => {
             }
 
             if (queryConditions.length > 0) {
-                // .lean() ব্যবহার করায় কুয়েরি অনেক দ্রুত এক্সিকিউট হবে
                 const selfMember = await Member.findOne({ $or: queryConditions }).lean();
                 members = selfMember ? [selfMember] : [];
             }
@@ -114,16 +113,44 @@ const getMemberProfile = async (req, res) => {
         const memberMongoId = member._id;
         const customMemberId = member.memberId;
 
-        // Parallel Fetching for Maximum Speed
-        const [deposits, memberLoans, withdrawals, payments, memberPenalties] = await Promise.all([
-            Deposit.find({ $or: [{ memberId: memberMongoId }, { member: memberMongoId }, { memberId: customMemberId }] }).sort({ createdAt: -1 }).lean().catch(() => []),
+        // Robust Deposit Fetching with Fallback
+        let deposits = [];
+        try {
+            deposits = await Deposit.find({
+                $or: [
+                    { memberId: memberMongoId },
+                    { member: memberMongoId },
+                    { memberId: customMemberId },
+                    { member: customMemberId },
+                    { 'memberId._id': memberMongoId },
+                    { 'member._id': memberMongoId },
+                    { 'memberId.memberId': customMemberId },
+                    { 'member.memberId': customMemberId }
+                ]
+            }).sort({ createdAt: -1, depositDate: -1 }).lean();
+
+            if (!deposits || deposits.length === 0) {
+                const allDeposits = await Deposit.find({}).lean();
+                deposits = allDeposits.filter(d => {
+                    const dMemberStr = JSON.stringify(d.member || d.memberId || '').toLowerCase();
+                    return dMemberStr.includes(String(memberMongoId).toLowerCase()) || 
+                           dMemberStr.includes(String(customMemberId).toLowerCase());
+                });
+            }
+        } catch (err) {
+            console.error("Deposit fetch error:", err);
+            deposits = [];
+        }
+
+        // Parallel Fetching for Other Collections
+        const [memberLoans, withdrawals, payments, memberPenalties] = await Promise.all([
             Loan.find({ $or: [{ memberId: memberMongoId }, { member: memberMongoId }] }).sort({ createdAt: -1 }).lean().catch(() => []),
             Withdrawal.find({ $or: [{ memberId: memberMongoId }, { member: memberMongoId }] }).sort({ date: -1 }).lean().catch(() => []),
             Payment.find({ $or: [{ memberId: memberMongoId }, { member: memberMongoId }] }).sort({ paymentDate: -1 }).lean().catch(() => []),
             Penalty.find({ $or: [{ member: memberMongoId }, { memberId: memberMongoId }, { member: customMemberId }, { memberId: customMemberId }] }).lean().catch(() => [])
         ]);
 
-        const totalDeposit = deposits.reduce((sum, d) => sum + (Number(d.amount) || Number(d.paidAmount) || 0), 0);
+        const totalDeposit = deposits.reduce((sum, d) => sum + (Number(d.amount) || Number(d.paidAmount) || Number(d.depositAmount) || 0), 0);
         const totalLoan = memberLoans.reduce((sum, loan) => sum + (Number(loan.amount) || 0), 0);
         const totalPenalty = memberPenalties.reduce((sum, p) => sum + (Number(p.amount) || Number(p.fineAmount) || Number(p.total) || 0), 0);
         const totalWithdrawal = withdrawals.reduce((sum, w) => sum + (Number(w.amount) || 0), 0);
