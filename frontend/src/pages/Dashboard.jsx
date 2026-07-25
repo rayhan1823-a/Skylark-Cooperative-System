@@ -354,7 +354,7 @@ function Dashboard() {
 
           <div className="bg-gradient-to-br from-rose-950 via-red-950 to-slate-900 border border-rose-800/50 text-white p-6 rounded-3xl shadow-[0_10px_35px_rgba(159,18,57,0.4)] hover:shadow-2xl transition-all duration-300 flex justify-between items-center group transform hover:-translate-y-1">
             <div>
-              <p className="text-[11px] font-black text-rose-300 tracking-wider uppercase">Total Deposit Due</p>
+              <p className="text-[11px] font-black text-rose-300 tracking-wider uppercase">Total Due</p>
               <h3 className="text-2xl font-black mt-2 text-white">৳ {totalDue.toLocaleString()}</h3>
             </div>
             <div className="p-4 bg-white/10 text-white rounded-2xl backdrop-blur-xl group-hover:scale-110 transition duration-300 shadow-inner border border-white/20">
