@@ -10,6 +10,8 @@ function UsersList() {
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [currentUserRole, setCurrentUserRole] = useState("");
+  const [currentUserId, setCurrentUserId] = useState("");
   const navigate = useNavigate(); // ✅ হুুক ডিফাইন করা হলো
 
   useEffect(() => {
@@ -19,8 +21,10 @@ function UsersList() {
     try {
       const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
       const userRole = storedUser.role || "";
+      setCurrentUserRole(userRole);
+      setCurrentUserId(storedUser.id || storedUser._id || "");
       
-      // যদি ইউজার ADMIN বা SUPER_ADMIN না হয়, তবে তাকে ড্যাশবোর্ডে পাঠিয়ে দেওয়া হবে
+      // যদি ইউজার ADMIN বা SUPER_ADMIN না হয়, তবে তাকে ড্যাশবোর্ডে পাঠিয়ে দেওয়া হবে
       if (userRole !== "SUPER_ADMIN" && userRole !== "ADMIN") {
         toast.error("Access Denied! Only admins can view registered users.");
         navigate("/");
@@ -70,6 +74,34 @@ function UsersList() {
   };
 
   // ==========================
+  // Delete User Function (New)
+  // ==========================
+  const deleteUser = async (id) => {
+    const ok = window.confirm("Are you sure you want to delete this user? Once deleted, they will need to register again.");
+    if (!ok) return;
+
+    try {
+      const token = localStorage.getItem("token") || localStorage.getItem("authToken") || localStorage.getItem("accessToken");
+
+      const res = await axios.delete(`${API_URL}/api/users/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (res.data.success) {
+        toast.success("User deleted successfully. They can register again.");
+        fetchUsers(); // ইউজার লিস্ট রিফ্রেশ করা
+      } else {
+        toast.error(res.data.message || "Failed to delete user");
+      }
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      toast.error(error.response?.data?.message || "Failed to delete user");
+    }
+  };
+
+  // ==========================
   // Search Filtering Logic
   // ==========================
   const filteredUsers = users.filter((user) => {
@@ -112,44 +144,65 @@ function UsersList() {
               <th className="p-4 font-semibold">Email</th>
               <th className="p-4 font-semibold text-center">Role</th>
               <th className="p-4 font-semibold text-center">Status</th>
+              <th className="p-4 font-semibold text-center">Action</th> {/* নতুন অ্যাকশন কলাম */}
             </tr>
           </thead>
           
           <tbody className="divide-y divide-gray-200">
             {loading ? (
               <tr>
-                <td colSpan={6} className="text-center py-10 text-gray-500 font-medium">
+                <td colSpan={7} className="text-center py-10 text-gray-500 font-medium">
                   Loading Registered Users...
                 </td>
               </tr>
             ) : filteredUsers.length > 0 ? (
-              filteredUsers.map((user, index) => (
-                <tr key={user._id || index} className="hover:bg-gray-50 transition">
-                  <td className="p-4 text-center text-gray-700">{index + 1}</td>
-                  <td className="p-4 font-semibold text-gray-800">{user.name || "N/A"}</td>
-                  <td className="p-4 text-gray-600">{user.phone || user.phoneNumber || "N/A"}</td>
-                  <td className="p-4 text-gray-600">{user.email || "N/A"}</td>
-                  
-                  <td className="p-4 text-center">
-                    <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-semibold">
-                      {user.role || "MEMBER"}
-                    </span>
-                  </td>
-                  
-                  <td className="p-4 text-center">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-semibold text-white ${
-                        user.status === "Inactive" ? "bg-gray-500" : "bg-green-600"
-                      }`}
-                    >
-                      {user.status || "Active"}
-                    </span>
-                  </td>
-                </tr>
-              ))
+              filteredUsers.map((user, index) => {
+                const userId = user._id || user.id;
+                // সুপার অ্যাডমিন নিজেই নিজের অ্যাকাউন্ট যেন ডিলিট করতে না পারে তার চেক
+                const isSelf = currentUserId === userId;
+
+                return (
+                  <tr key={userId || index} className="hover:bg-gray-50 transition">
+                    <td className="p-4 text-center text-gray-700">{index + 1}</td>
+                    <td className="p-4 font-semibold text-gray-800">{user.name || "N/A"}</td>
+                    <td className="p-4 text-gray-600">{user.phone || user.phoneNumber || "N/A"}</td>
+                    <td className="p-4 text-gray-600">{user.email || "N/A"}</td>
+                    
+                    <td className="p-4 text-center">
+                      <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-semibold">
+                        {user.role || "MEMBER"}
+                      </span>
+                    </td>
+                    
+                    <td className="p-4 text-center">
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-semibold text-white ${
+                          user.status === "Inactive" ? "bg-gray-500" : "bg-green-600"
+                        }`}
+                      >
+                        {user.status || "Active"}
+                      </span>
+                    </td>
+
+                    {/* Action Column: Delete Button */}
+                    <td className="p-4 text-center">
+                      {currentUserRole === "SUPER_ADMIN" && !isSelf ? (
+                        <button
+                          onClick={() => deleteUser(userId)}
+                          className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-sm font-medium transition shadow-sm"
+                        >
+                          Delete
+                        </button>
+                      ) : (
+                        <span className="text-xs text-gray-400 italic">N/A</span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })
             ) : (
               <tr>
-                <td colSpan={6} className="text-center py-10 text-gray-500 font-medium">
+                <td colSpan={7} className="text-center py-10 text-gray-500 font-medium">
                   No Registered Users Found.
                 </td>
               </tr>
