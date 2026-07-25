@@ -24,7 +24,6 @@ function MemberProfile() {
     const role = (localStorage.getItem("role") || "").toLowerCase();
     const loggedInMemberId = localStorage.getItem("memberId") || localStorage.getItem("userId") || localStorage.getItem("id");
 
-    // যদি ইউজার 'member' হয় এবং ইউআরএল-এর id তার নিজের id-এর সাথে না মেলে
     if (role === "member" && loggedInMemberId && id !== loggedInMemberId) {
       navigate(`/members/${loggedInMemberId}`, { replace: true });
       return;
@@ -43,8 +42,6 @@ function MemberProfile() {
 
       const res = await axios.get(`${API}/members/${id}`, config);
       
-      console.log("API Full Response:", res.data);
-
       const responseData = res.data.success !== undefined ? res.data : { success: true, ...res.data };
 
       if (responseData) {
@@ -80,7 +77,9 @@ function MemberProfile() {
   const totalPenalty = summary?.totalPenalty ?? penalties.reduce((sum, p) => sum + Number(p.amount || p.fineAmount || p.total || p.penaltyAmount || 0), 0);
 
   const currentBalance = totalDeposit - totalWithdrawal - loanAmount;
-  const totalDueAmount = (summary?.totalDue ?? 0) + loanAmount + totalWithdrawal;
+  
+  // ✅ ব্যাকএন্ড থেকে আসা টোটাল ডিউ সরাসরি ব্যবহার করা হলো (অতিরিক্ত যোগ-বিয়োগ বাদ দেওয়া হয়েছে)
+  const totalDueAmount = summary?.totalDue ?? 0;
 
   if (loading) {
     return (
@@ -98,7 +97,6 @@ function MemberProfile() {
     );
   }
 
-  // ইমেজের সঠিক পাথ তৈরি করার লজিক
   let profileImageUrl = "";
   if (member.photo) {
     if (member.photo.startsWith("http") || member.photo.startsWith("blob")) {
@@ -137,7 +135,6 @@ function MemberProfile() {
           </div>
           <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
             
-            {/* Profile Image & Fallback Initial Letter Avatar */}
             <div className="relative">
               {profileImageUrl ? (
                 <img 
@@ -175,12 +172,11 @@ function MemberProfile() {
           </div>
         </div>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 mb-8">
+        {/* Summary Cards (Total Deposit Due কার্ড বাদ দিয়ে ৭টি কার্ড রাখা হলো) */}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-8">
           {[
             { label: 'Total Deposit', val: totalDeposit, color: 'bg-green-600' },
             { label: 'Total Withdrawal', val: totalWithdrawal, color: 'bg-pink-600' },
-            { label: 'Total Deposit Due', val: summary?.totalDue ?? 0, color: 'bg-red-600' },
             { label: 'Total Loan', val: loanAmount, color: 'bg-purple-700' },
             { label: 'Penalty', val: totalPenalty, color: 'bg-yellow-500' },
             { label: 'Advance', val: summary?.advanceBalance ?? 0, color: 'bg-blue-600' },
