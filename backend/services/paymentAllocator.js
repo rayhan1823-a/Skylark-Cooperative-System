@@ -197,7 +197,7 @@ const generateMemberAllocation = async (memberId) => {
     let totalDepositDue = totalTarget - totalDeposit;
     if (totalDepositDue < 0) totalDepositDue = 0;
 
-    // ২. টোটাল ডিউ: বর্তমান কার্যকরী ব্যালেন্স (জমা - উত্তোলন) থেকে নিট বকেয়া হিসাব
+    // ২. টোটাল ডিউ: টার্গেট থেকে বর্তমান কার্যকরী ব্যালেন্স (জমা - উত্তোলন) বাদ দিয়ে সঠিক নিট বকেয়া
     const currentBalance = totalDeposit - totalWithdrawal;
     let finalTotalDue = totalTarget - currentBalance;
     if (finalTotalDue < 0) finalTotalDue = 0;
@@ -205,7 +205,7 @@ const generateMemberAllocation = async (memberId) => {
     return {
       totalPaid,
       totalDue: finalTotalDue,          // ✅ সঠিক নিট বকেয়া (৫,০০০ টাকা)
-      totalDepositDue: totalDepositDue, // ✅ সঠিক ডিপোজিট বকেয়া (০ টাকা)
+      totalDepositDue: totalDepositDue, // ✅ সঠিক ডিপোজিট ডিউ (০ টাকা)
       totalWithdrawal,
       monthlyDetails,
     };
