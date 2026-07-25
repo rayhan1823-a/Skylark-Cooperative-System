@@ -10,7 +10,7 @@ const bcrypt = require('bcryptjs');
 const { generateMemberAllocation, rebuildAllocation } = require('../services/paymentAllocator');
 
 // ==========================================
-// 1. Get All Members (Role-based Restriction)
+// 1. Get All Members (Fast & Optimized)
 // ==========================================
 const getAllMembers = async (req, res) => {
     try {
@@ -19,38 +19,31 @@ const getAllMembers = async (req, res) => {
 
         if (userRole === 'MEMBER') {
             const tokenMemberId = String(req.user.id || req.user._id || '');
-            const tokenPhone = String(req.user.phone || req.user.mobile || '').trim();
+            const rawPhone = String(req.user.phone || req.user.mobile || '').trim();
+            const tokenPhone = rawPhone.replace(/[^0-9]/g, ''); // শুধুমাত্র ডিজিট রাখা
 
-            let query = {};
+            const queryConditions = [];
+
             if (tokenMemberId && mongoose.Types.ObjectId.isValid(tokenMemberId)) {
-                query = { _id: tokenMemberId };
-            } else if (tokenMemberId) {
-                query = { $or: [{ memberId: tokenMemberId }, { userId: tokenMemberId }] };
-            } else if (tokenPhone) {
-                query = { 
-                    $or: [
-                        { phone: tokenPhone }, 
-                        { mobile: tokenPhone },
-                        { phone: { $regex: new RegExp(tokenPhone, 'i') } },
-                        { mobile: { $regex: new RegExp(tokenPhone, 'i') } }
-                    ] 
-                };
+                queryConditions.push({ _id: tokenMemberId });
+            }
+            if (tokenMemberId) {
+                queryConditions.push({ memberId: tokenMemberId });
+                queryConditions.push({ userId: tokenMemberId });
+            }
+            if (tokenPhone) {
+                const phoneRegex = new RegExp(tokenPhone, 'i');
+                queryConditions.push({ phone: phoneRegex });
+                queryConditions.push({ mobile: phoneRegex });
             }
 
-            const selfMember = await Member.findOne(query);
-            
-            if (!selfMember && tokenPhone) {
-                const allMembersList = await Member.find({});
-                const matched = allMembersList.find(m => {
-                    const mPhone = String(m.phone || m.mobile || '').trim();
-                    return mPhone && (mPhone.includes(tokenPhone) || tokenPhone.includes(mPhone));
-                });
-                members = matched ? [matched] : [];
-            } else {
+            if (queryConditions.length > 0) {
+                // .lean() ব্যবহার করায় কুয়েরি অনেক দ্রুত এক্সিকিউট হবে
+                const selfMember = await Member.findOne({ $or: queryConditions }).lean();
                 members = selfMember ? [selfMember] : [];
             }
         } else {
-            members = await Member.find().sort({ memberId: 1 });
+            members = await Member.find().sort({ memberId: 1 }).lean();
         }
 
         return res.status(200).json({ 
@@ -82,37 +75,21 @@ const getMemberProfile = async (req, res) => {
             const tokenMemberId = String(req.user.id || req.user._id || '');
             const tokenPhone = req.user.phone || req.user.mobile || '';
 
+            const profileQueries = [];
             if (id) {
-                if (mongoose.Types.ObjectId.isValid(id)) {
-                    member = await Member.findById(id);
-                }
-                if (!member) {
-                    member = await Member.findOne({ 
-                        $or: [
-                            { memberId: id }, 
-                            { userId: id },
-                            { memberId: new RegExp('^' + id + '$', 'i') },
-                            { userId: new RegExp('^' + id + '$', 'i') }
-                        ] 
-                    });
-                }
+                if (mongoose.Types.ObjectId.isValid(id)) profileQueries.push({ _id: id });
+                profileQueries.push({ memberId: id }, { userId: id });
+            }
+            if (tokenMemberId) {
+                if (mongoose.Types.ObjectId.isValid(tokenMemberId)) profileQueries.push({ _id: tokenMemberId });
+                profileQueries.push({ memberId: tokenMemberId }, { userId: tokenMemberId });
+            }
+            if (tokenPhone) {
+                profileQueries.push({ phone: tokenPhone }, { mobile: tokenPhone });
             }
 
-            if (!member && tokenMemberId && mongoose.Types.ObjectId.isValid(tokenMemberId)) {
-                member = await Member.findById(tokenMemberId);
-            }
-            if (!member && tokenMemberId) {
-                member = await Member.findOne({ 
-                    $or: [
-                        { memberId: tokenMemberId }, 
-                        { userId: tokenMemberId }
-                    ] 
-                });
-            }
-            if (!member && tokenPhone) {
-                member = await Member.findOne({ 
-                    $or: [{ phone: tokenPhone }, { mobile: tokenPhone }] 
-                });
+            if (profileQueries.length > 0) {
+                member = await Member.findOne({ $or: profileQueries }).lean();
             }
 
             if (!member) {
@@ -123,20 +100,11 @@ const getMemberProfile = async (req, res) => {
                 return res.status(400).json({ success: false, message: "Member ID is required" });
             }
 
-            if (mongoose.Types.ObjectId.isValid(id)) {
-                member = await Member.findById(id);
-            }
+            const adminQueries = [];
+            if (mongoose.Types.ObjectId.isValid(id)) adminQueries.push({ _id: id });
+            adminQueries.push({ memberId: id }, { userId: id });
 
-            if (!member) {
-                member = await Member.findOne({ 
-                    $or: [
-                        { memberId: id }, 
-                        { userId: id },
-                        { memberId: new RegExp('^' + id + '$', 'i') },
-                        { userId: new RegExp('^' + id + '$', 'i') }
-                    ] 
-                });
-            }
+            member = await Member.findOne({ $or: adminQueries }).lean();
         }
 
         if (!member) {
@@ -145,109 +113,24 @@ const getMemberProfile = async (req, res) => {
 
         const memberMongoId = member._id;
         const customMemberId = member.memberId;
-        const memberName = member.name || '';
 
-        // Fetch Deposits
-        let deposits = await Deposit.find({
-            $or: [{ memberId: memberMongoId }, { member: memberMongoId }]
-        }).sort({ createdAt: -1, depositDate: -1 }).catch(() => []);
-
-        if ((!deposits || deposits.length === 0) && customMemberId) {
-            deposits = await Deposit.find({
-                $or: [
-                    { memberId: customMemberId },
-                    { member: customMemberId },
-                    { 'memberId.memberId': customMemberId }
-                ]
-            }).sort({ createdAt: -1, depositDate: -1 }).catch(() => []);
-        }
+        // Parallel Fetching for Maximum Speed
+        const [deposits, memberLoans, withdrawals, payments, memberPenalties] = await Promise.all([
+            Deposit.find({ $or: [{ memberId: memberMongoId }, { member: memberMongoId }, { memberId: customMemberId }] }).sort({ createdAt: -1 }).lean().catch(() => []),
+            Loan.find({ $or: [{ memberId: memberMongoId }, { member: memberMongoId }] }).sort({ createdAt: -1 }).lean().catch(() => []),
+            Withdrawal.find({ $or: [{ memberId: memberMongoId }, { member: memberMongoId }] }).sort({ date: -1 }).lean().catch(() => []),
+            Payment.find({ $or: [{ memberId: memberMongoId }, { member: memberMongoId }] }).sort({ paymentDate: -1 }).lean().catch(() => []),
+            Penalty.find({ $or: [{ member: memberMongoId }, { memberId: memberMongoId }, { member: customMemberId }, { memberId: customMemberId }] }).lean().catch(() => [])
+        ]);
 
         const totalDeposit = deposits.reduce((sum, d) => sum + (Number(d.amount) || Number(d.paidAmount) || 0), 0);
-
-        // Fetch Loans
-        const memberLoans = await Loan.find({ 
-            $or: [{ memberId: memberMongoId }, { member: memberMongoId }] 
-        }).sort({ createdAt: -1, issueDate: -1 }).catch(() => []);
-        
         const totalLoan = memberLoans.reduce((sum, loan) => sum + (Number(loan.amount) || 0), 0);
-
-        // Fetch Penalties
-        let memberPenalties = [];
-        try {
-            const queryConditions = [
-                { member: memberMongoId }, { memberId: memberMongoId },
-                { member: customMemberId }, { memberId: customMemberId },
-                { member: String(memberMongoId) }, { memberId: String(memberMongoId) },
-                { 'member._id': memberMongoId }, { 'memberId._id': memberMongoId },
-                { 'member.memberId': customMemberId }, { 'memberId.memberId': customMemberId }
-            ];
-
-            memberPenalties = await Penalty.find({ $or: queryConditions }).lean().catch(() => []);
-
-            if (!memberPenalties || memberPenalties.length === 0) {
-                const db = mongoose.connection.db;
-                const collections = await db.listCollections().toArray();
-                
-                let transactionPenalties = [];
-                for (const col of collections) {
-                    try {
-                        const results = await db.collection(col.name).find({}).toArray();
-                        const matched = results.filter(item => {
-                            const itemStr = JSON.stringify(item).toLowerCase();
-                            const matchMember = 
-                                String(item.memberId || '') === String(memberMongoId) ||
-                                String(item.member || '') === String(memberMongoId) ||
-                                String(item.memberId || '') === String(customMemberId) ||
-                                String(item.member || '') === String(customMemberId) ||
-                                (memberName && itemStr.includes(memberName.toLowerCase())) ||
-                                itemStr.includes(String(customMemberId).toLowerCase());
-                            
-                            const categoryStr = String(item.category || item.type || item.description || item.note || item.title || item.reason || '').toLowerCase();
-                            const matchCategory = categoryStr.includes('penalty') || categoryStr.includes('fine') || col.name.toLowerCase().includes('penalty') || col.name.toLowerCase().includes('fine');
-                            
-                            return matchMember && matchCategory;
-                        });
-                        transactionPenalties = [...transactionPenalties, ...matched];
-                    } catch (colErr) {
-                        // Ignore individual collection errors
-                    }
-                }
-
-                const combinedMap = new Map();
-                transactionPenalties.forEach(item => {
-                    const key = item._id ? item._id.toString() : JSON.stringify(item);
-                    combinedMap.set(key, item);
-                });
-                memberPenalties = Array.from(combinedMap.values());
-            }
-        } catch (err) {
-            console.error("Penalty fetch major error:", err);
-            memberPenalties = [];
-        }
-
-        const totalPenalty = memberPenalties.reduce((sum, p) => sum + (Number(p.amount) || Number(p.fineAmount) || Number(p.total) || Number(p.penaltyAmount) || 0), 0);
-
-        // Fetch Withdrawals & Payments
-        const withdrawals = await Withdrawal.find({ 
-            $or: [{ memberId: memberMongoId }, { member: memberMongoId }] 
-        }).sort({ date: -1, createdAt: -1 }).catch(() => []);
-        
+        const totalPenalty = memberPenalties.reduce((sum, p) => sum + (Number(p.amount) || Number(p.fineAmount) || Number(p.total) || 0), 0);
         const totalWithdrawal = withdrawals.reduce((sum, w) => sum + (Number(w.amount) || 0), 0);
 
-        const payments = await Payment.find({ 
-            $or: [{ memberId: memberMongoId }, { member: memberMongoId }] 
-        }).sort({ paymentDate: -1 }).catch(() => []);
-        
-        // Allocation Calculation
         let allocationResult = { totalPaid: 0, totalDue: 0, monthlyDetails: [] };
         try {
-            await rebuildAllocation(memberMongoId);
             allocationResult = await generateMemberAllocation(memberMongoId);
-            
-            if ((!allocationResult.monthlyDetails || allocationResult.monthlyDetails.length === 0) && customMemberId) {
-                await rebuildAllocation(customMemberId);
-                allocationResult = await generateMemberAllocation(customMemberId);
-            }
         } catch (allocError) {
             console.error("Allocation Execution Error:", allocError.message);
         }
@@ -300,13 +183,13 @@ const createMember = async (req, res) => {
             return res.status(400).json({ success: false, message: "Member ID is required!" });
         }
 
-        const existingMember = await Member.findOne({ memberId });
+        const existingMember = await Member.findOne({ memberId }).lean();
         if (existingMember) {
             return res.status(400).json({ success: false, message: "Member ID already exists!" });
         }
 
         const finalUserId = userId ? userId.trim() : memberId;
-        const existingUser = await Member.findOne({ userId: finalUserId });
+        const existingUser = await Member.findOne({ userId: finalUserId }).lean();
         if (existingUser) {
             return res.status(400).json({ success: false, message: "User ID already exists!" });
         }
