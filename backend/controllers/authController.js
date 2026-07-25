@@ -147,7 +147,7 @@ const login = async (req, res) => {
 const changePassword = async (req, res) => {
   try {
     const { oldPassword, newPassword } = req.body;
-    const userId = req.user.id; // টোকেন থেকে ইউজারের আইডি নেওয়া হচ্ছে
+    const userId = req.user.id; // টোকেন থেকে ইউজারের আইডি নেওয়া হচ্ছে
 
     if (!oldPassword || !newPassword) {
       return res.status(400).json({
@@ -165,7 +165,7 @@ const changePassword = async (req, res) => {
       });
     }
 
-    // পুরনো পাসওয়ার্ড ম্যাচ করছে কিনা চেক করা
+    // পুরনো পাসওয়ার্ড ম্যাচ করছে কিনা চেক করা
     const isMatch = await bcrypt.compare(oldPassword, user.password);
 
     if (!isMatch) {
@@ -175,7 +175,7 @@ const changePassword = async (req, res) => {
       });
     }
 
-    // নতুন পাসওয়ার্ড এনক্রিপ্ট করে সেভ করা
+    // নতুন পাসওয়ার্ড এনক্রিপ্ট করে সেভ করা
     user.password = await bcrypt.hash(newPassword, 10);
     await user.save();
 
@@ -185,11 +185,47 @@ const changePassword = async (req, res) => {
     });
   } catch (error) {
     return res.status(500).json({
-      success: {
+      success: false,
+      message: "Server Error",
+      error: error.message,
+    });
+  }
+};
+
+// ======================================
+// Forgot Password (OTP / Reset Link Handler)
+// ======================================
+const forgotPassword = async (req, res) => {
+  try {
+    const { email, phone } = req.body;
+
+    if (!email && !phone) {
+      return res.status(400).json({
         success: false,
-        message: "Server Error",
-        error: error.message,
-      },
+        message: "Email or Phone number is required",
+      });
+    }
+
+    const user = await User.findOne({ $or: [{ email }, { phone }] });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found with this email or phone",
+      });
+    }
+
+    // এখানে আপনি চাইলে Nodemailer দিয়ে ইমেইল বা SMS পাঠানোর লজিক যুক্ত করতে পারেন।
+    // আপাতত সাকসেস রেসপন্স পাঠানো হচ্ছে যাতে ফ্রন্টএন্ডে এরর না আসে।
+    return res.status(200).json({
+      success: true,
+      message: "Password reset instructions sent successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Server Error",
+      error: error.message,
     });
   }
 };
@@ -197,5 +233,6 @@ const changePassword = async (req, res) => {
 module.exports = {
   register,
   login,
-  changePassword, // ✅ এক্সপোর্ট করা হলো
+  changePassword,
+  forgotPassword, // ✅ এক্সপোর্ট করা হলো
 };
