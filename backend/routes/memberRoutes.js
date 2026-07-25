@@ -24,14 +24,15 @@ router.get("/dashboard/stats", authMiddleware, getDashboardStats);
 
 // ২. সাধারণ কালেকশন রাউট
 router.get("/", authMiddleware, getAllMembers);
-// নতুন মেম্বার তৈরি শুধু Super Admin বা Staff করতে পারবে
+// নতুন মেম্বার তৈরি শুধু Super Admin বা Staff করতে পারবে (আগের লজিক বহাল আছে)
 router.post("/", authMiddleware, roleMiddleware("SUPER_ADMIN", "STAFF"), uploadMemberFiles, createMember);
 
 // ৩. ডায়নামিক আইডি রাউট (সবার নিচে থাকবে) - সাধারণ মেম্বাররাও যেন নিজের প্রোফাইল দেখতে পারে সেজন্য 'MEMBER' রোল যুক্ত করা হলো
-router.get("/:id", authMiddleware, roleMiddleware("SUPER_ADMIN", "STAFF", "MEMBER"), getMemberProfile);
+router.get("/:id", authMiddleware, roleMiddleware("SUPER_ADMIN", "ADMIN", "STAFF", "MEMBER"), getMemberProfile);
 
-// মেম্বার আপডেট শুধু Super Admin বা Staff করতে পারবে
-router.put("/:id", authMiddleware, roleMiddleware("SUPER_ADMIN", "STAFF"), uploadMemberFiles, updateMember);
+// মেম্বার আপডেট শুধুমাত্র Super Admin করতে পারবে (ADMIN বা অন্যদের এডিট করার পারমিশন বাদ দেওয়া হয়েছে)
+router.put("/:id", authMiddleware, roleMiddleware("SUPER_ADMIN"), uploadMemberFiles, updateMember);
+
 // মেম্বার ডিলিট শুধু Super Admin করতে পারবে
 router.delete("/:id", authMiddleware, roleMiddleware("SUPER_ADMIN"), deleteMember);
 

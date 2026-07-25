@@ -10,12 +10,34 @@ const bcrypt = require('bcryptjs'); // ✅ পাসওয়ার্ড হা
 const { generateMemberAllocation, rebuildAllocation } = require('../services/paymentAllocator');
 
 // ======================================
-// 1. Get All Members (Sorted by Member ID ascending: small to large)
+// 1. Get All Members (Role-based restriction implemented)
 // ======================================
 const getAllMembers = async (req, res) => {
     try {
-        // ✅ মেম্বার আইডি অনুযায়ী ছোট থেকে বড় (SKY-202301 থেকে শুরু করে ক্রমানুসারে) সাজানোর জন্য sort({ memberId: 1 }) দেওয়া হলো
-        const members = await Member.find().sort({ memberId: 1 });
+        const userRole = req.user && req.user.role ? String(req.user.role).toUpperCase() : '';
+        let members = [];
+
+        // যদি ইউজার সাধারণ মেম্বার হয়, তবে সে শুধু নিজের ডাটাটাই দেখতে পাবে
+        if (userRole === 'MEMBER') {
+            const tokenMemberId = String(req.user.id || req.user._id || '');
+            const tokenPhone = req.user.phone;
+
+            let query = {};
+            if (tokenMemberId && mongoose.Types.ObjectId.isValid(tokenMemberId)) {
+                query = { _id: tokenMemberId };
+            } else if (tokenMemberId) {
+                query = { $or: [{ memberId: tokenMemberId }, { userId: tokenMemberId }] };
+            } else if (tokenPhone) {
+                query = { phone: tokenPhone };
+            }
+
+            const selfMember = await Member.findOne(query);
+            members = selfMember ? [selfMember] : [];
+        } else {
+            // অ্যাডমিন, সুপার অ্যাডমিন বা স্টাফ হলে সবাই দেখতে পারবে (ছোট থেকে বড় ক্রমানুসারে সাজানো)
+            members = await Member.find().sort({ memberId: 1 });
+        }
+
         return res.status(200).json({ success: true, count: members.length, members });
     } catch (error) {
         return res.status(500).json({ success: false, message: "Server Error", error: error.message });

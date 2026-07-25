@@ -45,7 +45,6 @@ router.get(
 
 // ======================================
 // Member Deposit History
-// (Temporary without auth)
 // ======================================
 
 router.get(
@@ -74,24 +73,24 @@ router.get(
 );
 
 // ======================================
-// Update Deposit
+// Update Deposit (শুধুমাত্র SUPER_ADMIN করতে পারবে)
 // ======================================
 
 router.put(
   "/:id",
   authMiddleware,
-  roleMiddleware("SUPER_ADMIN", "STAFF"),
+  roleMiddleware("SUPER_ADMIN"),
   updateDeposit
 );
 
 // ======================================
-// Delete Deposit
+// Delete Deposit (শুধুমাত্র SUPER_ADMIN করতে পারবে)
 // ======================================
 
 router.delete(
   "/:id",
   authMiddleware,
-  roleMiddleware("SUPER_ADMIN", "STAFF"),
+  roleMiddleware("SUPER_ADMIN"),
   deleteDeposit
 );
 

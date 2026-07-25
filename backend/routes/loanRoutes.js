@@ -70,12 +70,12 @@ router.get(
 );
 
 // ======================================
-// Update Loan (SUPER_ADMIN & ADMIN)
+// Update Loan (শুধুমাত্র SUPER_ADMIN করতে পারবে)
 // ======================================
 router.put(
   "/:id",
   authMiddleware,
-  roleMiddleware("SUPER_ADMIN", "ADMIN"),
+  roleMiddleware("SUPER_ADMIN"),
   updateLoan
 );
 

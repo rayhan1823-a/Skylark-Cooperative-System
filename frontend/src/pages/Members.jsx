@@ -11,16 +11,20 @@ function Members() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // ইউজারের রোল এবং ফোন নম্বর ট্র্যাক করার স্টেট
+  // ইউজারের রোল এবং পরিচয় ট্র্যাক করার স্টেট
   const [userRole, setUserRole] = useState("");
   const [userPhone, setUserPhone] = useState("");
+  const [currentUserId, setCurrentUserId] = useState("");
+  const [currentUserMemberId, setCurrentUserMemberId] = useState("");
 
   useEffect(() => {
-    // লোকাল স্টোরেজ থেকে লগইন করা ইউজারের তথ্য বের করা (আগের কোনো লজিক নষ্ট না করে)
+    // লোকাল স্টোরেজ থেকে লগইন করা ইউজারের তথ্য নিরাপদে বের করা
     try {
       const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
       setUserRole(storedUser.role || localStorage.getItem("role") || "MEMBER");
       setUserPhone(storedUser.phone || storedUser.phoneNumber || localStorage.getItem("phone") || "");
+      setCurrentUserId(storedUser.id || storedUser._id || localStorage.getItem("userId") || "");
+      setCurrentUserMemberId(storedUser.memberId || localStorage.getItem("memberId") || "");
     } catch (e) {
       setUserRole("MEMBER");
     }
@@ -87,16 +91,25 @@ function Members() {
   };
 
   // ==========================
-  // Role & Search Filtering Logic
+  // Role & Search Filtering Logic (Secured for Members)
   // ==========================
   const isAdmin = userRole === "SUPER_ADMIN" || userRole === "ADMIN";
 
   const filteredMembers = members.filter((member) => {
-    // যদি ইউজার সাধারণ মেম্বার হয়, তবে সে শুধু তার নিজের ফোন নম্বরের মেম্বার কার্ডটিই দেখতে পাবে
+    // যদি ইউজার সাধারণ মেম্বার হয়, তবে সে শুধু নিজের ডাটাটাই দেখতে পাবে (আইডি বা ফোন নম্বর মিলিয়ে)
     if (!isAdmin) {
       const cleanMemberPhone = (member.phone || "").trim();
       const cleanUserPhone = (userPhone || "").trim();
-      if (cleanMemberPhone !== cleanUserPhone) {
+      
+      const cleanMemberId = String(member._id || "").trim();
+      const cleanUserId = String(currentUserId || "").trim();
+      const cleanMemberCustomId = String(member.memberId || "").trim();
+      const cleanUserMemberId = String(currentUserMemberId || "").trim();
+
+      const isPhoneMatch = cleanUserPhone && cleanMemberPhone === cleanUserPhone;
+      const isIdMatch = (cleanUserId && cleanMemberId === cleanUserId) || (cleanUserMemberId && cleanMemberCustomId === cleanUserMemberId);
+
+      if (!isPhoneMatch && !isIdMatch) {
         return false;
       }
     }
@@ -224,7 +237,7 @@ function Members() {
                     
                     <td className="p-4">
                       <div className="flex flex-wrap justify-center gap-2">
-                        {/* View Button (সবাই দেখতে পাবে - এখন সঠিক _id পাস করবে) */}
+                        {/* View Button */}
                         <Link
                           to={`/member/${member._id}`}
                           className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-sm font-medium transition"
@@ -232,7 +245,7 @@ function Members() {
                           View
                         </Link>
                         
-                        {/* ID Card Button (সবাই দেখতে পাবে) */}
+                        {/* ID Card Button */}
                         <Link
                           to={`/member-card/${member._id}`}
                           className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded text-sm font-medium transition"
