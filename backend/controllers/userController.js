@@ -12,7 +12,7 @@ const bcrypt = require("bcryptjs");
 
 const getUsers = async (req, res) => {
   try {
-    // 🔒 অতিরিক্ত সিকিউরিটি চেক: রিকোয়েস্টকারী সুপার অ্যাডমিন না হলে ব্লক করা হবে
+    // 🔒 অতিরিক্ত সিকিউরিটি চেক: রিকোয়েস্টকারী সুপার অ্যাডমিন না হলে ব্লক করা হবে
     if (req.user && req.user.role !== "SUPER_ADMIN") {
       return res.status(403).json({
         success: false,
@@ -45,21 +45,24 @@ const getUsers = async (req, res) => {
 
 const createUser = async (req, res) => {
   try {
-    const { name, phone, password, role } = req.body;
+    const { name, email, phone, password, role } = req.body;
 
     if (!name || !phone || !password) {
       return res.status(400).json({
         success: false,
-        message: "Name Phone Password Required",
+        message: "Name, Phone and Password Required",
       });
     }
 
-    const existUser = await User.findOne({ phone });
+    // ফোন বা ইমেইল অলরেডি রেজিস্টার্ড আছে কি না চেক করা
+    const existUser = await User.findOne({ 
+      $or: [{ phone }, ...(email ? [{ email }] : [])] 
+    });
 
     if (existUser) {
       return res.status(409).json({
         success: false,
-        message: "Phone Already Registered",
+        message: "Phone or Email Already Registered",
       });
     }
 
@@ -67,6 +70,7 @@ const createUser = async (req, res) => {
 
     const user = await User.create({
       name,
+      email: email || undefined,
       phone,
       password: hashPassword,
       role: role || "STAFF",
@@ -78,6 +82,7 @@ const createUser = async (req, res) => {
       user: {
         id: user._id,
         name: user.name,
+        email: user.email,
         phone: user.phone,
         role: user.role,
       },
@@ -124,7 +129,7 @@ const getUser = async (req, res) => {
 
 const updateUser = async (req, res) => {
   try {
-    const { name, phone, role, password } = req.body;
+    const { name, email, phone, role, password } = req.body;
 
     const user = await User.findById(req.params.id);
 
@@ -136,6 +141,7 @@ const updateUser = async (req, res) => {
     }
 
     if (name) user.name = name;
+    if (email !== undefined) user.email = email;
     if (phone) user.phone = phone;
     if (role) user.role = role;
 
