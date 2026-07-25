@@ -392,27 +392,19 @@ const updateDeposit = async (req, res) => {
 // Delete Deposit (Safely handled)
 // ======================================
 const deleteDeposit = async (req, res) => {
-    const session = await mongoose.startSession();
-    session.startTransaction();
-
     try {
         const depositId = req.params.id;
 
         if (!mongoose.Types.ObjectId.isValid(depositId)) {
-            await session.abortTransaction();
-            session.endSession();
             return res.status(400).json({
                 success: false,
                 message: "Invalid Deposit ID format",
             });
         }
 
-        const deposit = await Deposit.findById(depositId).session(session);
+        const deposit = await Deposit.findById(depositId);
 
         if (!deposit) {
-            await session.abortTransaction();
-            session.endSession();
-
             return res.status(404).json({
                 success: false,
                 message: "Deposit not found",
@@ -424,20 +416,15 @@ const deleteDeposit = async (req, res) => {
         // ==========================
         // Delete Transaction
         // ==========================
-        await Transaction.findOneAndDelete(
-            {
-                referenceId: deposit._id,
-                type: "INCOME",
-            },
-            {
-                session,
-            }
-        );
+        await Transaction.findOneAndDelete({
+            referenceId: deposit._id,
+            type: "INCOME",
+        });
 
         // ==========================
         // Delete Deposit
         // ==========================
-        await Deposit.findByIdAndDelete(depositId).session(session);
+        await Deposit.findByIdAndDelete(depositId);
 
         // ==========================
         // Rebuild Allocation (Safe handling)
@@ -451,9 +438,6 @@ const deleteDeposit = async (req, res) => {
             console.log("Allocation Rebuild Warning during delete:", allocError.message);
         }
 
-        await session.commitTransaction();
-        session.endSession();
-
         return res.status(200).json({
             success: true,
             message: "Deposit Deleted Successfully",
@@ -461,9 +445,6 @@ const deleteDeposit = async (req, res) => {
         });
 
     } catch (error) {
-        await session.abortTransaction();
-        session.endSession();
-
         console.log("Delete Deposit Error:", error);
 
         return res.status(500).json({

@@ -7,12 +7,12 @@ const router = express.Router();
 // ======================================
 
 const {
-  createDeposit,
-  getDeposits,
-  getMemberDeposits,
-  getDeposit,
-  updateDeposit,
-  deleteDeposit,
+    createDeposit,
+    getDeposits,
+    getMemberDeposits,
+    getDeposit,
+    updateDeposit,
+    deleteDeposit,
 } = require("../controllers/depositController");
 
 // ======================================
@@ -27,10 +27,10 @@ const roleMiddleware = require("../middlewares/roleMiddleware");
 // ======================================
 
 router.post(
-  "/",
-  authMiddleware,
-  roleMiddleware("SUPER_ADMIN", "STAFF"),
-  createDeposit
+    "/",
+    authMiddleware,
+    roleMiddleware("SUPER_ADMIN", "STAFF"),
+    createDeposit
 );
 
 // ======================================
@@ -38,18 +38,20 @@ router.post(
 // ======================================
 
 router.get(
-  "/",
-  authMiddleware,
-  getDeposits
+    "/",
+    authMiddleware,
+    getDeposits
 );
 
 // ======================================
 // Member Deposit History
+// (Specific routes with prefix should always stay above generic /:id)
 // ======================================
 
 router.get(
-  "/member/:id",
-  getMemberDeposits
+    "/member/:id",
+    authMiddleware,
+    getMemberDeposits
 );
 
 // ======================================
@@ -57,19 +59,20 @@ router.get(
 // ======================================
 
 router.get(
-  "/receipt/:id",
-  authMiddleware,
-  getDeposit
+    "/receipt/:id",
+    authMiddleware,
+    getDeposit
 );
 
 // ======================================
 // Single Deposit
+// (Generic /:id should always be placed at the bottom of GET routes)
 // ======================================
 
 router.get(
-  "/:id",
-  authMiddleware,
-  getDeposit
+    "/:id",
+    authMiddleware,
+    getDeposit
 );
 
 // ======================================
@@ -77,10 +80,10 @@ router.get(
 // ======================================
 
 router.put(
-  "/:id",
-  authMiddleware,
-  roleMiddleware("SUPER_ADMIN"),
-  updateDeposit
+    "/:id",
+    authMiddleware,
+    roleMiddleware("SUPER_ADMIN"),
+    updateDeposit
 );
 
 // ======================================
@@ -88,10 +91,10 @@ router.put(
 // ======================================
 
 router.delete(
-  "/:id",
-  authMiddleware,
-  roleMiddleware("SUPER_ADMIN"),
-  deleteDeposit
+    "/:id",
+    authMiddleware,
+    roleMiddleware("SUPER_ADMIN"),
+    deleteDeposit
 );
 
 module.exports = router;
