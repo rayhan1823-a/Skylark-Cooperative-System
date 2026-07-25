@@ -237,6 +237,7 @@ function Settings() {
                 className="border p-3 rounded-lg w-full md:col-span-2"
               >
                 <option value="STAFF">STAFF</option>
+                <option value="ADMIN">ADMIN</option>
                 <option value="SUPER_ADMIN">SUPER_ADMIN</option>
               </select>
               <div>
