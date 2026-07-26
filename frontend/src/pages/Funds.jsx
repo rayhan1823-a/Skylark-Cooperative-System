@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import MainLayout from "../layouts/MainLayout";
 import { Plus, Search, Pencil, Trash2, X, TrendingUp, TrendingDown } from "lucide-react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
@@ -107,7 +106,7 @@ function Funds() {
 
   const netBalance = totalIncome - totalExpense;
 
-  // Category-wise Calculations (Fine / Penalty removed)
+  // Category-wise Calculations
   const incomeCategories = [
     "Admission Fee",
     "Share Capital",
@@ -217,7 +216,6 @@ function Funds() {
     if (item) {
       setEditingId(id);
       
-      // Safely resolve member ID whether populated or raw string/ID
       let resolvedMemberId = "";
       if (typeof item.memberId === "string") {
         resolvedMemberId = item.memberId;
@@ -273,7 +271,6 @@ function Funds() {
     const categoryStr = item.category ? String(item.category).toLowerCase() : "";
     const descStr = item.description ? String(item.description).toLowerCase() : "";
     
-    // Safely retrieve member name for search filtration
     const memberNameStr = item.memberName || item.member?.name || item.member?.fullName || "";
     const matchMemberName = String(memberNameStr).toLowerCase();
     
@@ -292,316 +289,312 @@ function Funds() {
   const currentData = filteredData.slice((page - 1) * limit, page * limit);
 
   return (
-    <MainLayout>
-      <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
-        {/* Header Block */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-5 rounded-xl shadow-sm border">
-          <div>
-            <h1 className="text-3xl font-extrabold text-blue-900 tracking-tight">
-              Fund & Transaction Management
-            </h1>
-            <p className="text-gray-500 mt-1">Track income, expenses, and current cash flow easily.</p>
+    <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+      {/* Header Block */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-5 rounded-xl shadow-sm border">
+        <div>
+          <h1 className="text-3xl font-extrabold text-blue-900 tracking-tight">
+            Fund & Transaction Management
+          </h1>
+          <p className="text-gray-500 mt-1">Track income, expenses, and current cash flow easily.</p>
+        </div>
+        <button
+          onClick={openAddModal}
+          disabled={!isSuperAdmin}
+          className={`flex items-center gap-2 font-semibold px-5 py-3 rounded-lg shadow transition duration-200 text-white ${
+            isSuperAdmin ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-400 cursor-not-allowed"
+          }`}
+          title={!isSuperAdmin ? "Only Super Admin can add transactions" : ""}
+        >
+          <Plus size={20} /> Add Transaction
+        </button>
+      </div>
+
+      {/* Counter Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl border border-green-200 shadow-sm">
+          <h3 className="text-sm font-semibold text-green-700 uppercase tracking-wider">Total Income</h3>
+          <p className="text-3xl font-black text-green-900 mt-2">৳ {(totalIncome || 0).toLocaleString()}</p>
+        </div>
+        <div className="bg-gradient-to-br from-red-50 to-red-100 p-6 rounded-xl border border-red-200 shadow-sm">
+          <h3 className="text-sm font-semibold text-red-700 uppercase tracking-wider">Total Expense</h3>
+          <p className="text-3xl font-black text-red-900 mt-2">৳ {(totalExpense || 0).toLocaleString()}</p>
+        </div>
+        <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border border-blue-200 shadow-sm">
+          <h3 className="text-sm font-semibold text-blue-700 uppercase tracking-wider">Net Balance</h3>
+          <p className="text-3xl font-black text-blue-900 mt-2">৳ {(netBalance || 0).toLocaleString()}</p>
+        </div>
+      </div>
+
+      {/* Category Breakdown Sections */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white p-5 rounded-xl shadow-sm border">
+          <div className="flex items-center gap-2 mb-4 pb-2 border-b">
+            <TrendingUp className="text-green-600" size={22} />
+            <h2 className="text-lg font-bold text-gray-800">Income Category Breakdown</h2>
           </div>
-          <button
-            onClick={openAddModal}
-            disabled={!isSuperAdmin}
-            className={`flex items-center gap-2 font-semibold px-5 py-3 rounded-lg shadow transition duration-200 text-white ${
-              isSuperAdmin ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-400 cursor-not-allowed"
-            }`}
-            title={!isSuperAdmin ? "Only Super Admin can add transactions" : ""}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {incomeCategories.map((cat) => (
+              <div key={cat} className="bg-green-50/50 p-3 rounded-lg border border-green-100 flex justify-between items-center">
+                <span className="text-xs font-semibold text-green-800">{cat}</span>
+                <span className="text-sm font-bold text-green-900">৳ {(incomeBreakdown[cat] || 0).toLocaleString()}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl shadow-sm border">
+          <div className="flex items-center gap-2 mb-4 pb-2 border-b">
+            <TrendingDown className="text-red-600" size={22} />
+            <h2 className="text-lg font-bold text-gray-800">Expense Category Breakdown</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {expenseCategories.map((cat) => (
+              <div key={cat} className="bg-red-50/50 p-3 rounded-lg border border-red-100 flex justify-between items-center">
+                <span className="text-xs font-semibold text-red-800">{cat}</span>
+                <span className="text-sm font-bold text-red-900">৳ {(expenseBreakdown[cat] || 0).toLocaleString()}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Search & Filters */}
+      <div className="bg-white p-5 rounded-xl shadow-sm border flex flex-col md:flex-row gap-4 items-center justify-between">
+        <div className="relative w-full md:w-96">
+          <Search className="absolute left-3 top-3.5 text-gray-400" size={18} />
+          <input
+            type="text"
+            placeholder="Search category, description or member..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
+          />
+        </div>
+        <div className="flex flex-wrap gap-3 w-full md:w-auto justify-end">
+          <select
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value)}
+            className="border px-4 py-2.5 rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none font-medium"
           >
-            <Plus size={20} /> Add Transaction
-          </button>
+            <option value="ALL">All Types</option>
+            <option value="INCOME">Income</option>
+            <option value="EXPENSE">Expense</option>
+          </select>
+          <select
+            value={filterMethod}
+            onChange={(e) => setFilterMethod(e.target.value)}
+            className="border px-4 py-2.5 rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none font-medium"
+          >
+            <option value="ALL">All Methods</option>
+            <option value="Cash">Cash</option>
+            <option value="Bank">Bank</option>
+            <option value="Bkash">Bkash</option>
+            <option value="Nagad">Nagad</option>
+          </select>
         </div>
+      </div>
 
-        {/* Counter Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl border border-green-200 shadow-sm">
-            <h3 className="text-sm font-semibold text-green-700 uppercase tracking-wider">Total Income</h3>
-            <p className="text-3xl font-black text-green-900 mt-2">৳ {(totalIncome || 0).toLocaleString()}</p>
-          </div>
-          <div className="bg-gradient-to-br from-red-50 to-red-100 p-6 rounded-xl border border-red-200 shadow-sm">
-            <h3 className="text-sm font-semibold text-red-700 uppercase tracking-wider">Total Expense</h3>
-            <p className="text-3xl font-black text-red-900 mt-2">৳ {(totalExpense || 0).toLocaleString()}</p>
-          </div>
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border border-blue-200 shadow-sm">
-            <h3 className="text-sm font-semibold text-blue-700 uppercase tracking-wider">Net Balance</h3>
-            <p className="text-3xl font-black text-blue-900 mt-2">৳ {(netBalance || 0).toLocaleString()}</p>
-          </div>
-        </div>
-
-        {/* Category Breakdown Sections */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Income Breakdown Card */}
-          <div className="bg-white p-5 rounded-xl shadow-sm border">
-            <div className="flex items-center gap-2 mb-4 pb-2 border-b">
-              <TrendingUp className="text-green-600" size={22} />
-              <h2 className="text-lg font-bold text-gray-800">Income Category Breakdown</h2>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {incomeCategories.map((cat) => (
-                <div key={cat} className="bg-green-50/50 p-3 rounded-lg border border-green-100 flex justify-between items-center">
-                  <span className="text-xs font-semibold text-green-800">{cat}</span>
-                  <span className="text-sm font-bold text-green-900">৳ {(incomeBreakdown[cat] || 0).toLocaleString()}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Expense Breakdown Card */}
-          <div className="bg-white p-5 rounded-xl shadow-sm border">
-            <div className="flex items-center gap-2 mb-4 pb-2 border-b">
-              <TrendingDown className="text-red-600" size={22} />
-              <h2 className="text-lg font-bold text-gray-800">Expense Category Breakdown</h2>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {expenseCategories.map((cat) => (
-                <div key={cat} className="bg-red-50/50 p-3 rounded-lg border border-red-100 flex justify-between items-center">
-                  <span className="text-xs font-semibold text-red-800">{cat}</span>
-                  <span className="text-sm font-bold text-red-900">৳ {(expenseBreakdown[cat] || 0).toLocaleString()}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Search & Filters */}
-        <div className="bg-white p-5 rounded-xl shadow-sm border flex flex-col md:flex-row gap-4 items-center justify-between">
-          <div className="relative w-full md:w-96">
-            <Search className="absolute left-3 top-3.5 text-gray-400" size={18} />
-            <input
-              type="text"
-              placeholder="Search category, description or member..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
-            />
-          </div>
-          <div className="flex flex-wrap gap-3 w-full md:w-auto justify-end">
-            <select
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-              className="border px-4 py-2.5 rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none font-medium"
-            >
-              <option value="ALL">All Types</option>
-              <option value="INCOME">Income</option>
-              <option value="EXPENSE">Expense</option>
-            </select>
-            <select
-              value={filterMethod}
-              onChange={(e) => setFilterMethod(e.target.value)}
-              className="border px-4 py-2.5 rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none font-medium"
-            >
-              <option value="ALL">All Methods</option>
-              <option value="Cash">Cash</option>
-              <option value="Bank">Bank</option>
-              <option value="Bkash">Bkash</option>
-              <option value="Nagad">Nagad</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Data Table */}
-        <div className="bg-white rounded-xl shadow border overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse min-w-[900px]">
-              <thead>
-                <tr className="bg-gray-100 text-gray-700 uppercase text-xs font-bold border-b">
-                  <th className="px-4 py-4 text-center">SL</th>
-                  <th className="px-4 py-4">Type</th>
-                  <th className="px-4 py-4">Category</th>
-                  <th className="px-4 py-4">Member Name</th>
-                  <th className="px-4 py-4 text-right">Amount</th>
-                  <th className="px-4 py-4">Method</th>
-                  <th className="px-4 py-4">Description</th>
-                  <th className="px-4 py-4">Date</th>
-                  <th className="px-4 py-4 text-center">Actions</th>
+      {/* Data Table */}
+      <div className="bg-white rounded-xl shadow border overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse min-w-[900px]">
+            <thead>
+              <tr className="bg-gray-100 text-gray-700 uppercase text-xs font-bold border-b">
+                <th className="px-4 py-4 text-center">SL</th>
+                <th className="px-4 py-4">Type</th>
+                <th className="px-4 py-4">Category</th>
+                <th className="px-4 py-4">Member Name</th>
+                <th className="px-4 py-4 text-right">Amount</th>
+                <th className="px-4 py-4">Method</th>
+                <th className="px-4 py-4">Description</th>
+                <th className="px-4 py-4">Date</th>
+                <th className="px-4 py-4 text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y text-sm text-gray-600">
+              {currentData.length === 0 ? (
+                <tr>
+                  <td colSpan="9" className="text-center py-10 font-medium text-gray-400">No transactions found.</td>
                 </tr>
-              </thead>
-              <tbody className="divide-y text-sm text-gray-600">
-                {currentData.length === 0 ? (
-                  <tr>
-                    <td colSpan="9" className="text-center py-10 font-medium text-gray-400">No transactions found.</td>
-                  </tr>
-                ) : (
-                  currentData.map((item, index) => {
-                    const rowMemberName = item?.memberName || item?.member?.name || item?.member?.fullName || "-";
-                    return (
-                      <tr key={item ? item._id : index} className="hover:bg-gray-50 transition">
-                        <td className="px-4 py-3 text-center font-medium">{(page - 1) * limit + index + 1}</td>
-                        <td className="px-4 py-3">
-                          <span className={`px-2.5 py-1 rounded-full text-xs font-bold tracking-wide ${item && item.type === "INCOME" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
-                            {item ? item.type : ""}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 font-medium">{item ? item.category : ""}</td>
-                        <td className="px-4 py-3 text-blue-600 font-medium">{rowMemberName}</td>
-                        <td className="px-4 py-3 text-right font-bold">৳ {Number(item ? item.amount : 0).toLocaleString()}</td>
-                        <td className="px-4 py-3">{item ? item.paymentMethod : ""}</td>
-                        <td className="px-4 py-3">{item && item.description ? item.description : "-"}</td>
-                        <td className="px-4 py-3">{item && item.createdAt ? new Date(item.createdAt).toLocaleDateString() : "-"}</td>
-                        <td className="px-4 py-3">
-                          <div className="flex justify-center gap-2">
-                            <button 
-                              onClick={() => editTransaction(item._id)} 
-                              disabled={!isSuperAdmin}
-                              className={`p-2 rounded-lg transition text-white ${isSuperAdmin ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-400 cursor-not-allowed"}`}
-                              title={!isSuperAdmin ? "Only Super Admin can edit" : ""}
-                            >
-                              <Pencil size={16} />
-                            </button>
-                            <button 
-                              onClick={() => deleteTransaction(item._id)} 
-                              disabled={!isSuperAdmin}
-                              className={`p-2 rounded-lg transition text-white ${isSuperAdmin ? "bg-red-600 hover:bg-red-700" : "bg-gray-400 cursor-not-allowed"}`}
-                              title={!isSuperAdmin ? "Only Super Admin can delete" : ""}
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
+              ) : (
+                currentData.map((item, index) => {
+                  const rowMemberName = item?.memberName || item?.member?.name || item?.member?.fullName || "-";
+                  return (
+                    <tr key={item ? item._id : index} className="hover:bg-gray-50 transition">
+                      <td className="px-4 py-3 text-center font-medium">{(page - 1) * limit + index + 1}</td>
+                      <td className="px-4 py-3">
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-bold tracking-wide ${item && item.type === "INCOME" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+                          {item ? item.type : ""}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 font-medium">{item ? item.category : ""}</td>
+                      <td className="px-4 py-3 text-blue-600 font-medium">{rowMemberName}</td>
+                      <td className="px-4 py-3 text-right font-bold">৳ {Number(item ? item.amount : 0).toLocaleString()}</td>
+                      <td className="px-4 py-3">{item ? item.paymentMethod : ""}</td>
+                      <td className="px-4 py-3">{item && item.description ? item.description : "-"}</td>
+                      <td className="px-4 py-3">{item && item.createdAt ? new Date(item.createdAt).toLocaleDateString() : "-"}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex justify-center gap-2">
+                          <button 
+                            onClick={() => editTransaction(item._id)} 
+                            disabled={!isSuperAdmin}
+                            className={`p-2 rounded-lg transition text-white ${isSuperAdmin ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-400 cursor-not-allowed"}`}
+                            title={!isSuperAdmin ? "Only Super Admin can edit" : ""}
+                          >
+                            <Pencil size={16} />
+                          </button>
+                          <button 
+                            onClick={() => deleteTransaction(item._id)} 
+                            disabled={!isSuperAdmin}
+                            className={`p-2 rounded-lg transition text-white ${isSuperAdmin ? "bg-red-600 hover:bg-red-700" : "bg-gray-400 cursor-not-allowed"}`}
+                            title={!isSuperAdmin ? "Only Super Admin can delete" : ""}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Pagination Block */}
+      {totalPages > 1 && (
+        <div className="flex justify-between items-center bg-white p-4 rounded-xl shadow border">
+          <span className="text-sm text-gray-500">
+            Showing {((page - 1) * limit) + 1} to {Math.min(page * limit, filteredData.length)} of {filteredData.length} entries
+          </span>
+          <div className="flex gap-2">
+            <button
+              disabled={page === 1}
+              onClick={() => setPage((prev) => prev - 1)}
+              className="px-4 py-2 border rounded-lg bg-gray-50 hover:bg-gray-100 disabled:opacity-50 transition"
+            >
+              Previous
+            </button>
+            <button
+              disabled={page === totalPages}
+              onClick={() => setPage((prev) => prev + 1)}
+              className="px-4 py-2 border rounded-lg bg-gray-50 hover:bg-gray-100 disabled:opacity-50 transition"
+            >
+              Next
+            </button>
           </div>
         </div>
+      )}
 
-        {/* Pagination Block */}
-        {totalPages > 1 && (
-          <div className="flex justify-between items-center bg-white p-4 rounded-xl shadow border">
-            <span className="text-sm text-gray-500">
-              Showing {((page - 1) * limit) + 1} to {Math.min(page * limit, filteredData.length)} of {filteredData.length} entries
-            </span>
-            <div className="flex gap-2">
-              <button
-                disabled={page === 1}
-                onClick={() => setPage((prev) => prev - 1)}
-                className="px-4 py-2 border rounded-lg bg-gray-50 hover:bg-gray-100 disabled:opacity-50 transition"
-              >
-                Previous
-              </button>
-              <button
-                disabled={page === totalPages}
-                onClick={() => setPage((prev) => prev + 1)}
-                className="px-4 py-2 border rounded-lg bg-gray-50 hover:bg-gray-100 disabled:opacity-50 transition"
-              >
-                Next
+      {/* Add / Edit Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 p-5">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden">
+            <div className="flex justify-between items-center border-b px-6 py-4">
+              <h2 className="text-2xl font-bold text-blue-700">{editingId ? "Edit Transaction" : "Add New Transaction"}</h2>
+              <button onClick={handleCancel} className="text-gray-500 hover:text-red-600 transition">
+                <X size={24} />
               </button>
             </div>
-          </div>
-        )}
 
-        {/* Add / Edit Modal */}
-        {showModal && (
-          <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 p-5">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden">
-              <div className="flex justify-between items-center border-b px-6 py-4">
-                <h2 className="text-2xl font-bold text-blue-700">{editingId ? "Edit Transaction" : "Add New Transaction"}</h2>
-                <button onClick={handleCancel} className="text-gray-500 hover:text-red-600 transition">
-                  <X size={24} />
-                </button>
+            <form onSubmit={handleSubmit} className="p-6 space-y-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                  <label className="block mb-2 font-medium text-gray-700">Transaction Type</label>
+                  <select name="type" value={form.type} onChange={handleChange} className="w-full border rounded-lg px-4 py-3 bg-gray-50 outline-none">
+                    <option value="INCOME">INCOME (আয়)</option>
+                    <option value="EXPENSE">EXPENSE (খরচ)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block mb-2 font-medium text-gray-700">Category</label>
+                  <select name="category" value={form.category} onChange={handleChange} className="w-full border rounded-lg px-4 py-3 bg-gray-50 outline-none" required>
+                    <option value="">Select Category</option>
+                    {form.type === "INCOME" ? (
+                      <>
+                        <option value="Admission Fee">Admission Fee (ভর্তি ফি)</option>
+                        <option value="Share Capital">Share Capital (শেয়ার ফি)</option>
+                        <option value="Savings Book Fee">Savings Book Fee (সঞ্চয় বই ফি)</option>
+                        <option value="Bank Profit">Bank Profit (ব্যাংক প্রফিট/মুনাফা)</option>
+                        <option value="Donation">Donation (অনুদান)</option>
+                        <option value="Other Income">Other Income (অন্যান্য আয়)</option>
+                      </>
+                    ) : (
+                      <>
+                        <option value="Office Expense">Office Expense (অফিস খরচ)</option>
+                        <option value="Utility Bill">Utility Bill (ইউটিলিটি বিল)</option>
+                        <option value="Bank Charge">Bank Charge (ব্যাংক চার্জ)</option>
+                        <option value="Office Rent">Office Rent (অফিস ভাড়া)</option>
+                        <option value="Entertainment">Entertainment (নাস্তা/আপ্যায়ন)</option>
+                        <option value="Loan Disbursement">Loan Disbursement (ঋণ প্রদান)</option>
+                        <option value="Other Expense">Other Expense (অন্যান্য ব্যয়)</option>
+                      </>
+                    )}
+                  </select>
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block mb-2 font-medium text-gray-700">Member (Optional)</label>
+                  <select 
+                    name="memberId" 
+                    value={form.memberId} 
+                    onChange={handleChange} 
+                    className="w-full border rounded-lg px-4 py-3 bg-gray-50 outline-none" 
+                  >
+                    <option value="">-- Select Member --</option>
+                    {Array.isArray(members) && members.map((m) => {
+                      if (!m) return null;
+                      const displayName = m.name || m.memberName || m.fullName || "Unknown Member";
+                      const customId = m.memberId ? ` (${m.memberId})` : "";
+                      return (
+                        <option key={m._id || m.id} value={m._id || m.id}>
+                          {displayName}{customId}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block mb-2 font-medium text-gray-700">Amount (৳)</label>
+                  <input type="number" name="amount" value={form.amount} onChange={handleChange} placeholder="Enter Amount" className="w-full border rounded-lg px-4 py-3 bg-gray-50 outline-none" required />
+                </div>
+
+                <div>
+                  <label className="block mb-2 font-medium text-gray-700">Payment Method</label>
+                  <select name="paymentMethod" value={form.paymentMethod} onChange={handleChange} className="w-full border rounded-lg px-4 py-3 bg-gray-50 outline-none">
+                    <option value="Cash">Cash</option>
+                    <option value="Bank">Bank</option>
+                    <option value="Bkash">Bkash</option>
+                    <option value="Nagad">Nagad</option>
+                  </select>
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block mb-2 font-medium text-gray-700">Description</label>
+                  <textarea name="description" value={form.description} onChange={handleChange} rows={3} placeholder="Write Details..." className="w-full border rounded-lg px-4 py-3 bg-gray-50 outline-none resize-none" />
+                </div>
               </div>
 
-              <form onSubmit={handleSubmit} className="p-6 space-y-5">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <div>
-                    <label className="block mb-2 font-medium text-gray-700">Transaction Type</label>
-                    <select name="type" value={form.type} onChange={handleChange} className="w-full border rounded-lg px-4 py-3 bg-gray-50 outline-none">
-                      <option value="INCOME">INCOME (আয়)</option>
-                      <option value="EXPENSE">EXPENSE (খরচ)</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block mb-2 font-medium text-gray-700">Category</label>
-                    <select name="category" value={form.category} onChange={handleChange} className="w-full border rounded-lg px-4 py-3 bg-gray-50 outline-none" required>
-                      <option value="">Select Category</option>
-                      {form.type === "INCOME" ? (
-                        <>
-                          <option value="Admission Fee">Admission Fee (ভর্তি ফি)</option>
-                          <option value="Share Capital">Share Capital (শেয়ার ফি)</option>
-                          <option value="Savings Book Fee">Savings Book Fee (সঞ্চয় বই ফি)</option>
-                          <option value="Bank Profit">Bank Profit (ব্যাংক প্রফিট/মুনাফা)</option>
-                          <option value="Donation">Donation (অনুদান)</option>
-                          <option value="Other Income">Other Income (অন্যান্য আয়)</option>
-                        </>
-                      ) : (
-                        <>
-                          <option value="Office Expense">Office Expense (অফিস খরচ)</option>
-                          <option value="Utility Bill">Utility Bill (ইউটিলিটি বিল)</option>
-                          <option value="Bank Charge">Bank Charge (ব্যাংক চার্জ)</option>
-                          <option value="Office Rent">Office Rent (অফিস ভাড়া)</option>
-                          <option value="Entertainment">Entertainment (নাস্তা/আপ্যায়ন)</option>
-                          <option value="Loan Disbursement">Loan Disbursement (ঋণ প্রদান)</option>
-                          <option value="Other Expense">Other Expense (অন্যান্য ব্যয়)</option>
-                        </>
-                      )}
-                    </select>
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <label className="block mb-2 font-medium text-gray-700">Member (Optional)</label>
-                    <select 
-                      name="memberId" 
-                      value={form.memberId} 
-                      onChange={handleChange} 
-                      className="w-full border rounded-lg px-4 py-3 bg-gray-50 outline-none" 
-                    >
-                      <option value="">-- Select Member --</option>
-                      {Array.isArray(members) && members.map((m) => {
-                        if (!m) return null;
-                        const displayName = m.name || m.memberName || m.fullName || "Unknown Member";
-                        const customId = m.memberId ? ` (${m.memberId})` : "";
-                        return (
-                          <option key={m._id || m.id} value={m._id || m.id}>
-                            {displayName}{customId}
-                          </option>
-                        );
-                      })}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block mb-2 font-medium text-gray-700">Amount (৳)</label>
-                    <input type="number" name="amount" value={form.amount} onChange={handleChange} placeholder="Enter Amount" className="w-full border rounded-lg px-4 py-3 bg-gray-50 outline-none" required />
-                  </div>
-
-                  <div>
-                    <label className="block mb-2 font-medium text-gray-700">Payment Method</label>
-                    <select name="paymentMethod" value={form.paymentMethod} onChange={handleChange} className="w-full border rounded-lg px-4 py-3 bg-gray-50 outline-none">
-                      <option value="Cash">Cash</option>
-                      <option value="Bank">Bank</option>
-                      <option value="Bkash">Bkash</option>
-                      <option value="Nagad">Nagad</option>
-                    </select>
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <label className="block mb-2 font-medium text-gray-700">Description</label>
-                    <textarea name="description" value={form.description} onChange={handleChange} rows={3} placeholder="Write Details..." className="w-full border rounded-lg px-4 py-3 bg-gray-50 outline-none resize-none" />
-                  </div>
-                </div>
-
-                <div className="flex justify-end gap-3 pt-4 border-t">
-                  <button type="button" onClick={handleCancel} className="px-6 py-2.5 rounded-lg bg-gray-200 text-gray-700 font-medium">Cancel</button>
-                  <button 
-                    type="submit" 
-                    disabled={!isSuperAdmin}
-                    className={`px-6 py-2.5 rounded-lg text-white font-medium ${isSuperAdmin ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-400 cursor-not-allowed"}`}
-                    title={!isSuperAdmin ? "Only Super Admin can save transactions" : ""}
-                  >
-                    Save Transaction
-                  </button>
-                </div>
-              </form>
-            </div>
+              <div className="flex justify-end gap-3 pt-4 border-t">
+                <button type="button" onClick={handleCancel} className="px-6 py-2.5 rounded-lg bg-gray-200 text-gray-700 font-medium">Cancel</button>
+                <button 
+                  type="submit" 
+                  disabled={!isSuperAdmin}
+                  className={`px-6 py-2.5 rounded-lg text-white font-medium ${isSuperAdmin ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-400 cursor-not-allowed"}`}
+                  title={!isSuperAdmin ? "Only Super Admin can save transactions" : ""}
+                >
+                  Save Transaction
+                </button>
+              </div>
+            </form>
           </div>
-        )}
-      </div>
-    </MainLayout>
+        </div>
+      )}
+    </div>
   );
 }
 

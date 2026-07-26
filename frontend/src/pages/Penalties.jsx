@@ -17,7 +17,7 @@ function Penalties() {
   const limit = 10;
   const navigate = useNavigate();
 
-  // ✅ লোকাল স্টোরেজ বা ইউজার রোল চেক করার জন্য স্টেট (ধরে নিচ্ছি টোকেন বা ইউজার ডাটা সেভ করা আছে)
+  // ✅ লোকাল স্টোরেজ বা ইউজার রোল চেক করার জন্য স্টেট
   const [userRole, setUserRole] = useState("");
 
   const initialForm = {
@@ -32,9 +32,16 @@ function Penalties() {
   useEffect(() => {
     try {
       const userStr = localStorage.getItem("user");
+      const r = localStorage.getItem("role");
+
       if (userStr) {
         const userObj = JSON.parse(userStr);
-        setUserRole(userObj.role ? String(userObj.role).toUpperCase() : "");
+        const resolvedRole = userObj.role || userObj.userRole || r || "";
+        setUserRole(String(resolvedRole).toUpperCase());
+      } else if (r) {
+        setUserRole(String(r).toUpperCase());
+      } else if (localStorage.getItem("isSuperAdmin") === "true") {
+        setUserRole("SUPER_ADMIN");
       }
     } catch (err) {
       console.error("Error reading user role:", err);
@@ -129,7 +136,7 @@ function Penalties() {
   };
 
   const editPenalty = (item) => {
-    // ✅ এডিট করার সময় সুপার অ্যাডমিন চেক
+    // ✅ এডিট করার সময় সুপার অ্যাডমিন চেক
     if (userRole !== "SUPER_ADMIN") {
       toast.error("Access Denied! Only SUPER_ADMIN can edit penalties.");
       return;
@@ -146,7 +153,7 @@ function Penalties() {
   };
 
   const deletePenalty = async (id) => {
-    // ✅ ডিলিট করার সময় সুপার অ্যাডমিন চেক
+    // ✅ ডিলিট করার সময় সুপার অ্যাডমিন চেক
     if (userRole !== "SUPER_ADMIN") {
       toast.error("Access Denied! Only SUPER_ADMIN can delete penalties.");
       return;
@@ -204,7 +211,7 @@ function Penalties() {
               setForm(initialForm); 
               setShowModal(true);
             }}
-            className={`relative z-10 flex items-center gap-2 bg-white text-blue-700 hover:bg-blue-50 font-bold px-6 py-3 rounded-xl shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0 ${userRole !== "SUPER_ADMIN" ? "opacity-70 cursor-not-allowed" : ""}`}
+            className={`relative z-10 flex items-center gap-2 bg-white text-blue-700 hover:bg-blue-50 font-bold px-6 py-3 rounded-xl shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0 ${userRole !== "SUPER_ADMIN" ? "opacity-70 cursor-not-allowed" : "cursor-pointer"}`}
           >
             <Plus size={20} className="text-blue-600" /> Add Penalty
           </button>
@@ -263,7 +270,7 @@ function Penalties() {
                     const memberCode = item.member?.memberId || item.memberId?.memberId ? ` (${item.member?.memberId || item.memberId?.memberId})` : "";
                     const description = item.reason || item.note || "-";
                     const statusVal = item.status || "Paid";
-                    const receiptNo = item.receiptNo || "N/A";
+                    const receiptNo = item.receiptNo || `SKY-PEN-${String((page - 1) * limit + index + 1).padStart(6, '0')}`;
 
                     return (
                       <tr key={item._id || index} className="hover:bg-indigo-50/30 transition-colors">
@@ -292,14 +299,14 @@ function Penalties() {
                             <button 
                               onClick={() => editPenalty(item)} 
                               title="Edit" 
-                              className={`bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-xl shadow-sm transition transform hover:scale-105 ${userRole !== "SUPER_ADMIN" ? "opacity-60 cursor-not-allowed" : ""}`}
+                              className={`bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-xl shadow-sm transition transform hover:scale-105 ${userRole !== "SUPER_ADMIN" ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
                             >
                               <Pencil size={15} />
                             </button>
                             <button 
                               onClick={() => deletePenalty(item._id)} 
                               title="Delete" 
-                              className={`bg-rose-600 hover:bg-rose-700 text-white p-2 rounded-xl shadow-sm transition transform hover:scale-105 ${userRole !== "SUPER_ADMIN" ? "opacity-60 cursor-not-allowed" : ""}`}
+                              className={`bg-rose-600 hover:bg-rose-700 text-white p-2 rounded-xl shadow-sm transition transform hover:scale-105 ${userRole !== "SUPER_ADMIN" ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
                             >
                               <Trash2 size={15} />
                             </button>
@@ -320,7 +327,7 @@ function Penalties() {
             <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-100 transform transition-all animate-in fade-in zoom-in duration-200">
               <div className="flex justify-between items-center bg-gradient-to-r from-indigo-600 to-blue-600 px-6 py-4 text-white">
                 <h2 className="text-xl font-bold">{editingId ? "Edit Penalty Details" : "Add New Penalty"}</h2>
-                <button onClick={handleCancel} className="text-white/80 hover:text-white bg-white/10 p-1.5 rounded-full transition">
+                <button onClick={handleCancel} className="text-white/80 hover:text-white bg-white/10 p-1.5 rounded-full transition cursor-pointer">
                   <X size={20} />
                 </button>
               </div>
@@ -357,8 +364,8 @@ function Penalties() {
                 </div>
 
                 <div className="flex justify-end gap-3 pt-4 border-t">
-                  <button type="button" onClick={handleCancel} className="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm transition">Cancel</button>
-                  <button type="submit" className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-bold text-sm shadow-md shadow-indigo-200 transition">Save Penalty</button>
+                  <button type="button" onClick={handleCancel} className="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm transition cursor-pointer">Cancel</button>
+                  <button type="submit" className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-bold text-sm shadow-md shadow-indigo-200 transition cursor-pointer">Save Penalty</button>
                 </div>
               </form>
             </div>

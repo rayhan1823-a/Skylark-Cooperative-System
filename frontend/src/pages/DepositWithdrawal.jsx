@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import MainLayout from "../layouts/MainLayout";
 import { FaWallet, FaHistory, FaTrash } from "react-icons/fa";
+import { toast } from "react-hot-toast";
 
 function DepositWithdrawal() {
   const [members, setMembers] = useState([]);
@@ -79,12 +79,12 @@ function DepositWithdrawal() {
     
     // সুপার অ্যাডমিন না হলে উইথড্র বা এডিট সাবমিশনে বাধা দেওয়া
     if (!isSuperAdmin) {
-      alert("Access Denied: Only Super Admin can process or modify withdrawals.");
+      toast.error("Access Denied: Only Super Admin can process or modify withdrawals.");
       return;
     }
 
     if (!selectedMember || !amount) {
-      alert("Please select a member and enter an amount.");
+      toast.error("Please select a member and enter an amount.");
       return;
     }
 
@@ -102,7 +102,7 @@ function DepositWithdrawal() {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.data.success) {
-        alert("Withdrawal recorded successfully!");
+        toast.success("Withdrawal recorded successfully!");
         setSelectedMember("");
         setAmount("");
         setNote("");
@@ -111,7 +111,7 @@ function DepositWithdrawal() {
       }
     } catch (error) {
       console.error("Error recording withdrawal:", error);
-      alert(error.response?.data?.message || "Failed to record withdrawal.");
+      toast.error(error.response?.data?.message || "Failed to record withdrawal.");
     } finally {
       setLoading(false);
     }
@@ -120,7 +120,7 @@ function DepositWithdrawal() {
   // Delete withdrawal (Super Admin only)
   const handleDelete = async (id) => {
     if (!isSuperAdmin) {
-      alert("Access Denied: Only Super Admin can delete records.");
+      toast.error("Access Denied: Only Super Admin can delete records.");
       return;
     }
 
@@ -131,19 +131,19 @@ function DepositWithdrawal() {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (res.data.success) {
-          alert("Withdrawal deleted successfully!");
+          toast.success("Withdrawal deleted successfully!");
           fetchWithdrawals();
         }
       } catch (error) {
         console.error("Error deleting withdrawal:", error);
-        alert(error.response?.data?.message || "Failed to delete withdrawal.");
+        toast.error(error.response?.data?.message || "Failed to delete withdrawal.");
       }
     }
   };
 
   return (
-    <MainLayout>
-      <div className="p-6 max-w-7xl mx-auto">
+    <div>
+      <div className="max-w-7xl mx-auto">
         
         {/* Total Withdrawn Amount Card */}
         <div className="bg-gradient-to-r from-pink-600 to-rose-600 text-white p-6 rounded-2xl shadow-lg flex items-center justify-between mb-8">
@@ -232,7 +232,7 @@ function DepositWithdrawal() {
                 onClick={(e) => {
                   if (!isSuperAdmin) {
                     e.preventDefault();
-                    alert("Access Denied: Only Super Admin can process withdrawals.");
+                    toast.error("Access Denied: Only Super Admin can process withdrawals.");
                   }
                 }}
                 className={`w-full text-white font-bold py-3.5 rounded-xl shadow-lg transition duration-200 ${
@@ -410,7 +410,7 @@ function DepositWithdrawal() {
         </div>
 
       </div>
-    </MainLayout>
+    </div>
   );
 }
 

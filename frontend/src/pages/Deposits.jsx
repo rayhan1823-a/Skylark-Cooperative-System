@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-import MainLayout from "../layouts/MainLayout";
 
 const API = "https://skylark-cooperative-system.onrender.com/api";
 
@@ -215,7 +214,7 @@ function Deposits() {
   };
 
   return (
-    <MainLayout>
+    <div>
       <h1 className="text-3xl font-bold mb-6">Deposit Management</h1>
 
       <div className="bg-white rounded-xl shadow p-6">
@@ -404,7 +403,7 @@ function Deposits() {
           </table>
         </div>
       </div>
-    </MainLayout>
+    </div>
   );
 }
 

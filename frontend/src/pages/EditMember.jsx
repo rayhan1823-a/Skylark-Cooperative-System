@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
-import MainLayout from "../layouts/MainLayout";
+import { toast } from "react-hot-toast";
 
 function EditMember() {
   const { id } = useParams();
@@ -79,30 +79,28 @@ function EditMember() {
         { 
           headers: { 
             "Content-Type": "multipart/form-data",
-            "Authorization": `Bearer ${token}` // টোকেন যুক্ত করা হলো যাতে 401 এরর না আসে
+            "Authorization": `Bearer ${token}`
           } 
         }
       );
 
-      alert("✅ Member Updated Successfully");
+      toast.success("Member Updated Successfully");
       navigate("/members");
     } catch (error) {
       console.log(error);
-      alert("❌ Update Failed");
+      toast.error("Update Failed");
     }
   };
 
   if (loading) {
     return (
-      <MainLayout>
-        <div className="p-10 text-center text-xl">Loading...</div>
-      </MainLayout>
+      <div className="p-10 text-center text-xl">Loading...</div>
     );
   }
 
   return (
-    <MainLayout>
-      <h1 className="text-3xl font-bold mb-6">Edit Member</h1>
+    <div className="max-w-7xl mx-auto">
+      <h1 className="text-3xl font-bold mb-6 text-gray-800">Edit Member</h1>
       <div className="bg-white shadow rounded-xl p-6">
         <div className="grid md:grid-cols-2 gap-5">
           <Field label="Member ID" name="memberId" value={formData.memberId} change={handleChange} />
@@ -117,12 +115,12 @@ function EditMember() {
           <DateField label="Joining Date" name="joiningDate" value={formData.joiningDate} change={handleChange} />
 
           <div>
-            <label className="font-semibold">Status</label>
+            <label className="font-semibold text-gray-700">Status</label>
             <select
               name="status"
               value={formData.status || "Active"}
               onChange={handleChange}
-              className="border p-3 rounded-lg w-full"
+              className="border p-3 rounded-lg w-full mt-1 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="Active">Active</option>
               <option value="Inactive">Inactive</option>
@@ -141,43 +139,48 @@ function EditMember() {
         </div>
 
         <div className="mt-5">
-          <label className="font-semibold">Present Address</label>
+          <label className="font-semibold text-gray-700">Present Address</label>
           <textarea
             name="presentAddress"
             value={formData.presentAddress || ""}
             onChange={handleChange}
             rows="3"
-            className="border p-3 rounded-lg w-full"
+            className="border p-3 rounded-lg w-full mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
           ></textarea>
         </div>
 
         <div className="mt-5">
-          <label className="font-semibold">Permanent Address</label>
+          <label className="font-semibold text-gray-700">Permanent Address</label>
           <textarea
             name="permanentAddress"
             value={formData.permanentAddress || ""}
             onChange={handleChange}
             rows="3"
-            className="border p-3 rounded-lg w-full"
+            className="border p-3 rounded-lg w-full mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
           ></textarea>
         </div>
 
         <button
           onClick={updateMember}
-          className="mt-6 bg-green-600 text-white px-10 py-3 rounded-lg hover:bg-green-700 transition"
+          className="mt-6 bg-green-600 text-white px-10 py-3 rounded-lg hover:bg-green-700 transition cursor-pointer font-bold shadow-md"
         >
           Update Member
         </button>
       </div>
-    </MainLayout>
+    </div>
   );
 }
 
 function Field({ label, name, value, change }) {
   return (
     <div>
-      <label className="font-semibold">{label}</label>
-      <input name={name} value={value || ""} onChange={change} className="border p-3 rounded-lg w-full" />
+      <label className="font-semibold text-gray-700">{label}</label>
+      <input 
+        name={name} 
+        value={value || ""} 
+        onChange={change} 
+        className="border p-3 rounded-lg w-full mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+      />
     </div>
   );
 }
@@ -185,13 +188,13 @@ function Field({ label, name, value, change }) {
 function DateField({ label, name, value, change }) {
   return (
     <div>
-      <label className="font-semibold">{label}</label>
+      <label className="font-semibold text-gray-700">{label}</label>
       <input
         type="date"
         name={name}
         value={value ? value.substring(0, 10) : ""}
         onChange={change}
-        className="border p-3 rounded-lg w-full"
+        className="border p-3 rounded-lg w-full mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
     </div>
   );
@@ -200,7 +203,7 @@ function DateField({ label, name, value, change }) {
 function FileField({ label, name, currentFile, change }) {
   return (
     <div>
-      <label className="font-semibold block mb-1">{label}</label>
+      <label className="font-semibold block mb-1 text-gray-700">{label}</label>
       {currentFile && (
         <div className="mb-2 text-sm">
           <a href={currentFile} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">
