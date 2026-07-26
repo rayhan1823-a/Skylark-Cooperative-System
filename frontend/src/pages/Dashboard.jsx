@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import MainLayout from "../components/MainLayout";
+import MainLayout from "../layouts/MainLayout";
 import { useNavigate } from "react-router-dom";
 import { Users, UserCheck, UserX, DollarSign, Wallet, TrendingDown, Building, ArrowUpRight, PiggyBank, ArrowDownRight, LogOut, ShieldCheck, AlertTriangle } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from "recharts";
