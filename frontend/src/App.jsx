@@ -10,8 +10,8 @@ import ResetPassword from "./pages/ResetPassword";
 import ChangePassword from "./pages/ChangePassword";
 import ProtectedRoute from "./components/ProtectedRoute";
 
-// MainLayout ইম্পোর্ট করা হলো (সাইডবার ও হেডারসহ)
-import MainLayout from "./components/MainLayout"; 
+// MainLayout সঠিক পাথ থেকে ইম্পোর্ট করা হলো (layouts ফোল্ডার থেকে)
+import MainLayout from "./layouts/MainLayout"; 
 
 // Home & Gallery
 import Home from "./pages/Home";
