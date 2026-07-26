@@ -1,7 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
-  FaHome,
-  FaImages, // ✅ গ্যালারির জন্য নতুন আইকন
   FaUsers,
   FaUserPlus,
   FaMoneyBillWave,
@@ -25,19 +23,9 @@ function Sidebar() {
 
   const menu = [
     {
-      title: "Home",
-      path: "/home", // ✅ সবার উপরে Home পেজ
-      icon: <FaHome />,
-    },
-    {
       title: "Dashboard",
       path: "/",
       icon: <FaChartBar />,
-    },
-    {
-      title: "Gallery",
-      path: "/gallery", // ✅ ড্যাশবোর্ডের পরেই Gallery পেজ
-      icon: <FaImages />,
     },
     {
       title: "Members",
