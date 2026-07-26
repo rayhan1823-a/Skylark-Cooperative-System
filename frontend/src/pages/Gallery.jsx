@@ -1,177 +1,151 @@
-import { useState } from "react";
-import Sidebar from "../components/Sidebar";
-import { FaImages, FaVideo, FaPlus, FaTrash, FaCheckCircle } from "react-icons/fa";
-import toast from "react-hot-toast";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
-function Gallery() {
-  const user = JSON.parse(localStorage.getItem("user")) || {};
-  const isSuperAdmin = user.role === "SUPER_ADMIN";
+const Gallery = () => {
+  const [images, setImages] = useState([]);
+  const [title, setTitle] = useState('');
+  const [file, setFile] = useState(null);
+  const [loading, setLoading] = useState(false);
+  
+  // আপনার প্রজেক্টের রোল চেক (সুপার অ্যাডমিন কিনা তা নিশ্চিত করার জন্য)
+  const userRole = "SUPER_ADMIN"; 
 
-  const [activeTab, setActiveTab] = useState("images"); // 'images' or 'videos'
+  // পেজ লোড হলে গ্যালারির ছবিগুলো ফেচ করা
+  useEffect(() => {
+    fetchImages();
+  }, []);
 
-  // ডেমো ডাটা (পরবর্তীতে ব্যাকএন্ড বা API থেকে নিয়ে আসতে পারবেন)
-  const [images, setImages] = useState([
-    { id: 1, title: "বার্ষিক সাধারণ সভা ২০২৬", url: "https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=500" },
-    { id: 2, title: "সমিতির প্রজেক্ট পরিদর্শন", url: "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=500" },
-  ]);
-
-  const [videos, setVideos] = useState([
-    { id: 1, title: "মাসিক মিটিং ভিডিও ক্লিপ", url: "https://www.youtube.com/embed/dQw4w9WgXcQ" },
-  ]);
-
-  // নতুন ফাইল যোগ করার হ্যান্ডলার (শুধুমাত্র Super Admin পারবে)
-  const handleUpload = (e) => {
-    e.preventDefault();
-    if (!isSuperAdmin) {
-      toast.error("আপনার গ্যালারিতে কন্টেন্ট আপলোড করার অনুমতি নেই!");
-      return;
+  const fetchImages = async () => {
+    try {
+      const res = await axios.get('http://localhost:5000/api/gallery');
+      setImages(res.data);
+    } catch (err) {
+      console.error("Error fetching gallery images:", err);
     }
-    toast.success("সফলভাবে আপলোড করা হয়েছে! (Backend API কানেক্ট করে নিতে পারেন)");
   };
 
-  // ডিলিট হ্যান্ডলার (শুধুমাত্র Super Admin পারবে)
-  const handleDelete = (id, type) => {
-    if (!isSuperAdmin) {
-      toast.error("শুধুমাত্র Super Admin এটি ডিলিট করতে পারবেন!");
+  // ছবি আপলোড হ্যান্ডলার
+  const handleUpload = async (e) => {
+    e.preventDefault();
+    if (!file) {
+      alert("দয়া করে একটি ছবি সিলেক্ট করুন!");
       return;
     }
-    if (type === "image") {
-      setImages(images.filter((img) => img.id !== id));
-    } else {
-      setVideos(videos.filter((vid) => vid.id !== id));
+
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('image', file);
+
+    setLoading(true);
+    try {
+      await axios.post('http://localhost:5000/api/gallery', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      alert("ছবি সফলভাবে আপলোড হয়েছে!");
+      setTitle('');
+      setFile(null);
+      e.target.reset();
+      fetchImages();
+    } catch (err) {
+      console.error("Upload error:", err);
+      alert("ছবি আপলোড ব্যর্থ হয়েছে!");
+    } finally {
+      setLoading(false);
     }
-    toast.success("সফলভাবে ডিলিট করা হয়েছে!");
+  };
+
+  // ছবি ডিলিট করার ফাংশন (সুপার অ্যাডমিনের জন্য)
+  const handleDelete = async (id) => {
+    if (window.confirm("আপনি কি নিশ্চিতভাবে এই ছবি ডিলিট করতে চান?")) {
+      try {
+        await axios.delete(`http://localhost:5000/api/gallery/${id}`);
+        alert("ছবি ডিলিট করা হয়েছে!");
+        fetchImages();
+      } catch (err) {
+        console.error("Delete error:", err);
+        alert("ডিলিট করতে সমস্যা হয়েছে!");
+      }
+    }
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-950 text-slate-100">
-      {/* Sidebar */}
-      <Sidebar />
+    <div className="p-6 text-white max-w-7xl mx-auto">
+      <h2 className="text-3xl font-bold mb-6">গ্যালারি (Gallery)</h2>
 
-      {/* Main Content */}
-      <main className="flex-1 p-6 lg:p-10 overflow-y-auto">
-        {/* Top Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-900/85 border border-slate-800 p-6 rounded-3xl shadow-xl mb-8 gap-4">
-          <div>
-            <span className="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-              Somiti Gallery
-            </span>
-            <h1 className="text-3xl font-black text-white mt-2 tracking-tight">
-              ইমেজ ও ভিডিও গ্যালারি
-            </h1>
-            <p className="text-slate-400 text-sm mt-1">
-              সমিতির সকল স্মরণীয় মুহূর্ত, ছবি এবং ভিডিও ক্লিপ এখানে সংরক্ষিত আছে।
-            </p>
-          </div>
-
-          {/* Tabs Switcher */}
-          <div className="flex bg-slate-950 border border-slate-800 p-1.5 rounded-2xl">
-            <button
-              onClick={() => setActiveTab("images")}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 ${
-                activeTab === "images"
-                  ? "bg-blue-600 text-white shadow-lg shadow-blue-600/30"
-                  : "text-slate-400 hover:text-white"
-              }`}
+      {/* সুপার অ্যাডমিন আপলোড ফর্ম */}
+      {userRole === "SUPER_ADMIN" && (
+        <div className="bg-slate-800 p-6 rounded-xl mb-8 border border-slate-700 shadow-lg">
+          <h3 className="text-xl font-semibold mb-4 text-emerald-400">নতুন ছবি যোগ করুন</h3>
+          <form onSubmit={handleUpload} className="space-y-4">
+            <div>
+              <label className="block text-sm text-gray-300 mb-1">ছবির শিরোনাম (Title):</label>
+              <input 
+                type="text" 
+                placeholder="যেমন: বার্ষিক বনভোজন ২০২৬..." 
+                value={title} 
+                onChange={(e) => setTitle(e.target.value)}
+                className="w-full p-2.5 bg-slate-900 rounded border border-slate-700 text-white focus:outline-none focus:border-emerald-500"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-gray-300 mb-1">ছবি সিলেক্ট করুন (Image File):</label>
+              <input 
+                type="file" 
+                accept="image/*"
+                onChange={(e) => setFile(e.target.files[0])}
+                className="w-full text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-emerald-600 file:text-white hover:file:bg-emerald-700 cursor-pointer"
+                required
+              />
+            </div>
+            <button 
+              type="submit" 
+              disabled={loading}
+              className="bg-blue-600 hover:bg-blue-700 px-6 py-2.5 rounded-lg font-medium transition duration-200"
             >
-              <FaImages /> Image Gallery
+              {loading ? "আপলোড হচ্ছে..." : "Upload Image"}
             </button>
-            <button
-              onClick={() => setActiveTab("videos")}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 ${
-                activeTab === "videos"
-                  ? "bg-blue-600 text-white shadow-lg shadow-blue-600/30"
-                  : "text-slate-400 hover:text-white"
-              }`}
-            >
-              <FaVideo /> Video Gallery
-            </button>
-          </div>
+          </form>
         </div>
+      )}
 
-        {/* Super Admin Upload Section (অন্য কেউ দেখতে পেলেও আপলোড বাটন রেস্ট্রিক্টেড থাকবে) */}
-        {isSuperAdmin && (
-          <div className="bg-slate-900/60 border border-slate-800 p-6 rounded-3xl mb-8 shadow-inner">
-            <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
-              <FaPlus className="text-blue-500" /> নতুন ছবি বা ভিডিও আপলোড করুন (Super Admin Only)
-            </h3>
-            <form onSubmit={handleUpload} className="flex flex-col sm:flex-row gap-4">
-              <input
-                type="text"
-                placeholder="টাইটেল লিখুন..."
-                className="flex-1 bg-slate-950 border border-slate-800 rounded-2xl px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500"
-                required
-              />
-              <input
-                type="file"
-                className="bg-slate-950 border border-slate-800 rounded-2xl px-4 py-2.5 text-sm text-slate-400 file:mr-4 file:py-1.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-600 file:text-white hover:file:bg-blue-700"
-                required
-              />
-              <button
-                type="submit"
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-2xl text-sm transition-all shadow-lg shadow-blue-600/20"
-              >
-                আপলোড করুন
-              </button>
-            </form>
-          </div>
-        )}
-
-        {/* Content Display Area */}
-        {activeTab === "images" ? (
-          <div>
-            <h2 className="text-xl font-bold text-white mb-4">সকল ছবিসমূহ</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {images.map((img) => (
-                <div key={img.id} className="bg-slate-900/80 border border-slate-800 rounded-3xl overflow-hidden shadow-xl group">
-                  <div className="h-48 overflow-hidden relative">
-                    <img src={img.url} alt={img.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  </div>
-                  <div className="p-4 flex justify-between items-center">
-                    <h4 className="font-bold text-white text-sm">{img.title}</h4>
-                    {isSuperAdmin && (
-                      <button
-                        onClick={() => handleDelete(img.id, "image")}
-                        className="bg-rose-500/10 hover:bg-rose-600 text-rose-400 hover:text-white p-2 rounded-xl border border-rose-500/20 transition-all"
-                        title="Delete Image"
-                      >
-                        <FaTrash size={14} />
-                      </button>
-                    )}
-                  </div>
+      {/* গ্যালারি গ্রিড (ছবিগুলো প্রদর্শনের জায়গা) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {images.length > 0 ? (
+          images.map((img) => (
+            <div key={img._id} className="bg-slate-800 rounded-xl overflow-hidden shadow-md border border-slate-700 flex flex-col justify-between">
+              <div>
+                <img 
+                  src={img.imageUrl} 
+                  alt={img.title} 
+                  className="w-full h-48 object-cover"
+                />
+                <div className="p-4">
+                  <h4 className="font-semibold text-lg text-white truncate">{img.title}</h4>
                 </div>
-              ))}
+              </div>
+              
+              {/* সুপার অ্যাডমিন চাইলে ছবি ডিলিট করতে পারবেন */}
+              {userRole === "SUPER_ADMIN" && (
+                <div className="px-4 pb-4">
+                  <button 
+                    onClick={() => handleDelete(img._id)}
+                    className="w-full bg-red-600 hover:bg-red-700 text-white py-1.5 rounded text-sm transition duration-200"
+                  >
+                    Delete
+                  </button>
+                </div>
+              )}
             </div>
-          </div>
+          ))
         ) : (
-          <div>
-            <h2 className="text-xl font-bold text-white mb-4">সকল ভিডিওসমূহ</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {videos.map((vid) => (
-                <div key={vid.id} className="bg-slate-900/80 border border-slate-800 rounded-3xl overflow-hidden shadow-xl">
-                  <div className="h-48 relative">
-                    <iframe src={vid.url} title={vid.title} className="w-full h-full" allowFullScreen></iframe>
-                  </div>
-                  <div className="p-4 flex justify-between items-center">
-                    <h4 className="font-bold text-white text-sm">{vid.title}</h4>
-                    {isSuperAdmin && (
-                      <button
-                        onClick={() => handleDelete(vid.id, "video")}
-                        className="bg-rose-500/10 hover:bg-rose-600 text-rose-400 hover:text-white p-2 rounded-xl border border-rose-500/20 transition-all"
-                        title="Delete Video"
-                      >
-                        <FaTrash size={14} />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <p className="text-gray-400 col-span-full text-center py-8">গ্যালারিতে কোনো ছবি পাওয়া যায়নি।</p>
         )}
-      </main>
+      </div>
     </div>
   );
-}
+};
 
 export default Gallery;

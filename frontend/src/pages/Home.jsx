@@ -1,141 +1,141 @@
-import { useState, useEffect } from "react";
-import Sidebar from "../components/Sidebar"; // আপনার প্রজেক্টের সাইডবার পাথ ঠিক করে নেবেন
-import { FaBullhorn, FaImages, FaInfoCircle, FaShieldAlt } from "react-icons/fa";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
-function Home() {
-  const user = JSON.parse(localStorage.getItem("user")) || {};
-  const isSuperAdmin = user.role === "SUPER_ADMIN";
+const Home = () => {
+  const [content, setContent] = useState({ title: '', subtitle: '' });
+  const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(false);
+  
+  // আপনার প্রজেক্টের রোল চেক (সুপার অ্যাডমিন কিনা তা নিশ্চিত করার জন্য)
+  const userRole = "SUPER_ADMIN"; 
 
-  // ব্যানার স্লাইডারের জন্য ইমেজ লিস্ট (আপনি চাইলে এগুলো পরিবর্তন বা ব্যাকএন্ড থেকে আনতে পারবেন)
-  const banners = [
-    {
-      id: 1,
-      title: "Skylark Cooperative Society",
-      subtitle: "Digital Cooperative Management System",
-      bg: "from-blue-900 via-indigo-900 to-slate-900",
-    },
-    {
-      id: 2,
-      title: "Secure & Transparent Financial Core",
-      subtitle: "Manage your savings, deposits, and loans easily.",
-      bg: "from-slate-900 via-blue-950 to-indigo-950",
-    },
-    {
-      id: 3,
-      title: "Empowering Members Together",
-      subtitle: "Building a stronger financial future for everyone.",
-      bg: "from-indigo-950 via-slate-900 to-blue-900",
-    },
-  ];
-
-  const [currentBanner, setCurrentBanner] = useState(0);
-
-  // অটো-চেঞ্জিং ব্যানার ইফেক্ট (৪ সেকেন্ড পর পর স্লাইড বদলাবে)
+  // পেজ লোড হলে ব্যাকএন্ড থেকে হোম পেজের টেক্সট ফেচ করা
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentBanner((prev) => (prev + 1) % banners.length);
-    }, 4000);
-    return () => clearInterval(timer);
-  }, [banners.length]);
+    fetchContent();
+  }, []);
+
+  const fetchContent = async () => {
+    try {
+      const res = await axios.get('http://localhost:5000/api/home');
+      if (res.data) {
+        setContent(res.data);
+      }
+    } catch (err) {
+      console.error("Error fetching home content:", err);
+    }
+  };
+
+  // হোম পেজের টেক্সট আপডেট বা সেভ করার হ্যান্ডলার
+  const handleSave = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const res = await axios.put('http://localhost:5000/api/home', content);
+      setContent(res.data.content);
+      setIsEditing(false);
+      alert("হোম পেজের লেখা সফলভাবে আপডেট হয়েছে!");
+    } catch (err) {
+      console.error("Update error:", err);
+      alert("আপডেট করতে ব্যর্থ হয়েছে!");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="flex min-h-screen bg-slate-950 text-slate-100">
-      {/* Sidebar */}
-      <Sidebar />
+    <div className="p-6 text-white max-w-7xl mx-auto">
+      {/* হোম পেজের মূল ব্যানার/ওয়েলকাম সেকশন */}
+      <div className="bg-slate-800 p-8 rounded-2xl relative shadow-lg border border-slate-700">
+        <span className="bg-blue-600 text-xs px-3 py-1 rounded-full font-semibold uppercase tracking-wider">
+          WELCOME HOME
+        </span>
+        
+        <h1 className="text-3xl md:text-4xl font-bold mt-4 text-white">
+          {content.title || "সমিতি হোম পেজ (Somiti Home)"}
+        </h1>
+        
+        <p className="mt-2 text-gray-300 text-lg">
+          {content.subtitle || "স্বাগতম! সমিতির মূল তথ্যাবলী ও আপডেট এখানে দেখতে পাবেন।"}
+        </p>
 
-      {/* Main Content */}
-      <main className="flex-1 p-6 lg:p-10 overflow-y-auto">
-        {/* Top Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-900/80 border border-slate-800 p-6 rounded-3xl shadow-xl mb-8 gap-4">
-          <div>
-            <span className="bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-              Welcome Home
-            </span>
-            <h1 className="text-3xl font-black text-white mt-2 tracking-tight">
-              समिति হোম পেজ (Somiti Home)
-            </h1>
-            <p className="text-slate-400 text-sm mt-1">
-              স্বাগতম, <span className="text-blue-400 font-semibold">{user.name || "User"}</span>! সমিতির মূল তথ্যাবলী ও আপডেট এখানে দেখতে পাবেন।
-            </p>
-          </div>
-          <div className="bg-slate-950/60 border border-slate-800 px-4 py-3 rounded-2xl text-right">
-            <p className="text-xs text-slate-400">Current Role</p>
-            <p className="text-sm font-bold text-indigo-400">{user.role}</p>
-          </div>
-        </div>
+        {/* সুপার অ্যাডমিন থাকলে এডিট বাটন দেখাবে */}
+        {userRole === "SUPER_ADMIN" && !isEditing && (
+          <button 
+            onClick={() => setIsEditing(true)} 
+            className="absolute top-6 right-6 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition duration-200 shadow"
+          >
+            ✏️ Edit Content
+          </button>
+        )}
+      </div>
 
-        {/* Auto-Changing Banner / Slider Section */}
-        <div className="relative w-full h-72 sm:h-80 lg:h-96 rounded-3xl overflow-hidden shadow-2xl border border-slate-800 mb-10">
-          {banners.map((banner, index) => (
-            <div
-              key={banner.id}
-              className={`absolute inset-0 bg-gradient-to-r ${banner.bg} flex flex-col justify-center items-center text-center p-8 transition-opacity duration-1000 ease-in-out ${
-                index === currentBanner ? "opacity-100 z-10" : "opacity-0 z-0"
-              }`}
-            >
-              <div className="max-w-2xl">
-                <span className="bg-white/10 text-blue-300 px-4 py-1.5 rounded-full text-xs font-bold tracking-widest uppercase border border-white/10 backdrop-blur-md">
-                  Official Notice & Highlights
-                </span>
-                <h2 className="text-3xl sm:text-5xl font-extrabold text-white mt-4 tracking-tight drop-shadow-md">
-                  {banner.title}
-                </h2>
-                <p className="text-slate-300 text-sm sm:text-lg mt-3 font-medium">
-                  {banner.subtitle}
-                </p>
-              </div>
-            </div>
-          ))}
-
-          {/* Slider Dots */}
-          <div className="absolute bottom-4 left-0 right-0 z-20 flex justify-center gap-2">
-            {banners.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentBanner(index)}
-                className={`h-2.5 rounded-full transition-all duration-300 ${
-                  index === currentBanner ? "w-8 bg-blue-500" : "w-2.5 bg-white/40"
-                }`}
+      {/* এডিট করার ফর্ম (যখন এডিট মোড অন থাকবে) */}
+      {isEditing && (
+        <div className="mt-6 bg-slate-900 p-6 rounded-2xl border border-slate-700 shadow-xl">
+          <h3 className="text-xl font-semibold mb-4 text-emerald-400">হোম পেজ কনটেন্ট এডিট করুন</h3>
+          <form onSubmit={handleSave} className="space-y-4">
+            <div>
+              <label className="block text-sm text-gray-300 mb-1">শিরোনাম (Title):</label>
+              <input 
+                type="text" 
+                value={content.title} 
+                onChange={(e) => setContent({ ...content, title: e.target.value })}
+                className="w-full p-3 bg-slate-800 rounded-lg border border-slate-700 text-white focus:outline-none focus:border-emerald-500"
+                required
               />
-            ))}
-          </div>
+            </div>
+            
+            <div>
+              <label className="block text-sm text-gray-300 mb-1">সাবটাইটেল বা বিবরণ (Subtitle):</label>
+              <textarea 
+                value={content.subtitle} 
+                onChange={(e) => setContent({ ...content, subtitle: e.target.value })}
+                className="w-full p-3 bg-slate-800 rounded-lg border border-slate-700 text-white focus:outline-none focus:border-emerald-500"
+                rows="3"
+                required
+              />
+            </div>
+            
+            <div className="flex gap-3 pt-2">
+              <button 
+                type="submit" 
+                disabled={loading}
+                className="bg-blue-600 hover:bg-blue-700 px-6 py-2.5 rounded-lg font-medium transition duration-200"
+              >
+                {loading ? "সংরক্ষণ হচ্ছে..." : "Save Changes"}
+              </button>
+              
+              <button 
+                type="button" 
+                onClick={() => setIsEditing(false)}
+                className="bg-gray-600 hover:bg-gray-700 px-6 py-2.5 rounded-lg font-medium transition duration-200"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
         </div>
+      )}
 
-        {/* Information Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-slate-900/60 border border-slate-800/80 p-6 rounded-3xl">
-            <div className="w-12 h-12 bg-blue-500/10 text-blue-400 rounded-2xl flex items-center justify-center text-xl mb-4 border border-blue-500/20">
-              <FaBullhorn />
-            </div>
-            <h3 className="text-lg font-bold text-white">সমিতির ঘোষণা</h3>
-            <p className="text-slate-400 text-sm mt-2">
-              সকল সদস্যের অবগতির জন্য জানানো যাচ্ছে যে, মাসিক জমা এবং কিস্তি নিয়মিত পরিশোধ করুন।
-            </p>
-          </div>
-
-          <div className="bg-slate-900/60 border border-slate-800/80 p-6 rounded-3xl">
-            <div className="w-12 h-12 bg-indigo-500/10 text-indigo-400 rounded-2xl flex items-center justify-center text-xl mb-4 border border-indigo-500/20">
-              <FaImages />
-            </div>
-            <h3 className="text-lg font-bold text-white">গ্যালারি ও কার্যক্রম</h3>
-            <p className="text-slate-400 text-sm mt-2">
-              আমাদের বিভিন্ন সভা, ইভেন্ট এবং প্রকল্পের ছবি ও ভিডিও দেখতে গ্যালারি ভিজিট করুন।
-            </p>
-          </div>
-
-          <div className="bg-slate-900/60 border border-slate-800/80 p-6 rounded-3xl">
-            <div className="w-12 h-12 bg-emerald-500/10 text-emerald-400 rounded-2xl flex items-center justify-center text-xl mb-4 border border-emerald-500/20">
-              <FaShieldAlt />
-            </div>
-            <h3 className="text-lg font-bold text-white">সিস্টেম সিকিউরিটি</h3>
-            <p className="text-slate-400 text-sm mt-2">
-              {isSuperAdmin ? "আপনি সুপার এডমিন হিসেবে সম্পূর্ণ পেজ বা কন্টেন্ট কন্ট্রোল করতে পারবেন।" : "আপনি একজন অনুমোদিত ব্যবহারকারী হিসেবে পেজটি দেখতে পারছেন।" }
-            </p>
-          </div>
+      {/* অন্যান্য সেকশন বা নোটিশ বোর্ড */}
+      <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-slate-800 p-6 rounded-xl border border-slate-700">
+          <h4 className="font-bold text-lg text-emerald-400 mb-2">নোটিশ বোর্ড</h4>
+          <p className="text-gray-300 text-sm">সমিতির সাম্প্রতিক সকল গুরুত্বপূর্ণ নোটিশ ও ঘোষণা এখানে প্রদর্শিত হবে।</p>
         </div>
-      </main>
+        
+        <div className="bg-slate-800 p-6 rounded-xl border border-slate-700">
+          <h4 className="font-bold text-lg text-blue-400 mb-2">আর্থিক সারাংশ</h4>
+          <p className="text-gray-300 text-sm">সঞ্চয়, ডিপোজিট এবং লোন সম্পর্কিত ড্যাশবোর্ড ওভারভিউ।</p>
+        </div>
+        
+        <div className="bg-slate-800 p-6 rounded-xl border border-slate-700">
+          <h4 className="font-bold text-lg text-purple-400 mb-2">দ্রুত লিংক</h4>
+          <p className="text-gray-300 text-sm">মেম্বার লিস্ট এবং গ্যালারি পেজে দ্রুত যাওয়ার শর্টকাট।</p>
+        </div>
+      </div>
     </div>
   );
-}
+};
 
 export default Home;

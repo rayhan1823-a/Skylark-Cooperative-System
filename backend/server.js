@@ -134,8 +134,12 @@ const backupRoutes = require("./routes/backupRoutes");
 // ✅ Withdrawals Route
 const withdrawalRoutes = require("./routes/withdrawalRoutes");
 
-// ✅ Penalty Route (নতুন যুক্ত করা হলো)
+// ✅ Penalty Route
 const penaltyRoute = require("./routes/penaltyroute");
+
+// ✅ Home & Gallery Routes (নতুন যুক্ত করা হলো)
+const homeRoutes = require("./routes/homeRoutes");
+const galleryRoutes = require("./routes/galleryRoutes");
 
 // ======================================
 // API Routes
@@ -196,8 +200,12 @@ app.use("/api/backup", backupRoutes);
 // ✅ Withdrawals API Route
 app.use("/api/withdrawals", withdrawalRoutes);
 
-// ✅ Penalty API Route (নতুন যুক্ত করা হলো)
+// ✅ Penalty API Route
 app.use("/api/penalties", penaltyRoute);
+
+// ✅ Home & Gallery API Routes (নতুন যুক্ত করা হলো)
+app.use("/api/home", homeRoutes);
+app.use("/api/gallery", galleryRoutes);
 
 // ======================================
 // Root Route
@@ -253,5 +261,6 @@ app.listen(PORT, () => {
   console.log("✅ Backup Scheduler Started");
   console.log("✅ Deposit Receipt Route Loaded");
   console.log("✅ Penalty Route Loaded");
+  console.log("✅ Home & Gallery Routes Loaded"); // নতুন লগ যোগ করা হলো
   console.log("✅ Skylark Cooperative Management System Ready");
 });
