@@ -26,7 +26,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// ২. নতুন ছবি আপলোড করার জন্য (POST)
+// ২. নতুন ছবি আপলোড করার জন্য (POST) - ডাইনামিক বেস ইউআরএল সহ
 router.post('/', upload.single('image'), async (req, res) => {
   try {
     const { title } = req.body;
@@ -35,8 +35,9 @@ router.post('/', upload.single('image'), async (req, res) => {
       return res.status(400).json({ error: "No image file provided" });
     }
 
-    // ছবির পাথ তৈরি (লোকাল বা সার্ভার পাথ)
-    const imageUrl = `http://localhost:5000/uploads/${req.file.filename}`;
+    // লোকাল বা লাইভ সার্ভারের বেস ইউআরএল ডায়নামিকভাবে তৈরি করা (যাতে রেন্ডার বা লোকালহোস্ট উভয় জায়গাতেই কাজ করে)
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const imageUrl = `${baseUrl}/uploads/${req.file.filename}`;
 
     const newImage = new Gallery({ 
       title, 

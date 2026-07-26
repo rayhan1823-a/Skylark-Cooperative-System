@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
+// রেন্ডার লাইভ সার্ভার লিংক যুক্ত করা হলো
+const API_URL = "https://skylark-cooperative-system.onrender.com";
+
 const Gallery = () => {
   const [images, setImages] = useState([]);
   const [title, setTitle] = useState('');
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   
-  // লোকালস্টোরেজ থেকে রিয়েল ইউজার এবং রোল নেওয়া
+  // লোকালস্টোরেজ থেকে রিয়েল ইউজার এবং রোল নেওয়া
   const user = JSON.parse(localStorage.getItem("user")) || {};
   const userRole = user.role || ""; 
-
-  // API Base URL (লোকাল অথবা লাইভ সার্ভার হ্যান্ডেল করার জন্য)
-  const API_URL = "http://localhost:5000";
 
   // পেজ লোড হলে গ্যালারির ছবিগুলো ফেচ করা
   useEffect(() => {
@@ -42,9 +42,11 @@ const Gallery = () => {
 
     setLoading(true);
     try {
+      const token = localStorage.getItem("token") || localStorage.getItem("authToken");
       await axios.post(`${API_URL}/api/gallery`, formData, {
         headers: {
-          'Content-Type': 'multipart/form-data'
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`
         }
       });
       alert("ছবি সফলভাবে আপলোড হয়েছে!");
@@ -64,7 +66,12 @@ const Gallery = () => {
   const handleDelete = async (id) => {
     if (window.confirm("আপনি কি নিশ্চিতভাবে এই ছবি ডিলিট করতে চান?")) {
       try {
-        await axios.delete(`${API_URL}/api/gallery/${id}`);
+        const token = localStorage.getItem("token") || localStorage.getItem("authToken");
+        await axios.delete(`${API_URL}/api/gallery/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
         alert("ছবি ডিলিট করা হয়েছে!");
         fetchImages();
       } catch (err) {

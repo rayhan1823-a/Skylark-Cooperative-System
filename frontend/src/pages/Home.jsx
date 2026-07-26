@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
+// রেন্ডার লাইভ সার্ভার লিংক যুক্ত করা হলো
+const API = "https://skylark-cooperative-system.onrender.com/api";
+
 const Home = () => {
   const [content, setContent] = useState({ title: '', subtitle: '' });
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   
-  // লোকালস্টোরেজ থেকে রিয়েল ইউজার এবং রোল নেওয়া
+  // লোকালস্টোরেজ থেকে রিয়েল ইউজার এবং রোল নেওয়া
   const user = JSON.parse(localStorage.getItem("user")) || {};
   const userRole = user.role || ""; 
 
@@ -17,7 +20,7 @@ const Home = () => {
 
   const fetchContent = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/home');
+      const res = await axios.get(`${API}/home`);
       if (res.data) {
         setContent(res.data);
       }
@@ -31,8 +34,15 @@ const Home = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await axios.put('http://localhost:5000/api/home', content);
-      setContent(res.data.content);
+      const token = localStorage.getItem("token") || localStorage.getItem("authToken");
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      };
+
+      const res = await axios.put(`${API}/home`, content, config);
+      setContent(res.data.content || res.data);
       setIsEditing(false);
       alert("হোম পেজের লেখা সফলভাবে আপডেট হয়েছে!");
     } catch (err) {
@@ -79,7 +89,7 @@ const Home = () => {
               <label className="block text-sm text-gray-300 mb-1">শিরোনাম (Title):</label>
               <input 
                 type="text" 
-                value={content.title} 
+                value={content.title || ""} 
                 onChange={(e) => setContent({ ...content, title: e.target.value })}
                 className="w-full p-3 bg-slate-800 rounded-lg border border-slate-700 text-white focus:outline-none focus:border-emerald-500"
                 required
@@ -89,7 +99,7 @@ const Home = () => {
             <div>
               <label className="block text-sm text-gray-300 mb-1">সাবটাইটেল বা বিবরণ (Subtitle):</label>
               <textarea 
-                value={content.subtitle} 
+                value={content.subtitle || ""} 
                 onChange={(e) => setContent({ ...content, subtitle: e.target.value })}
                 className="w-full p-3 bg-slate-800 rounded-lg border border-slate-700 text-white focus:outline-none focus:border-emerald-500"
                 rows="3"
