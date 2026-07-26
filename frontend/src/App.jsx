@@ -1,3 +1,4 @@
+import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 
@@ -12,10 +13,6 @@ import ProtectedRoute from "./components/ProtectedRoute";
 
 // MainLayout সঠিক পাথ থেকে ইম্পোর্ট করা হলো (layouts ফোল্ডার থেকে)
 import MainLayout from "./layouts/MainLayout"; 
-
-// Home & Gallery
-import Home from "./pages/Home";
-import Gallery from "./pages/Gallery";
 
 // Dashboard
 import Dashboard from "./pages/Dashboard";
@@ -120,9 +117,7 @@ function App() {
           }
         >
           {/* MainLayout এর ভেতরে Outlet হিসেবে এই পেজগুলো রেন্ডার হবে */}
-          <Route path="/home" element={<Home />} />
           <Route path="/" element={<Dashboard />} />
-          <Route path="/gallery" element={<Gallery />} />
           <Route path="/members" element={<Members />} />
           <Route
             path="/users-list"
