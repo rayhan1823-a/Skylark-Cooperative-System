@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import MainLayout from "../layouts/MainLayout";
+import MainLayout from "../components/MainLayout";
 import { useNavigate } from "react-router-dom";
 import { Users, UserCheck, UserX, DollarSign, Wallet, TrendingDown, Building, ArrowUpRight, PiggyBank, ArrowDownRight, LogOut, ShieldCheck, AlertTriangle } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from "recharts";
@@ -191,7 +191,7 @@ function Dashboard() {
     .filter(t => t && t.type === "EXPENSE")
     .reduce((sum, t) => sum + Number(t.amount || 0), 0);
 
-  // অটোমেটিক ডাইনামিক ক্যালকুলেশন (ডাটা পরিবর্তনে নিজে থেকেই আপডেট হবে)
+  // অটোমেটিক ডাইনামিক ক্যালকুলেশন
   const memberCountForTarget = stats.totalMembers > 0 ? stats.totalMembers : 5;
   const targetPerMember = 38000;
   const totalTargetDeposit = memberCountForTarget * targetPerMember;
@@ -353,7 +353,6 @@ function Dashboard() {
             </div>
           </div>
 
-          {/* Total Due Card (Automatically calculated via Target, Deposit and Withdrawal) */}
           <div className="bg-gradient-to-br from-rose-950 via-red-950 to-slate-900 border border-rose-800/50 text-white p-6 rounded-3xl shadow-[0_10px_35px_rgba(159,18,57,0.4)] hover:shadow-2xl transition-all duration-300 flex justify-between items-center group transform hover:-translate-y-1">
             <div>
               <p className="text-[11px] font-black text-rose-300 tracking-wider uppercase">Total Due</p>
