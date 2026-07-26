@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 
 // Authentication
@@ -7,11 +7,13 @@ import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 import VerifyOTP from "./pages/VerifyOTP";
 import ResetPassword from "./pages/ResetPassword";
-import ChangePassword from "./pages/ChangePassword"; // ✅ পাসওয়ার্ড পরিবর্তনের পেজ ইম্পোর্ট করা হলো
+import ChangePassword from "./pages/ChangePassword";
 import ProtectedRoute from "./components/ProtectedRoute";
-import Sidebar from "./components/Sidebar"; // ✅ সাইডবার ইম্পোর্ট করা হলো (যদি অলরেডি লেআউট ফাইল থাকে তবে এটি অপশনাল)
 
-// Home & Gallery (নতুন পেজ ইম্পোর্ট করা হলো)
+// MainLayout ইম্পোর্ট করা হলো (সাইডবার ও হেডারসহ)
+import MainLayout from "./components/MainLayout"; 
+
+// Home & Gallery
 import Home from "./pages/Home";
 import Gallery from "./pages/Gallery";
 
@@ -46,26 +48,8 @@ import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 
 // ======================================
-// Dashboard Layout (Sidebar Show করার জন্য)
-// ======================================
-function DashboardLayout() {
-  return (
-    <div className="flex min-h-screen bg-slate-950">
-      {/* সাইডবার */}
-      <Sidebar />
-      
-      {/* মেইন কন্টেন্ট এরিয়া */}
-      <div className="flex-1 overflow-y-auto">
-        <Outlet />
-      </div>
-    </div>
-  );
-}
-
-// ======================================
 // 404 Page
 // ======================================
-
 function NotFound() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -85,7 +69,6 @@ function NotFound() {
 
 function App() {
   const token = localStorage.getItem("token");
-  // ইউজার অবজেক্ট থেকে রোল বের করা হচ্ছে রাউট প্রটেক্ট করার জন্য
   const user = JSON.parse(localStorage.getItem("user")) || {};
 
   return (
@@ -106,9 +89,8 @@ function App() {
 
       <Routes>
         {/* ==========================
-            Authentication
+            Authentication Routes (Without Sidebar/MainLayout)
         ========================== */}
-
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
@@ -128,63 +110,45 @@ function App() {
         />
 
         {/* ==========================
-            Protected Dashboard Layout Routes (Sidebar সহ সব পেজ)
+            Protected MainLayout Routes (With Sidebar + Header + Content)
         ========================== */}
         <Route
           element={
             <ProtectedRoute>
-              <DashboardLayout />
+              <MainLayout />
             </ProtectedRoute>
           }
         >
-          {/* Home & Dashboard */}
+          {/* MainLayout এর ভেতরে Outlet হিসেবে এই পেজগুলো রেন্ডার হবে */}
           <Route path="/home" element={<Home />} />
           <Route path="/" element={<Dashboard />} />
-
-          {/* Gallery */}
           <Route path="/gallery" element={<Gallery />} />
-
-          {/* Members & Users */}
           <Route path="/members" element={<Members />} />
-
-          {/* ✅ Users List Route Protected for SUPER_ADMIN only */}
           <Route
             path="/users-list"
             element={user.role === "SUPER_ADMIN" ? <UsersList /> : <Navigate to="/" replace />}
           />
-
           <Route path="/add-member" element={<AddMember />} />
           <Route path="/edit-member/:id" element={<EditMember />} />
           <Route path="/member/:id" element={<MemberProfile />} />
           <Route path="/member-card/:id" element={<MemberIDCard />} />
-
-          {/* Change Password */}
           <Route path="/change-password" element={<ChangePassword />} />
-
-          {/* Print Receipts */}
           <Route path="/print-receipt/:id" element={<PrintReceipt />} />
           <Route path="/loans/receipt/:id" element={<LoanReceipt />} />
           <Route path="/penalties/receipt/:id" element={<PenaltyReceipt />} />
-
-          {/* Transactions & Funds */}
           <Route path="/deposits" element={<Deposits />} />
           <Route path="/deposit-withdrawal" element={<DepositWithdrawal />} />
           <Route path="/payments" element={<Payments />} />
           <Route path="/loans" element={<Loans />} />
           <Route path="/funds" element={<Funds />} />
           <Route path="/penalties" element={<Penalties />} />
-
-          {/* Reports */}
           <Route path="/reports" element={<Reports />} />
-
-          {/* Settings */}
           <Route path="/settings" element={<Settings />} />
         </Route>
 
         {/* ==========================
             Redirect & 404
         ========================== */}
-
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, Link, useLocation } from "react-router-dom";
+import { useNavigate, Link, useLocation, Outlet } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 
 import {
@@ -12,7 +12,7 @@ import {
   X
 } from "lucide-react";
 
-function MainLayout({ children }) {
+function MainLayout() {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -212,7 +212,7 @@ function MainLayout({ children }) {
             PAGE CONTENT
         ========================= */}
         <main className="flex-1 p-4 lg:p-8 overflow-auto">
-          {children}
+          <Outlet />
         </main>
       </div>
     </div>
