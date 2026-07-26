@@ -30,7 +30,7 @@ function MainLayout({ children }) {
     return () => clearInterval(timer);
   }, []);
 
-  // লোকেশন পরিবর্তন হলে মোবাইল সাইডবার স্বয়ংক্রিয়ভাবে বন্ধ হয়ে যাবে
+  // লোকেশন পরিবর্তন হলে মোবাইল সাইডবার স্বয়ংক্রিয়ভাবে বন্ধ হয়ে যাবে
   useEffect(() => {
     setIsMobileSidebarOpen(false);
   }, [location.pathname]);

@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 
 // Authentication
@@ -9,6 +9,7 @@ import VerifyOTP from "./pages/VerifyOTP";
 import ResetPassword from "./pages/ResetPassword";
 import ChangePassword from "./pages/ChangePassword"; // ✅ পাসওয়ার্ড পরিবর্তনের পেজ ইম্পোর্ট করা হলো
 import ProtectedRoute from "./components/ProtectedRoute";
+import Sidebar from "./components/Sidebar"; // ✅ সাইডবার ইম্পোর্ট করা হলো (যদি অলরেডি লেআউট ফাইল থাকে তবে এটি অপশনাল)
 
 // Home & Gallery (নতুন পেজ ইম্পোর্ট করা হলো)
 import Home from "./pages/Home";
@@ -43,6 +44,23 @@ import Reports from "./pages/Reports";
 
 // Settings
 import Settings from "./pages/Settings";
+
+// ======================================
+// Dashboard Layout (Sidebar Show করার জন্য)
+// ======================================
+function DashboardLayout() {
+  return (
+    <div className="flex min-h-screen bg-slate-950">
+      {/* সাইডবার */}
+      <Sidebar />
+      
+      {/* মেইন কন্টেন্ট এরিয়া */}
+      <div className="flex-1 overflow-y-auto">
+        <Outlet />
+      </div>
+    </div>
+  );
+}
 
 // ======================================
 // 404 Page
@@ -110,225 +128,58 @@ function App() {
         />
 
         {/* ==========================
-            Home & Dashboard
-        ========================== */}
-
-        <Route
-          path="/home"
-          element={
-            <ProtectedRoute>
-              <Home />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* ==========================
-            Gallery
-        ========================== */}
-
-        <Route
-          path="/gallery"
-          element={
-            <ProtectedRoute>
-              <Gallery />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* ==========================
-            Members & Users
-        ========================== */}
-
-        <Route
-          path="/members"
-          element={
-            <ProtectedRoute>
-              <Members />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* ✅ Users List Route Protected for SUPER_ADMIN only */}
-        <Route
-          path="/users-list"
-          element={
-            <ProtectedRoute>
-              {user.role === "SUPER_ADMIN" ? <UsersList /> : <Navigate to="/" replace />}
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/add-member"
-          element={
-            <ProtectedRoute>
-              <AddMember />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/edit-member/:id"
-          element={
-            <ProtectedRoute>
-              <EditMember />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/member/:id"
-          element={
-            <ProtectedRoute>
-              <MemberProfile />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/member-card/:id"
-          element={
-            <ProtectedRoute>
-              <MemberIDCard />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* ==========================
-            Change Password (ProtectedRoute সহ)
+            Protected Dashboard Layout Routes (Sidebar সহ সব পেজ)
         ========================== */}
         <Route
-          path="/change-password"
           element={
             <ProtectedRoute>
-              <ChangePassword />
+              <DashboardLayout />
             </ProtectedRoute>
           }
-        />
+        >
+          {/* Home & Dashboard */}
+          <Route path="/home" element={<Home />} />
+          <Route path="/" element={<Dashboard />} />
 
-        {/* ==========================
-            Print Receipts
-        ========================== */}
+          {/* Gallery */}
+          <Route path="/gallery" element={<Gallery />} />
 
-        <Route
-          path="/print-receipt/:id"
-          element={
-            <ProtectedRoute>
-              <PrintReceipt />
-            </ProtectedRoute>
-          }
-        />
+          {/* Members & Users */}
+          <Route path="/members" element={<Members />} />
 
-        <Route
-          path="/loans/receipt/:id"
-          element={
-            <ProtectedRoute>
-              <LoanReceipt />
-            </ProtectedRoute>
-          }
-        />
+          {/* ✅ Users List Route Protected for SUPER_ADMIN only */}
+          <Route
+            path="/users-list"
+            element={user.role === "SUPER_ADMIN" ? <UsersList /> : <Navigate to="/" replace />}
+          />
 
-        <Route
-          path="/penalties/receipt/:id"
-          element={
-            <ProtectedRoute>
-              <PenaltyReceipt />
-            </ProtectedRoute>
-          }
-        />
+          <Route path="/add-member" element={<AddMember />} />
+          <Route path="/edit-member/:id" element={<EditMember />} />
+          <Route path="/member/:id" element={<MemberProfile />} />
+          <Route path="/member-card/:id" element={<MemberIDCard />} />
 
-        {/* ==========================
-            Transactions & Funds
-        ========================== */}
+          {/* Change Password */}
+          <Route path="/change-password" element={<ChangePassword />} />
 
-        <Route
-          path="/deposits"
-          element={
-            <ProtectedRoute>
-              <Deposits />
-            </ProtectedRoute>
-          }
-        />
+          {/* Print Receipts */}
+          <Route path="/print-receipt/:id" element={<PrintReceipt />} />
+          <Route path="/loans/receipt/:id" element={<LoanReceipt />} />
+          <Route path="/penalties/receipt/:id" element={<PenaltyReceipt />} />
 
-        <Route
-          path="/deposit-withdrawal"
-          element={
-            <ProtectedRoute>
-              <DepositWithdrawal />
-            </ProtectedRoute>
-          }
-        />
+          {/* Transactions & Funds */}
+          <Route path="/deposits" element={<Deposits />} />
+          <Route path="/deposit-withdrawal" element={<DepositWithdrawal />} />
+          <Route path="/payments" element={<Payments />} />
+          <Route path="/loans" element={<Loans />} />
+          <Route path="/funds" element={<Funds />} />
+          <Route path="/penalties" element={<Penalties />} />
 
-        <Route
-          path="/payments"
-          element={
-            <ProtectedRoute>
-              <Payments />
-            </ProtectedRoute>
-          }
-        />
+          {/* Reports */}
+          <Route path="/reports" element={<Reports />} />
 
-        <Route
-          path="/loans"
-          element={
-            <ProtectedRoute>
-              <Loans />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/funds"
-          element={
-            <ProtectedRoute>
-              <Funds />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/penalties"
-          element={
-            <ProtectedRoute>
-              <Penalties />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* ==========================
-            Reports
-        ========================== */}
-
-        <Route
-          path="/reports"
-          element={
-            <ProtectedRoute>
-              <Reports />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* ==========================
-            Settings
-        ========================== */}
-
-        <Route
-          path="/settings"
-          element={
-            <ProtectedRoute>
-              <Settings />
-            </ProtectedRoute>
-          }
-        />
+          {/* Settings */}
+          <Route path="/settings" element={<Settings />} />
+        </Route>
 
         {/* ==========================
             Redirect & 404
