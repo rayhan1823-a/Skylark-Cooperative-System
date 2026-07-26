@@ -6,8 +6,9 @@ const Home = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   
-  // আপনার প্রজেক্টের রোল চেক (সুপার অ্যাডমিন কিনা তা নিশ্চিত করার জন্য)
-  const userRole = "SUPER_ADMIN"; 
+  // লোকালস্টোরেজ থেকে রিয়েল ইউজার এবং রোল নেওয়া
+  const user = JSON.parse(localStorage.getItem("user")) || {};
+  const userRole = user.role || ""; 
 
   // পেজ লোড হলে ব্যাকএন্ড থেকে হোম পেজের টেক্সট ফেচ করা
   useEffect(() => {
@@ -33,10 +34,10 @@ const Home = () => {
       const res = await axios.put('http://localhost:5000/api/home', content);
       setContent(res.data.content);
       setIsEditing(false);
-      alert("হোম পেজের লেখা সফলভাবে আপডেট হয়েছে!");
+      alert("হোম পেজের লেখা সফলভাবে আপডেট হয়েছে!");
     } catch (err) {
       console.error("Update error:", err);
-      alert("আপডেট করতে ব্যর্থ হয়েছে!");
+      alert("আপডেট করতে ব্যর্থ হয়েছে!");
     } finally {
       setLoading(false);
     }
@@ -44,7 +45,7 @@ const Home = () => {
 
   return (
     <div className="p-6 text-white max-w-7xl mx-auto">
-      {/* হোম পেজের মূল ব্যানার/ওয়েলকাম সেকশন */}
+      {/* হোম পেজের মূল ব্যানার/ওয়েলকাম সেকশন */}
       <div className="bg-slate-800 p-8 rounded-2xl relative shadow-lg border border-slate-700">
         <span className="bg-blue-600 text-xs px-3 py-1 rounded-full font-semibold uppercase tracking-wider">
           WELCOME HOME
@@ -126,12 +127,12 @@ const Home = () => {
         
         <div className="bg-slate-800 p-6 rounded-xl border border-slate-700">
           <h4 className="font-bold text-lg text-blue-400 mb-2">আর্থিক সারাংশ</h4>
-          <p className="text-gray-300 text-sm">সঞ্চয়, ডিপোজিট এবং লোন সম্পর্কিত ড্যাশবোর্ড ওভারভিউ।</p>
+          <p className="text-gray-300 text-sm">সঞ্চয়, ডিপোজিট এবং লোন সম্পর্কিত ড্যাশবোর্ড ওভারভিউ।</p>
         </div>
         
         <div className="bg-slate-800 p-6 rounded-xl border border-slate-700">
           <h4 className="font-bold text-lg text-purple-400 mb-2">দ্রুত লিংক</h4>
-          <p className="text-gray-300 text-sm">মেম্বার লিস্ট এবং গ্যালারি পেজে দ্রুত যাওয়ার শর্টকাট।</p>
+          <p className="text-gray-300 text-sm">মেম্বার লিস্ট এবং গ্যালারি পেজে দ্রুত যাওয়ার শর্টকাট।</p>
         </div>
       </div>
     </div>

@@ -7,8 +7,12 @@ const Gallery = () => {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   
-  // আপনার প্রজেক্টের রোল চেক (সুপার অ্যাডমিন কিনা তা নিশ্চিত করার জন্য)
-  const userRole = "SUPER_ADMIN"; 
+  // লোকালস্টোরেজ থেকে রিয়েল ইউজার এবং রোল নেওয়া
+  const user = JSON.parse(localStorage.getItem("user")) || {};
+  const userRole = user.role || ""; 
+
+  // API Base URL (লোকাল অথবা লাইভ সার্ভার হ্যান্ডেল করার জন্য)
+  const API_URL = "http://localhost:5000";
 
   // পেজ লোড হলে গ্যালারির ছবিগুলো ফেচ করা
   useEffect(() => {
@@ -17,7 +21,7 @@ const Gallery = () => {
 
   const fetchImages = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/gallery');
+      const res = await axios.get(`${API_URL}/api/gallery`);
       setImages(res.data);
     } catch (err) {
       console.error("Error fetching gallery images:", err);
@@ -28,7 +32,7 @@ const Gallery = () => {
   const handleUpload = async (e) => {
     e.preventDefault();
     if (!file) {
-      alert("দয়া করে একটি ছবি সিলেক্ট করুন!");
+      alert("দয়া করে একটি ছবি সিলেক্ট করুন!");
       return;
     }
 
@@ -38,19 +42,19 @@ const Gallery = () => {
 
     setLoading(true);
     try {
-      await axios.post('http://localhost:5000/api/gallery', formData, {
+      await axios.post(`${API_URL}/api/gallery`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
-      alert("ছবি সফলভাবে আপলোড হয়েছে!");
+      alert("ছবি সফলভাবে আপলোড হয়েছে!");
       setTitle('');
       setFile(null);
       e.target.reset();
       fetchImages();
     } catch (err) {
       console.error("Upload error:", err);
-      alert("ছবি আপলোড ব্যর্থ হয়েছে!");
+      alert("ছবি আপলোড ব্যর্থ হয়েছে!");
     } finally {
       setLoading(false);
     }
@@ -60,12 +64,12 @@ const Gallery = () => {
   const handleDelete = async (id) => {
     if (window.confirm("আপনি কি নিশ্চিতভাবে এই ছবি ডিলিট করতে চান?")) {
       try {
-        await axios.delete(`http://localhost:5000/api/gallery/${id}`);
-        alert("ছবি ডিলিট করা হয়েছে!");
+        await axios.delete(`${API_URL}/api/gallery/${id}`);
+        alert("ছবি ডিলিট করা হয়েছে!");
         fetchImages();
       } catch (err) {
         console.error("Delete error:", err);
-        alert("ডিলিট করতে সমস্যা হয়েছে!");
+        alert("ডিলিট করতে সমস্যা হয়েছে!");
       }
     }
   };
@@ -111,7 +115,7 @@ const Gallery = () => {
         </div>
       )}
 
-      {/* গ্যালারি গ্রিড (ছবিগুলো প্রদর্শনের জায়গা) */}
+      {/* গ্যালারি গ্রিড (ছবিগুলো প্রদর্শনের জায়গা) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {images.length > 0 ? (
           images.map((img) => (
@@ -141,7 +145,7 @@ const Gallery = () => {
             </div>
           ))
         ) : (
-          <p className="text-gray-400 col-span-full text-center py-8">গ্যালারিতে কোনো ছবি পাওয়া যায়নি।</p>
+          <p className="text-gray-400 col-span-full text-center py-8">গ্যালারিতে কোনো ছবি পাওয়া যায়নি।</p>
         )}
       </div>
     </div>
