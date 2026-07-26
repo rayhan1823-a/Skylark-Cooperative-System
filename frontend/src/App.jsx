@@ -10,6 +10,10 @@ import ResetPassword from "./pages/ResetPassword";
 import ChangePassword from "./pages/ChangePassword"; // ✅ পাসওয়ার্ড পরিবর্তনের পেজ ইম্পোর্ট করা হলো
 import ProtectedRoute from "./components/ProtectedRoute";
 
+// Home & Gallery (নতুন পেজ ইম্পোর্ট করা হলো)
+import Home from "./pages/Home";
+import Gallery from "./pages/Gallery";
+
 // Dashboard
 import Dashboard from "./pages/Dashboard";
 
@@ -106,14 +110,36 @@ function App() {
         />
 
         {/* ==========================
-            Dashboard
+            Home & Dashboard
         ========================== */}
+
+        <Route
+          path="/home"
+          element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/"
           element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ==========================
+            Gallery
+        ========================== */}
+
+        <Route
+          path="/gallery"
+          element={
+            <ProtectedRoute>
+              <Gallery />
             </ProtectedRoute>
           }
         />
@@ -307,8 +333,6 @@ function App() {
         {/* ==========================
             Redirect & 404
         ========================== */}
-
-        <Route path="/home" element={<Navigate to="/" replace />} />
 
         <Route path="*" element={<NotFound />} />
       </Routes>
