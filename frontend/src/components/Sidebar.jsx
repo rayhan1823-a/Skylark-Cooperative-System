@@ -1,6 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   FaHome,
+  FaImages, // ✅ গ্যালারির জন্য নতুন আইকন
   FaUsers,
   FaUserPlus,
   FaMoneyBillWave,
@@ -12,7 +13,7 @@ import {
   FaExchangeAlt,
   FaMinusCircle,
   FaExclamationTriangle,
-  FaUserShield, // ✅ ইউজার লিস্টের জন্য নতুন আইকন ইম্পোর্ট করা হলো
+  FaUserShield,
 } from "react-icons/fa";
 
 function Sidebar() {
@@ -24,9 +25,19 @@ function Sidebar() {
 
   const menu = [
     {
+      title: "Home",
+      path: "/home", // ✅ সবার উপরে Home পেজ
+      icon: <FaHome />,
+    },
+    {
       title: "Dashboard",
       path: "/",
-      icon: <FaHome />,
+      icon: <FaChartBar />,
+    },
+    {
+      title: "Gallery",
+      path: "/gallery", // ✅ ড্যাশবোর্ডের পরেই Gallery পেজ
+      icon: <FaImages />,
     },
     {
       title: "Members",
@@ -36,8 +47,8 @@ function Sidebar() {
     {
       title: "Users List",
       path: "/users-list",
-      icon: <FaUserShield />, // ✅ এখানে আইকনটি আপডেট করা হলো যাতে Members থেকে আলাদা বোঝায়
-      roles: ["SUPER_ADMIN"], // ✅ শুধুমাত্র SUPER_ADMIN দেখতে পাবে (ADMIN ও STAFF বাদ দেওয়া হয়েছে)
+      icon: <FaUserShield />,
+      roles: ["SUPER_ADMIN"],
     },
     {
       title: "Add Member",
