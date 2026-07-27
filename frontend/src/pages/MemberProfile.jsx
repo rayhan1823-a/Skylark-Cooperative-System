@@ -151,13 +151,13 @@ function MemberProfile() {
 
           <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
             
-            {/* ফিক্সড: ইমেজ যেন কেটে না যায় (object-contain এবং ব্যাকগ্রাউন্ড দেওয়া হয়েছে) */}
+            {/* ফিক্সড: ইমেজ সুন্দরভাবে জুম ও পারফেক্ট ফিট করার জন্য object-cover এবং object-top ব্যবহার করা হয়েছে */}
             <div className="relative flex-shrink-0 group">
               <div className="absolute -inset-1.5 bg-gradient-to-r from-indigo-500 via-blue-600 to-purple-600 rounded-full blur-md opacity-40 group-hover:opacity-75 transition duration-500"></div>
               {profileImageUrl ? (
                 <img 
                   src={profileImageUrl} 
-                  className="w-40 h-40 rounded-full object-contain object-center border-4 border-white shadow-2xl bg-slate-100 relative transform transition duration-500 group-hover:scale-[1.02]" 
+                  className="w-40 h-40 rounded-full object-cover object-top border-4 border-white shadow-2xl bg-slate-100 relative transform transition duration-500 group-hover:scale-[1.02]" 
                   alt={member.name}
                   onError={(e) => {
                     e.target.onerror = null; 
@@ -183,7 +183,7 @@ function MemberProfile() {
               <div><p className="text-slate-400 text-[11px] font-extrabold uppercase tracking-wider">Mother Name</p><p className="font-bold text-base text-slate-700 mt-1">{member.motherName || "-"}</p></div>
               <div><p className="text-slate-400 text-[11px] font-extrabold uppercase tracking-wider">Phone</p><p className="font-bold text-base text-slate-700 mt-1">{member.phone}</p></div>
               
-              {/* ফিক্সড: ইমার্জেন্সি নম্বর এখানে সফলভাবে যুক্ত করা হলো */}
+              {/* ইমার্জেন্সি নম্বর */}
               <div><p className="text-slate-400 text-[11px] font-extrabold uppercase tracking-wider">Emergency Number</p><p className="font-bold text-base text-slate-700 mt-1">{member.emergencyNumber || member.emergencyPhone || member.emergencyContact || "-"}</p></div>
               
               <div><p className="text-slate-400 text-[11px] font-extrabold uppercase tracking-wider">Blood Group</p><p className="font-extrabold text-base text-rose-600 mt-1">{member.bloodGroup || "-"}</p></div>
