@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom"; // ✅ রিডাইরেক্ট করার জন্য ইম্পোর্ট করা হলো
 import { toast } from "react-hot-toast";
-import MainLayout from "../layouts/MainLayout";
 
 const API_URL = "https://skylark-cooperative-system.onrender.com";
 
@@ -115,7 +114,7 @@ function UsersList() {
   });
 
   return (
-    <MainLayout>
+    <div>
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
         <div>
@@ -210,7 +209,7 @@ function UsersList() {
           </tbody>
         </table>
       </div>
-    </MainLayout>
+    </div>
   );
 }
 
