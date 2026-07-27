@@ -323,18 +323,21 @@ function MemberProfile() {
             </div>
         </div>
 
-        {/* Signature */}
-        <div className="signature-section mt-16 flex justify-between items-center px-8 pb-10">
+        {/* Signature - Fixed and aligned properly in one straight line */}
+        <div className="signature-section mt-16 flex justify-between items-end px-8 pb-10">
           <div className="text-center">
             <div className="border-t-2 border-black w-48 mb-2"></div>
-            <p className="font-bold">Member Signature</p>
+            <p className="font-bold text-sm">Member Signature</p>
           </div>
           <div className="text-center">
-            <div className="mb-1"><img src="/signature.png" alt="Authorized Signature" className="w-32 mx-auto h-12 object-contain" /></div>
+            <div className="mb-1">
+              <img src="/signature.png" alt="Authorized Signature" className="w-32 mx-auto h-12 object-contain" />
+            </div>
             <div className="border-t-2 border-black w-48 mb-2"></div>
-            <p className="font-bold">Authorized Signature</p>
+            <p className="font-bold text-sm">Authorized Signature</p>
           </div>
         </div>
+
       </div>
     </div>
   );
