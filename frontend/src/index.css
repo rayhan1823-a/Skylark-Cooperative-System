@@ -18,11 +18,11 @@ body {
 ===================================================== */
 @page {
   size: A4 portrait;
-  margin: 15mm; /* মার্জিন ঠিক করা হয়েছে */
+  margin: 10mm; /* মার্জিন সামান্য কমানো হলো যাতে সিগনেচার বা টেবিল নিচে কেটে না যায় */
 }
 
 @media print {
-  /* অপ্রয়োজনীয় ইউআই এলিমেন্ট লুকানো */
+  /* অপ্রয়োজনীয় ইউআই এলিমেন্ট লুকানো */
   .no-print, button, nav, aside, header, footer {
     display: none !important;
   }
@@ -38,9 +38,10 @@ body {
     width: 100% !important;
     color: #000 !important;
     padding: 0 !important;
+    margin: 0 !important;
   }
 
-  /* মেম্বার ইনফরমেশন গ্রিড ফিক্স (লাল বক্সের সমস্যার জন্য) */
+  /* মেম্বার ইনফরমেশন গ্রিড ফিক্স */
   .grid {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -51,13 +52,13 @@ body {
     grid-column: span 2 / span 2 !important;
   }
 
-  /* টেবিল স্টাইলিং */
+  /* টেবিল স্টাইলিং এবং ওভারফ্লো ফিক্স */
   table {
     display: table !important;
     width: 100% !important;
     border-collapse: collapse !important;
-    font-size: 10pt !important;
-    margin-bottom: 20px !important;
+    font-size: 9pt !important; /* ফন্ট সাইজ সামান্য এডজাস্ট করা হলো যাতে পেজে জায়গা বেশি পায় */
+    margin-bottom: 10px !important;
   }
 
   thead {
@@ -73,21 +74,28 @@ body {
   td, th {
     display: table-cell !important;
     border: 1px solid #000 !important;
-    padding: 6px !important;
+    padding: 4px 6px !important; /* প্যাডিং একটু কমানো হলো */
     text-align: center !important;
   }
 
   /* কালার সাপোর্ট নিশ্চিত করা */
-  .text-red-600 { color: #dc2626 !important; -webkit-print-color-adjust: exact !important; }
-  .text-green-600 { color: #16a34a !important; -webkit-print-color-adjust: exact !important; }
+  .text-red-600 { color: #dc2626 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  .text-green-600 { color: #16a34a !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 
-  /* সিগনেচার সেকশন স্মার্টলি সাজানো */
+  /* পেজ ব্রেক এবং সিগনেচার সেকশন ফিক্স (মূল পরিবর্তন) */
+  .page-break-inside-avoid {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* সিগনেচার সেকশন স্মার্টলি সাজানো এবং কেটে যাওয়া রোধ করা */
   .signature-section {
     display: flex !important;
     justify-content: space-between !important;
     align-items: flex-end !important;
     break-inside: avoid !important;
-    margin-top: 50px !important;
+    page-break-inside: avoid !important;
+    margin-top: 30px !important; /* মার্জিন কমানো হলো যাতে পেজের ভেতর ফিট থাকে */
     width: 100% !important;
   }
 }

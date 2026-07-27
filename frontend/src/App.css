@@ -113,4 +113,17 @@ img {
 
   }
 
+  /* =====================================================
+     SIGNATURE SECTION PRINT FIX (নতুন যোগ করা অংশ)
+  ===================================================== */
+  .signature-section {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: flex-end !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    margin-top: 40px !important;
+    width: 100% !important;
+  }
+
 }
