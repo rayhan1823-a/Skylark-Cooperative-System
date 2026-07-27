@@ -92,7 +92,8 @@ function Reports(){
           "Loan",
           "Penalty",
           "Advance",
-          "Due"
+          "Due",
+          "Current Balance"
         ]
       ],
       body: report.map((item, index)=>[
@@ -106,7 +107,8 @@ function Reports(){
         `৳ ${item.totalLoan || 0}`,
         `৳ ${item.totalPenalty || 0}`,
         `৳ ${item.advance || 0}`,
-        `৳ ${item.totalDue || 0}`
+        `৳ ${item.totalDue || 0}`,
+        `৳ ${item.currentBalance || 0}`
       ]),
       styles: { fontSize: 8 }
     });
@@ -130,7 +132,8 @@ function Reports(){
       "Total Loan": item.totalLoan || 0,
       "Total Penalty": item.totalPenalty || 0,
       "Advance": item.advance || 0,
-      "Total Due": item.totalDue || 0
+      "Total Due": item.totalDue || 0,
+      "Current Balance": item.currentBalance || 0
     }));
 
     const sheet = XLSX.utils.json_to_sheet(data);
@@ -245,6 +248,7 @@ function Reports(){
               <th className="border p-3 text-center">Penalty</th>
               <th className="border p-3 text-center">Advance</th>
               <th className="border p-3 text-center">Due</th>
+              <th className="border p-3 text-center">Current Balance</th>
             </tr>
           </thead>
           <tbody>
@@ -262,6 +266,7 @@ function Reports(){
                   <td className="border p-3 text-center text-rose-600 font-semibold">৳ {item.totalPenalty || 0}</td>
                   <td className="border p-3 text-center font-semibold">৳ {item.advance || 0}</td>
                   <td className="border p-3 text-center text-red-600 font-semibold">৳ {item.totalDue || 0}</td>
+                  <td className="border p-3 text-center text-teal-700 font-bold">৳ {item.currentBalance || 0}</td>
                 </tr>
               ))
             }
