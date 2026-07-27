@@ -170,47 +170,61 @@ function Reports(){
   return(
     <div className="space-y-8" id="printArea">
 
-      {/* Header */}
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-blue-700">
-          Skylark Cooperative Society
-        </h1>
-        <h2 className="text-xl mt-2 font-semibold text-gray-700">
-          Member Financial Report
-        </h2>
-        <p className="text-gray-500 mt-1">
-          Date: {new Date().toLocaleDateString()}
-        </p>
+      {/* Header with Logo */}
+      <div className="text-center flex flex-col items-center justify-center space-y-3 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <div className="w-16 h-16 rounded-full bg-blue-50 border border-blue-200 flex items-center justify-center shadow-inner overflow-hidden p-1">
+          <img 
+            src="https://skylark-cooperative-system.onrender.com/logo.png" 
+            onError={(e)=>{e.target.src = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"}} 
+            alt="Logo" 
+            className="w-full h-full object-contain"
+          />
+        </div>
+        <div>
+          <h1 className="text-3xl font-extrabold text-blue-700 tracking-tight">
+            Skylark Cooperative Society
+          </h1>
+          <h2 className="text-lg font-semibold text-gray-600 mt-1">
+            Member Financial Report
+          </h2>
+          <p className="text-gray-400 text-sm mt-1">
+            Date: {new Date().toLocaleDateString()}
+          </p>
+        </div>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+      {/* Professional Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         <SummaryCard
           title="Total Members"
           value={totalMembers}
-          icon={<Users/>}
+          icon={<Users className="w-6 h-6"/>}
           color="text-blue-600"
+          bgIcon="bg-blue-50"
         />
 
         <SummaryCard
           title="Active Members"
           value={activeMembers}
-          icon={<UserCheck/>}
+          icon={<UserCheck className="w-6 h-6"/>}
           color="text-green-600"
+          bgIcon="bg-green-50"
         />
 
         <SummaryCard
           title="Total Deposit"
           value={`৳ ${totalDeposit.toLocaleString()}`}
-          icon={<Wallet/>}
+          icon={<Wallet className="w-6 h-6"/>}
           color="text-purple-600"
+          bgIcon="bg-purple-50"
         />
 
         <SummaryCard
           title="Total Due"
           value={`৳ ${totalDue.toLocaleString()}`}
-          icon={<TrendingDown/>}
+          icon={<TrendingDown className="w-6 h-6"/>}
           color="text-red-600"
+          bgIcon="bg-red-50"
         />
       </div>
 
@@ -218,47 +232,47 @@ function Reports(){
       <div className="flex gap-4 flex-wrap no-print">
         <button
           onClick={exportPDF}
-          className="bg-red-600 hover:bg-red-700 transition text-white px-5 py-3 rounded-lg flex gap-2 items-center font-medium shadow-sm"
+          className="bg-red-600 hover:bg-red-700 transition text-white px-5 py-2.5 rounded-xl flex gap-2 items-center font-medium shadow-sm"
         >
-          <FileText/>
+          <FileText className="w-4 h-4"/>
           PDF
         </button>
 
         <button
           onClick={exportExcel}
-          className="bg-green-600 hover:bg-green-700 transition text-white px-5 py-3 rounded-lg flex gap-2 items-center font-medium shadow-sm"
+          className="bg-green-600 hover:bg-green-700 transition text-white px-5 py-2.5 rounded-xl flex gap-2 items-center font-medium shadow-sm"
         >
-          <FileSpreadsheet/>
+          <FileSpreadsheet className="w-4 h-4"/>
           Excel
         </button>
 
         <button
           onClick={printReport}
-          className="bg-blue-600 hover:bg-blue-700 transition text-white px-5 py-3 rounded-lg flex gap-2 items-center font-medium shadow-sm"
+          className="bg-blue-600 hover:bg-blue-700 transition text-white px-5 py-2.5 rounded-xl flex gap-2 items-center font-medium shadow-sm"
         >
-          <Printer/>
+          <Printer className="w-4 h-4"/>
           Print
         </button>
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden p-5">
+      <div className="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden p-5">
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-sm">
             <thead>
-              <tr className="bg-slate-800 text-white">
-                <th className="border border-slate-700 p-3 text-center">SL</th>
-                <th className="border border-slate-700 p-3 whitespace-nowrap">Member ID</th>
-                <th className="border border-slate-700 p-3 whitespace-nowrap">Name</th>
-                <th className="border border-slate-700 p-3 whitespace-nowrap">Phone</th>
-                <th className="border border-slate-700 p-3 text-center whitespace-nowrap">Fixed Deposit</th>
-                <th className="border border-slate-700 p-3 text-center whitespace-nowrap">Deposit</th>
-                <th className="border border-slate-700 p-3 text-center whitespace-nowrap">Withdrawal</th>
-                <th className="border border-slate-700 p-3 text-center whitespace-nowrap">Loan</th>
-                <th className="border border-slate-700 p-3 text-center whitespace-nowrap">Penalty</th>
-                <th className="border border-slate-700 p-3 text-center whitespace-nowrap">Advance</th>
-                <th className="border border-slate-700 p-3 text-center whitespace-nowrap">Due</th>
-                <th className="border border-slate-700 p-3 text-center whitespace-nowrap">Current Balance</th>
+              <tr className="bg-slate-900 text-white">
+                <th className="border border-slate-800 p-3 text-center">SL</th>
+                <th className="border border-slate-800 p-3 whitespace-nowrap">Member ID</th>
+                <th className="border border-slate-800 p-3 whitespace-nowrap">Name</th>
+                <th className="border border-slate-800 p-3 whitespace-nowrap">Phone</th>
+                <th className="border border-slate-800 p-3 text-center whitespace-nowrap">Fixed Deposit</th>
+                <th className="border border-slate-800 p-3 text-center whitespace-nowrap">Deposit</th>
+                <th className="border border-slate-800 p-3 text-center whitespace-nowrap">Withdrawal</th>
+                <th className="border border-slate-800 p-3 text-center whitespace-nowrap">Loan</th>
+                <th className="border border-slate-800 p-3 text-center whitespace-nowrap">Penalty</th>
+                <th className="border border-slate-800 p-3 text-center whitespace-nowrap">Advance</th>
+                <th className="border border-slate-800 p-3 text-center whitespace-nowrap">Due</th>
+                <th className="border border-slate-800 p-3 text-center whitespace-nowrap">Current Balance</th>
               </tr>
             </thead>
             <tbody>
@@ -285,17 +299,13 @@ function Reports(){
         </div>
       </div>
 
-      {/* Signature */}
-      <div className="mt-16 flex justify-between text-center font-medium text-gray-700">
-        <div>
-          ____________________
-          <br/>
+      {/* Signature Section */}
+      <div className="mt-20 flex justify-between items-center text-center font-medium text-gray-700 px-6">
+        <div className="border-t-2 border-gray-400 w-56 pt-2">
           Prepared By
         </div>
 
-        <div>
-          ____________________
-          <br/>
+        <div className="border-t-2 border-gray-400 w-56 pt-2">
           Authorized Signature
         </div>
       </div>
@@ -308,18 +318,19 @@ function SummaryCard({
   title,
   value,
   icon,
-  color
+  color,
+  bgIcon
 }){
   return(
-    <div className="bg-white shadow-sm border border-gray-200 rounded-xl p-5">
+    <div className="bg-white shadow-sm border border-gray-200/80 rounded-2xl p-5 hover:shadow-md transition-shadow">
       <div className="flex justify-between items-center">
         <div>
-          <p className="text-gray-500 text-sm font-medium">{title}</p>
-          <h2 className={`text-3xl font-bold mt-1 ${color}`}>
+          <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider">{title}</p>
+          <h2 className={`text-2xl font-extrabold mt-1.5 ${color}`}>
             {value}
           </h2>
         </div>
-        <div className={`p-3 rounded-lg bg-gray-50 ${color}`}>
+        <div className={`p-3 rounded-xl ${bgIcon} ${color} shadow-sm`}>
           {icon}
         </div>
       </div>
