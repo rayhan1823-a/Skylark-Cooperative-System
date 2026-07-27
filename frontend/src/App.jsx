@@ -66,7 +66,18 @@ function NotFound() {
 
 function App() {
   const token = localStorage.getItem("token");
-  const user = JSON.parse(localStorage.getItem("user")) || {};
+  
+  // সেফটি চেক সহ লোকাল স্টোরেজ থেকে ইউজার রোল রিড করা
+  const getUserData = () => {
+    try {
+      return JSON.parse(localStorage.getItem("user")) || {};
+    } catch {
+      return {};
+    }
+  };
+  
+  const user = getUserData();
+  const userRole = localStorage.getItem("role") || user.role || "";
 
   return (
     <BrowserRouter>
@@ -121,7 +132,7 @@ function App() {
           <Route path="/members" element={<Members />} />
           <Route
             path="/users-list"
-            element={user.role === "SUPER_ADMIN" ? <UsersList /> : <Navigate to="/" replace />}
+            element={userRole === "SUPER_ADMIN" ? <UsersList /> : <Navigate to="/" replace />}
           />
           <Route path="/add-member" element={<AddMember />} />
           <Route path="/edit-member/:id" element={<EditMember />} />

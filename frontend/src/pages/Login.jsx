@@ -45,17 +45,20 @@ function Login() {
         return;
       }
 
+      // ব্যাকএন্ড রেসপন্স থেকে সেফলি ডেটা এক্সট্রাক্ট করা (যাতে কোনো ডেটা মিসিং না হয়)
+      const responseData = res.data;
+      const userObj = responseData.user || {};
+
       // টোকেন এবং ইউজার ডেটা সেভ করা হচ্ছে
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
+      localStorage.setItem("token", responseData.token || "");
+      localStorage.setItem("user", JSON.stringify(userObj));
 
-      // রোল এবং আইডি লোকাল স্টোরেজে সেভ করা (নতুন সংযোজন)
-      const userData = res.data.user || {};
-      const userRole = res.data.role || userData.role || "member"; 
-      const userId = res.data.memberId || userData.memberId || userData._id || "";
+      // রোল এবং আইডি লোকাল স্টোরেজে সঠিকভাবে সেভ করা
+      const userRole = responseData.role || userObj.role || "SUPER_ADMIN"; 
+      const userId = responseData.memberId || userObj.memberId || userObj._id || "";
 
-      localStorage.setItem("role", userRole); // "admin" বা "member"
-      localStorage.setItem("memberId", userId); // ইউজারের নিজস্ব আইডি
+      localStorage.setItem("role", userRole); 
+      localStorage.setItem("memberId", userId); 
 
       alert("Login Successful");
 

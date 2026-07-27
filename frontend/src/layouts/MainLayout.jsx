@@ -145,7 +145,7 @@ function MainLayout() {
               <div className="relative">
                 <button
                   onClick={() => setShowMenu(!showMenu)}
-                  className="flex items-center gap-2 lg:gap-3 focus:outline-none"
+                  className="flex items-center gap-2 lg:gap-3 focus:outline-0"
                 >
                   <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-blue-700 text-white flex items-center justify-center text-lg lg:text-xl font-bold">
                     {user?.name
