@@ -27,14 +27,23 @@ function Reports(){
   },[]);
 
   // ============================
-  // Load Report
+  // Load Report & Sort by Member ID
   // ============================
   const loadReport = async()=>{
     try{
       const res = await axios.get(`${API}/reports/members`);
 
       if(res.data.success){
-        setReport(res.data.report || []);
+        let membersData = res.data.report || [];
+        
+        // মেম্বার আইডি অনুযায়ী ছোট থেকে বড় (Ascending) সাজানো
+        membersData.sort((a, b) => {
+          const idA = String(a.memberId || "").trim();
+          const idB = String(b.memberId || "").trim();
+          return idA.localeCompare(idB, undefined, { numeric: true });
+        });
+
+        setReport(membersData);
       }
     }
     catch(error){
@@ -74,7 +83,7 @@ function Reports(){
     doc.text("Skylark Cooperative Society", 14, 15);
 
     doc.setFontSize(12);
-    doc.text("Comprehensive Member Financial Report", 14, 23);
+    doc.text("Member Financial Report", 14, 23);
 
     doc.text(`Date: ${new Date().toLocaleDateString()}`, 14, 30);
 
@@ -238,17 +247,17 @@ function Reports(){
           <thead>
             <tr className="bg-gray-100">
               <th className="border p-3">SL</th>
-              <th className="border p-3">Member ID</th>
-              <th className="border p-3">Name</th>
-              <th className="border p-3">Phone</th>
-              <th className="border p-3 text-center">Fixed Deposit</th>
-              <th className="border p-3 text-center">Deposit</th>
-              <th className="border p-3 text-center">Withdrawal</th>
-              <th className="border p-3 text-center">Loan</th>
-              <th className="border p-3 text-center">Penalty</th>
-              <th className="border p-3 text-center">Advance</th>
-              <th className="border p-3 text-center">Due</th>
-              <th className="border p-3 text-center">Current Balance</th>
+              <th className="border p-3 whitespace-nowrap">Member ID</th>
+              <th className="border p-3 whitespace-nowrap">Name</th>
+              <th className="border p-3 whitespace-nowrap">Phone</th>
+              <th className="border p-3 text-center whitespace-nowrap">Fixed Deposit</th>
+              <th className="border p-3 text-center whitespace-nowrap">Deposit</th>
+              <th className="border p-3 text-center whitespace-nowrap">Withdrawal</th>
+              <th className="border p-3 text-center whitespace-nowrap">Loan</th>
+              <th className="border p-3 text-center whitespace-nowrap">Penalty</th>
+              <th className="border p-3 text-center whitespace-nowrap">Advance</th>
+              <th className="border p-3 text-center whitespace-nowrap">Due</th>
+              <th className="border p-3 text-center whitespace-nowrap">Current Balance</th>
             </tr>
           </thead>
           <tbody>
@@ -256,17 +265,17 @@ function Reports(){
               report.map((item,index)=>(
                 <tr key={index} className="hover:bg-gray-50">
                   <td className="border p-3 text-center">{index + 1}</td>
-                  <td className="border p-3">{item.memberId}</td>
-                  <td className="border p-3 font-medium">{item.name}</td>
-                  <td className="border p-3">{item.phone}</td>
-                  <td className="border p-3 text-center text-indigo-600 font-semibold">৳ {item.fixedDeposit || 0}</td>
-                  <td className="border p-3 text-center text-emerald-600 font-semibold">৳ {item.totalDeposit || 0}</td>
-                  <td className="border p-3 text-center text-amber-600 font-semibold">৳ {item.totalWithdrawal || 0}</td>
-                  <td className="border p-3 text-center text-blue-600 font-semibold">৳ {item.totalLoan || 0}</td>
-                  <td className="border p-3 text-center text-rose-600 font-semibold">৳ {item.totalPenalty || 0}</td>
-                  <td className="border p-3 text-center font-semibold">৳ {item.advance || 0}</td>
-                  <td className="border p-3 text-center text-red-600 font-semibold">৳ {item.totalDue || 0}</td>
-                  <td className="border p-3 text-center text-teal-700 font-bold">৳ {item.currentBalance || 0}</td>
+                  <td className="border p-3 whitespace-nowrap font-semibold">{item.memberId}</td>
+                  <td className="border p-3 whitespace-nowrap font-medium">{item.name}</td>
+                  <td className="border p-3 whitespace-nowrap">{item.phone}</td>
+                  <td className="border p-3 text-center text-indigo-600 font-semibold whitespace-nowrap">৳ {item.fixedDeposit || 0}</td>
+                  <td className="border p-3 text-center text-emerald-600 font-semibold whitespace-nowrap">৳ {item.totalDeposit || 0}</td>
+                  <td className="border p-3 text-center text-amber-600 font-semibold whitespace-nowrap">৳ {item.totalWithdrawal || 0}</td>
+                  <td className="border p-3 text-center text-blue-600 font-semibold whitespace-nowrap">৳ {item.totalLoan || 0}</td>
+                  <td className="border p-3 text-center text-rose-600 font-semibold whitespace-nowrap">৳ {item.totalPenalty || 0}</td>
+                  <td className="border p-3 text-center font-semibold whitespace-nowrap">৳ {item.advance || 0}</td>
+                  <td className="border p-3 text-center text-red-600 font-semibold whitespace-nowrap">৳ {item.totalDue || 0}</td>
+                  <td className="border p-3 text-center text-teal-700 font-bold whitespace-nowrap">৳ {item.currentBalance || 0}</td>
                 </tr>
               ))
             }
