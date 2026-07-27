@@ -1,8 +1,7 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
-import MainLayout from "../layouts/MainLayout";
 
 const API_URL = "https://skylark-cooperative-system.onrender.com";
 
@@ -161,12 +160,12 @@ function Members() {
   });
 
   return (
-    <MainLayout>
+    <div>
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Members</h1>
         
-        {/* Add Member বাটন (সুপার অ্যাডমিন না হলে ক্লিক করলে টাস্ট মেসেজ ও বাধা দেবে) */}
+        {/* Add Member বাটন */}
         <Link
           to="/add-member"
           onClick={handleAddClick}
@@ -291,7 +290,7 @@ function Members() {
                           ID Card
                         </Link>
 
-                        {/* Edit Button (নন-সুপার অ্যাডমিন ক্লিক করলে টাস্ট মেসেজ দিয়ে বাধা দেবে) */}
+                        {/* Edit Button */}
                         <button
                           onClick={(e) => handleEditClick(e, member._id)}
                           className={`px-3 py-1.5 rounded text-sm font-medium transition text-white ${
@@ -302,7 +301,7 @@ function Members() {
                           Edit
                         </button>
                         
-                        {/* Delete Button (নন-সুপার অ্যাডমিন ক্লিক করলে টাস্ট মেসেজ দিয়ে বাধা দেবে) */}
+                        {/* Delete Button */}
                         <button
                           onClick={() => deleteMember(member._id)}
                           className={`px-3 py-1.5 rounded text-sm font-medium transition text-white ${
@@ -327,7 +326,7 @@ function Members() {
           </tbody>
         </table>
       </div>
-    </MainLayout>
+    </div>
   );
 }
 
