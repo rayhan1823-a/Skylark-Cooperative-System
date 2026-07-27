@@ -2,6 +2,7 @@ const Member = require("../models/Member");
 const Deposit = require("../models/Deposit");
 const Withdrawal = require("../models/Withdrawal");
 const Loan = require("../models/Loan");
+const Penalty = require("../models/Penalty");
 const { calculateMemberSummary } = require("../services/dueCalculator");
 
 const ExcelJS = require("exceljs");
@@ -22,15 +23,18 @@ const getMemberReport = async (req, res) => {
         const report = [];
 
         for (const member of members) {
+            const memberMongoId = member._id;
+
+            // Summary from Due Calculator service
             const summary = await calculateMemberSummary(
-                member._id
-            );
+                memberMongoId
+            ).catch(() => ({}));
 
             // Total Deposit
             const deposit = await Deposit.aggregate([
                 {
                     $match: {
-                        memberId: member._id
+                        $or: [{ memberId: memberMongoId }, { member: memberMongoId }]
                     }
                 },
                 {
@@ -47,7 +51,7 @@ const getMemberReport = async (req, res) => {
             const withdrawal = await Withdrawal.aggregate([
                 {
                     $match: {
-                        memberId: member._id
+                        $or: [{ memberId: memberMongoId }, { member: memberMongoId }]
                     }
                 },
                 {
@@ -64,7 +68,24 @@ const getMemberReport = async (req, res) => {
             const loan = await Loan.aggregate([
                 {
                     $match: {
-                        memberId: member._id
+                        $or: [{ memberId: memberMongoId }, { member: memberMongoId }]
+                    }
+                },
+                {
+                    $group: {
+                        _id: null,
+                        total: {
+                            $sum: "$amount"
+                        }
+                    }
+                }
+            ]);
+
+            // Total Penalty
+            const penalty = await Penalty.aggregate([
+                {
+                    $match: {
+                        $or: [{ memberId: memberMongoId }, { member: memberMongoId }]
                     }
                 },
                 {
@@ -86,7 +107,7 @@ const getMemberReport = async (req, res) => {
                 totalDeposit: deposit.length ? deposit[0].total : 0,
                 totalWithdrawal: withdrawal.length ? withdrawal[0].total : 0,
                 totalLoan: loan.length ? loan[0].total : 0,
-                totalPenalty: summary.totalPenalty || 0,
+                totalPenalty: penalty.length ? penalty[0].total : (summary.totalPenalty || 0),
                 advance: summary.advance || 0,
                 totalDue: summary.totalDue || 0
             });
@@ -232,14 +253,16 @@ const getReportData = async () => {
     const result = [];
 
     for (const member of members) {
+        const memberMongoId = member._id;
+
         const summary = await calculateMemberSummary(
-            member._id
-        );
+            memberMongoId
+        ).catch(() => ({}));
 
         const deposit = await Deposit.aggregate([
             {
                 $match: {
-                    memberId: member._id
+                    $or: [{ memberId: memberMongoId }, { member: memberMongoId }]
                 }
             },
             {
@@ -255,7 +278,7 @@ const getReportData = async () => {
         const withdrawal = await Withdrawal.aggregate([
             {
                 $match: {
-                    memberId: member._id
+                    $or: [{ memberId: memberMongoId }, { member: memberMongoId }]
                 }
             },
             {
@@ -271,7 +294,23 @@ const getReportData = async () => {
         const loan = await Loan.aggregate([
             {
                 $match: {
-                    memberId: member._id
+                    $or: [{ memberId: memberMongoId }, { member: memberMongoId }]
+                }
+            },
+            {
+                $group: {
+                    _id: null,
+                    total: {
+                        $sum: "$amount"
+                    }
+                }
+            }
+        ]);
+
+        const penalty = await Penalty.aggregate([
+            {
+                $match: {
+                    $or: [{ memberId: memberMongoId }, { member: memberMongoId }]
                 }
             },
             {
@@ -291,7 +330,7 @@ const getReportData = async () => {
             totalDeposit: deposit.length ? deposit[0].total : 0,
             totalWithdrawal: withdrawal.length ? withdrawal[0].total : 0,
             totalLoan: loan.length ? loan[0].total : 0,
-            totalPenalty: summary.totalPenalty || 0,
+            totalPenalty: penalty.length ? penalty[0].total : (summary.totalPenalty || 0),
             advance: summary.advance || 0,
             totalDue: summary.totalDue || 0,
             status: member.status
