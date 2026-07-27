@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import MainLayout from "../layouts/MainLayout";
 
 function MemberProfile() {
   const { id } = useParams();
@@ -78,22 +77,22 @@ function MemberProfile() {
 
   const currentBalance = totalDeposit - totalWithdrawal - loanAmount;
   
-  // ✅ ব্যাকএন্ড থেকে আসা টোটাল ডিউ সরাসরি ব্যবহার করা হলো (অতিরিক্ত যোগ-বিয়োগ বাদ দেওয়া হয়েছে)
+  // ✅ ব্যাকএন্ড থেকে আসা টোটাল ডিউ সরাসরি ব্যবহার করা হলো (অতিরিক্ত যোগ-বিয়োগ বাদ দেওয়া হয়েছে)
   const totalDueAmount = summary?.totalDue ?? 0;
 
   if (loading) {
     return (
-      <MainLayout>
-        <div className="p-10 text-center text-2xl font-bold text-blue-600">Loading Member Profile...</div>
-      </MainLayout>
+      <div className="flex-1 p-10 text-center text-2xl font-bold text-blue-600 bg-slate-50 min-h-screen flex items-center justify-center">
+        Loading Member Profile...
+      </div>
     );
   }
 
   if (!member) {
     return (
-      <MainLayout>
-        <div className="p-10 text-center text-red-600 text-xl font-bold">Member Not Found</div>
-      </MainLayout>
+      <div className="flex-1 p-10 text-center text-red-600 text-xl font-bold bg-slate-50 min-h-screen flex items-center justify-center">
+        Member Not Found
+      </div>
     );
   }
 
@@ -112,8 +111,8 @@ function MemberProfile() {
   }
 
   return (
-    <MainLayout>
-      <div className="profile-print-container p-4">
+    <div className="flex-1 p-6 overflow-y-auto w-full bg-slate-50 min-h-screen">
+      <div className="profile-print-container max-w-7xl mx-auto space-y-6">
         
         <div className="flex justify-end mb-4 no-print">
           <button 
@@ -172,7 +171,7 @@ function MemberProfile() {
           </div>
         </div>
 
-        {/* Summary Cards (Total Deposit Due কার্ড বাদ দিয়ে ৭টি কার্ড রাখা হলো) */}
+        {/* Summary Cards (Total Deposit Due কার্ড বাদ দিয়ে ৭টি কার্ড রাখা হলো) */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-8">
           {[
             { label: 'Total Deposit', val: totalDeposit, color: 'bg-green-600' },
@@ -193,126 +192,136 @@ function MemberProfile() {
         {/* 1. Deposit History */}
         <div className="bg-white border rounded-xl mb-8 overflow-hidden shadow-sm">
             <h2 className="text-xl font-bold p-4 bg-blue-600 text-white">Deposit History</h2>
-            <table className="w-full text-sm">
-              <thead className="bg-blue-50 text-blue-800">
-                <tr><th className="p-3">Month</th><th>Year</th><th>Amount</th><th>Receipt</th></tr>
-              </thead>
-              <tbody>
-                {deposits.length > 0 ? deposits.map((d, index) => (
-                  <tr key={d._id || index} className={`border-t text-center ${index % 2 === 0 ? 'bg-white' : 'bg-blue-50/30'} hover:bg-blue-100 transition-colors`}>
-                      <td className="p-3">{d.month}</td>
-                      <td>{d.year}</td>
-                      <td className="font-bold text-green-700">৳ {d.amount || d.paidAmount || 0}</td>
-                      <td className="p-2">
-                        <a href={`${API}/deposit-receipt/${d._id}`} 
-                           target="_blank" rel="noopener noreferrer" className="text-blue-600 font-bold hover:underline cursor-pointer">
-                           {d.receiptNo || "View"}
-                        </a>
-                      </td>
-                  </tr>
-                )) : (
-                  <tr><td colSpan="4" className="py-4 text-center text-gray-500">No deposit history found.</td></tr>
-                )}
-              </tbody>
-            </table>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-blue-50 text-blue-800">
+                  <tr><th className="p-3">Month</th><th>Year</th><th>Amount</th><th>Receipt</th></tr>
+                </thead>
+                <tbody>
+                  {deposits.length > 0 ? deposits.map((d, index) => (
+                    <tr key={d._id || index} className={`border-t text-center ${index % 2 === 0 ? 'bg-white' : 'bg-blue-50/30'} hover:bg-blue-100 transition-colors`}>
+                        <td className="p-3">{d.month}</td>
+                        <td>{d.year}</td>
+                        <td className="font-bold text-green-700">৳ {d.amount || d.paidAmount || 0}</td>
+                        <td className="p-2">
+                          <a href={`${API}/deposit-receipt/${d._id}`} 
+                             target="_blank" rel="noopener noreferrer" className="text-blue-600 font-bold hover:underline cursor-pointer">
+                             {d.receiptNo || "View"}
+                          </a>
+                        </td>
+                    </tr>
+                  )) : (
+                    <tr><td colSpan="4" className="py-4 text-center text-gray-500">No deposit history found.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
         </div>
 
         {/* 2. Loan History */}
         <div className="bg-white border rounded-xl mb-8 overflow-hidden shadow-sm">
             <h2 className="text-xl font-bold p-4 bg-purple-700 text-white">Loan History</h2>
-            <table className="w-full text-sm">
-              <thead className="bg-purple-50 text-purple-800">
-                <tr><th className="p-3">Date</th><th>Amount</th><th>Receipt No</th><th>Note</th></tr>
-              </thead>
-              <tbody>
-                {loans.length > 0 ? loans.map((l, index) => (
-                  <tr key={l._id || index} className={`border-t text-center ${index % 2 === 0 ? 'bg-white' : 'bg-purple-50/30'} hover:bg-purple-100 transition-colors`}>
-                      <td className="p-3">{new Date(l.issueDate || l.date || l.createdAt).toLocaleDateString()}</td>
-                      <td className="font-bold text-purple-700">৳ {l.amount || 0}</td>
-                      <td className="font-semibold text-blue-600">{l.receiptNo || "N/A"}</td>
-                      <td className="italic text-gray-500">{l.remarks || l.note || "N/A"}</td>
-                  </tr>
-                )) : (
-                  <tr><td colSpan="4" className="py-4 text-center text-gray-500">No loan history found.</td></tr>
-                )}
-              </tbody>
-            </table>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-purple-50 text-purple-800">
+                  <tr><th className="p-3">Date</th><th>Amount</th><th>Receipt No</th><th>Note</th></tr>
+                </thead>
+                <tbody>
+                  {loans.length > 0 ? loans.map((l, index) => (
+                    <tr key={l._id || index} className={`border-t text-center ${index % 2 === 0 ? 'bg-white' : 'bg-purple-50/30'} hover:bg-purple-100 transition-colors`}>
+                        <td className="p-3">{new Date(l.issueDate || l.date || l.createdAt).toLocaleDateString()}</td>
+                        <td className="font-bold text-purple-700">৳ {l.amount || 0}</td>
+                        <td className="font-semibold text-blue-600">{l.receiptNo || "N/A"}</td>
+                        <td className="italic text-gray-500">{l.remarks || l.note || "N/A"}</td>
+                    </tr>
+                  )) : (
+                    <tr><td colSpan="4" className="py-4 text-center text-gray-500">No loan history found.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
         </div>
 
         {/* 3. Penalty History */}
         <div className="bg-white border rounded-xl mb-8 overflow-hidden shadow-sm">
             <h2 className="text-xl font-bold p-4 bg-yellow-600 text-white">Penalty History</h2>
-            <table className="w-full text-sm">
-              <thead className="bg-yellow-50 text-yellow-800">
-                <tr><th className="p-3">Date</th><th>Amount</th><th>Receipt No</th><th>Note</th></tr>
-              </thead>
-              <tbody>
-                {penalties.length > 0 ? penalties.map((p, index) => (
-                  <tr key={p._id || index} className={`border-t text-center ${index % 2 === 0 ? 'bg-white' : 'bg-yellow-50/30'} hover:bg-yellow-100 transition-colors`}>
-                      <td className="p-3">{new Date(p.date || p.penaltyDate || p.createdAt).toLocaleDateString()}</td>
-                      <td className="font-bold text-yellow-700">৳ {p.amount || p.fineAmount || p.total || p.penaltyAmount || 0}</td>
-                      <td className="font-semibold text-blue-600">{p.receiptNo || "N/A"}</td>
-                      <td className="italic text-gray-500">{p.note || p.reason || p.description || "N/A"}</td>
-                  </tr>
-                )) : (
-                  <tr><td colSpan="4" className="py-4 text-center text-gray-500">No penalty history found.</td></tr>
-                )}
-              </tbody>
-            </table>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-yellow-50 text-yellow-800">
+                  <tr><th className="p-3">Date</th><th>Amount</th><th>Receipt No</th><th>Note</th></tr>
+                </thead>
+                <tbody>
+                  {penalties.length > 0 ? penalties.map((p, index) => (
+                    <tr key={p._id || index} className={`border-t text-center ${index % 2 === 0 ? 'bg-white' : 'bg-yellow-50/30'} hover:bg-yellow-100 transition-colors`}>
+                        <td className="p-3">{new Date(p.date || p.penaltyDate || p.createdAt).toLocaleDateString()}</td>
+                        <td className="font-bold text-yellow-700">৳ {p.amount || p.fineAmount || p.total || p.penaltyAmount || 0}</td>
+                        <td className="font-semibold text-blue-600">{p.receiptNo || "N/A"}</td>
+                        <td className="italic text-gray-500">{p.note || p.reason || p.description || "N/A"}</td>
+                    </tr>
+                  )) : (
+                    <tr><td colSpan="4" className="py-4 text-center text-gray-500">No penalty history found.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
         </div>
 
         {/* 4. Withdrawal History */}
         <div className="bg-white border rounded-xl mb-8 overflow-hidden shadow-sm">
             <h2 className="text-xl font-bold p-4 bg-pink-600 text-white">Withdrawal History</h2>
-            <table className="w-full text-sm">
-              <thead className="bg-pink-50 text-pink-800">
-                <tr><th className="p-3">Date</th><th>Amount</th><th>Receipt No</th><th>Note</th></tr>
-              </thead>
-              <tbody>
-                {withdrawals.length > 0 ? withdrawals.map((w, index) => (
-                  <tr key={w._id || index} className={`border-t text-center ${index % 2 === 0 ? 'bg-white' : 'bg-pink-50/30'} hover:bg-pink-100 transition-colors`}>
-                      <td className="p-3">{new Date(w.date || w.createdAt).toLocaleDateString()}</td>
-                      <td className="font-bold text-red-600">৳ {w.amount}</td>
-                      <td className="font-semibold text-blue-600">{w.receiptNo || "N/A"}</td>
-                      <td className="italic text-gray-500">{w.note || "N/A"}</td>
-                  </tr>
-                )) : (
-                  <tr><td colSpan="4" className="py-4 text-center text-gray-500">No withdrawal history found.</td></tr>
-                )}
-              </tbody>
-            </table>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-pink-50 text-pink-800">
+                  <tr><th className="p-3">Date</th><th>Amount</th><th>Receipt No</th><th>Note</th></tr>
+                </thead>
+                <tbody>
+                  {withdrawals.length > 0 ? withdrawals.map((w, index) => (
+                    <tr key={w._id || index} className={`border-t text-center ${index % 2 === 0 ? 'bg-white' : 'bg-pink-50/30'} hover:bg-pink-100 transition-colors`}>
+                        <td className="p-3">{new Date(w.date || w.createdAt).toLocaleDateString()}</td>
+                        <td className="font-bold text-red-600">৳ {w.amount}</td>
+                        <td className="font-semibold text-blue-600">{w.receiptNo || "N/A"}</td>
+                        <td className="italic text-gray-500">{w.note || "N/A"}</td>
+                    </tr>
+                  )) : (
+                    <tr><td colSpan="4" className="py-4 text-center text-gray-500">No withdrawal history found.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
         </div>
 
         {/* 5. Payment Allocation History */}
         <div className="bg-white border rounded-xl mb-12 overflow-hidden shadow-sm">
             <h2 className="text-xl font-bold p-4 bg-purple-600 text-white">Payment Allocation History</h2>
-            <table className="w-full text-sm">
-              <thead className="bg-purple-50 text-purple-800">
-                <tr><th className="p-3">Year</th><th>Month</th><th>Amount</th><th>Paid</th><th>Due</th><th>Status</th></tr>
-              </thead>
-              <tbody>
-                {allocation.length > 0 ? allocation.map((item, index) => (
-                  <tr key={item._id || index} className={`border-t text-center ${index % 2 === 0 ? 'bg-white' : 'bg-purple-50/30'} hover:bg-purple-100 transition-colors`}>
-                      <td className="p-3">{item.year}</td>
-                      <td>{item.monthName || item.month}</td>
-                      <td>৳ {item.monthlyAmount || item.amount || 0}</td>
-                      <td className="text-green-600 font-bold">৳ {item.paidAmount || 0}</td>
-                      <td className="text-red-600 font-bold">৳ {item.dueAmount || 0}</td>
-                      <td>
-                        <span className={`px-2 py-1 rounded text-xs font-bold ${item.status === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                            {item.status || "Due"}
-                        </span>
-                      </td>
-                  </tr>
-                )) : (
-                  <tr><td colSpan="6" className="py-4 text-center text-gray-500">No allocation history found.</td></tr>
-                )}
-              </tbody>
-            </table>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-purple-50 text-purple-800">
+                  <tr><th className="p-3">Year</th><th>Month</th><th>Amount</th><th>Paid</th><th>Due</th><th>Status</th></tr>
+                </thead>
+                <tbody>
+                  {allocation.length > 0 ? allocation.map((item, index) => (
+                    <tr key={item._id || index} className={`border-t text-center ${index % 2 === 0 ? 'bg-white' : 'bg-purple-50/30'} hover:bg-purple-100 transition-colors`}>
+                        <td className="p-3">{item.year}</td>
+                        <td>{item.monthName || item.month}</td>
+                        <td>৳ {item.monthlyAmount || item.amount || 0}</td>
+                        <td className="text-green-600 font-bold">৳ {item.paidAmount || 0}</td>
+                        <td className="text-red-600 font-bold">৳ {item.dueAmount || 0}</td>
+                        <td>
+                          <span className={`px-2 py-1 rounded text-xs font-bold ${item.status === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                              {item.status || "Due"}
+                          </span>
+                        </td>
+                    </tr>
+                  )) : (
+                    <tr><td colSpan="6" className="py-4 text-center text-gray-500">No allocation history found.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
         </div>
 
         {/* Signature */}
-        <div className="signature-section mt-16 flex justify-between items-center px-8">
+        <div className="signature-section mt-16 flex justify-between items-center px-8 pb-10">
           <div className="text-center">
             <div className="border-t-2 border-black w-48 mb-2"></div>
             <p className="font-bold">Member Signature</p>
@@ -324,7 +333,7 @@ function MemberProfile() {
           </div>
         </div>
       </div>
-    </MainLayout>
+    </div>
   );
 }
 
