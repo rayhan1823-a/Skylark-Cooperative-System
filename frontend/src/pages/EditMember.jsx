@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
-import MainLayout from "../layouts/MainLayout";
 
 function EditMember() {
   const { id } = useParams();
@@ -96,86 +95,82 @@ function EditMember() {
 
   if (loading) {
     return (
-      <MainLayout>
-        <div className="flex-1 p-10 text-center text-xl bg-slate-50 min-h-screen flex items-center justify-center">Loading...</div>
-      </MainLayout>
+      <div className="flex-1 p-10 text-center text-xl bg-slate-50 min-h-screen flex items-center justify-center">Loading...</div>
     );
   }
 
   return (
-    <MainLayout>
-      <div className="p-6 bg-slate-50 min-h-screen w-full">
-        <div className="max-w-7xl mx-auto space-y-6">
-          <h1 className="text-3xl font-bold mb-6 text-blue-900">Edit Member</h1>
-          <div className="bg-white shadow rounded-xl p-6 border border-gray-200">
-            <div className="grid md:grid-cols-2 gap-5">
-              <Field label="Member ID" name="memberId" value={formData.memberId} change={handleChange} />
-              <Field label="Full Name" name="name" value={formData.name} change={handleChange} />
-              <Field label="Father Name" name="fatherName" value={formData.fatherName} change={handleChange} />
-              <Field label="Mother Name" name="motherName" value={formData.motherName} change={handleChange} />
-              <Field label="Phone Number" name="phone" value={formData.phone} change={handleChange} />
-              <Field label="Emergency Contact" name="emergencyContact" value={formData.emergencyContact} change={handleChange} />
-              <Field label="Blood Group" name="bloodGroup" value={formData.bloodGroup} change={handleChange} />
-              <Field label="NID Number" name="nid" value={formData.nid} change={handleChange} />
-              <DateField label="Date of Birth" name="dateOfBirth" value={formData.dateOfBirth} change={handleChange} />
-              <DateField label="Joining Date" name="joiningDate" value={formData.joiningDate} change={handleChange} />
+    <div className="p-6 bg-slate-50 min-h-screen w-full">
+      <div className="max-w-7xl mx-auto space-y-6">
+        <h1 className="text-3xl font-bold mb-6 text-blue-900">Edit Member</h1>
+        <div className="bg-white shadow rounded-xl p-6 border border-gray-200">
+          <div className="grid md:grid-cols-2 gap-5">
+            <Field label="Member ID" name="memberId" value={formData.memberId} change={handleChange} />
+            <Field label="Full Name" name="name" value={formData.name} change={handleChange} />
+            <Field label="Father Name" name="fatherName" value={formData.fatherName} change={handleChange} />
+            <Field label="Mother Name" name="motherName" value={formData.motherName} change={handleChange} />
+            <Field label="Phone Number" name="phone" value={formData.phone} change={handleChange} />
+            <Field label="Emergency Contact" name="emergencyContact" value={formData.emergencyContact} change={handleChange} />
+            <Field label="Blood Group" name="bloodGroup" value={formData.bloodGroup} change={handleChange} />
+            <Field label="NID Number" name="nid" value={formData.nid} change={handleChange} />
+            <DateField label="Date of Birth" name="dateOfBirth" value={formData.dateOfBirth} change={handleChange} />
+            <DateField label="Joining Date" name="joiningDate" value={formData.joiningDate} change={handleChange} />
 
-              <div>
-                <label className="font-semibold block mb-1">Status</label>
-                <select
-                  name="status"
-                  value={formData.status || "Active"}
-                  onChange={handleChange}
-                  className="border p-3 rounded-lg w-full bg-white"
-                >
-                  <option value="Active">Active</option>
-                  <option value="Inactive">Inactive</option>
-                  <option value="Exited">Exited</option>
-                </select>
-              </div>
-
-              <Field label="Nominee Name" name="nomineeName" value={formData.nomineeName} change={handleChange} />
-              <Field label="Nominee Relation" name="nomineeRelation" value={formData.nomineeRelation} change={handleChange} />
-
-              <FileField label="Member Photo" name="photo" currentFile={formData.photo} change={handleFileChange} />
-              <FileField label="NID File" name="nidFile" currentFile={formData.nidFile} change={handleFileChange} />
-              <FileField label="Signature" name="signature" currentFile={formData.signature} change={handleFileChange} />
-              <FileField label="Nominee Photo" name="nomineePhoto" currentFile={formData.nomineePhoto} change={handleFileChange} />
-              <FileField label="Nominee NID File" name="nomineeNid" currentFile={formData.nomineeNid} change={handleFileChange} />
-            </div>
-
-            <div className="mt-5">
-              <label className="font-semibold block mb-1">Present Address</label>
-              <textarea
-                name="presentAddress"
-                value={formData.presentAddress || ""}
+            <div>
+              <label className="font-semibold block mb-1">Status</label>
+              <select
+                name="status"
+                value={formData.status || "Active"}
                 onChange={handleChange}
-                rows="3"
-                className="border p-3 rounded-lg w-full"
-              ></textarea>
+                className="border p-3 rounded-lg w-full bg-white"
+              >
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+                <option value="Exited">Exited</option>
+              </select>
             </div>
 
-            <div className="mt-5">
-              <label className="font-semibold block mb-1">Permanent Address</label>
-              <textarea
-                name="permanentAddress"
-                value={formData.permanentAddress || ""}
-                onChange={handleChange}
-                rows="3"
-                className="border p-3 rounded-lg w-full"
-              ></textarea>
-            </div>
+            <Field label="Nominee Name" name="nomineeName" value={formData.nomineeName} change={handleChange} />
+            <Field label="Nominee Relation" name="nomineeRelation" value={formData.nomineeRelation} change={handleChange} />
 
-            <button
-              onClick={updateMember}
-              className="mt-6 bg-green-600 text-white px-10 py-3 rounded-lg hover:bg-green-700 font-bold transition shadow-md"
-            >
-              Update Member
-            </button>
+            <FileField label="Member Photo" name="photo" currentFile={formData.photo} change={handleFileChange} />
+            <FileField label="NID File" name="nidFile" currentFile={formData.nidFile} change={handleFileChange} />
+            <FileField label="Signature" name="signature" currentFile={formData.signature} change={handleFileChange} />
+            <FileField label="Nominee Photo" name="nomineePhoto" currentFile={formData.nomineePhoto} change={handleFileChange} />
+            <FileField label="Nominee NID File" name="nomineeNid" currentFile={formData.nomineeNid} change={handleFileChange} />
           </div>
+
+          <div className="mt-5">
+            <label className="font-semibold block mb-1">Present Address</label>
+            <textarea
+              name="presentAddress"
+              value={formData.presentAddress || ""}
+              onChange={handleChange}
+              rows="3"
+              className="border p-3 rounded-lg w-full"
+            ></textarea>
+          </div>
+
+          <div className="mt-5">
+            <label className="font-semibold block mb-1">Permanent Address</label>
+            <textarea
+              name="permanentAddress"
+              value={formData.permanentAddress || ""}
+              onChange={handleChange}
+              rows="3"
+              className="border p-3 rounded-lg w-full"
+            ></textarea>
+          </div>
+
+          <button
+            onClick={updateMember}
+            className="mt-6 bg-green-600 text-white px-10 py-3 rounded-lg hover:bg-green-700 font-bold transition shadow-md"
+          >
+            Update Member
+          </button>
         </div>
       </div>
-    </MainLayout>
+    </div>
   );
 }
 
