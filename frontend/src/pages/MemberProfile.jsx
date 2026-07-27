@@ -327,14 +327,14 @@ function MemberProfile() {
         <div className="signature-section mt-16 pt-6 flex justify-between items-end px-8 pb-10 page-break-inside-avoid">
           <div className="text-center">
             <div className="border-t-2 border-black w-48 mb-2"></div>
-            <p className="font-bold text-sm">Member Signature</p>
+            <p className="font-bold text-sm text-black print:text-black">Member Signature</p>
           </div>
           <div className="text-center">
             <div className="mb-1">
               <img src="/signature.png" alt="Authorized Signature" className="w-32 mx-auto h-12 object-contain" />
             </div>
             <div className="border-t-2 border-black w-48 mb-2"></div>
-            <p className="font-bold text-sm">Authorized Signature</p>
+            <p className="font-bold text-sm text-black print:text-black">Authorized Signature</p>
           </div>
         </div>
 
