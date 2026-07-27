@@ -10,6 +10,66 @@ const PDFDocument = require("pdfkit");
 
 
 // ======================================
+// Helper Function: সমিতির নিয়ম অনুযায়ী ফিক্সড ডিপোজিট হিসাব
+// ======================================
+const calculateTotalFixedDeposit = (member) => {
+    const joiningDate = new Date(member.joiningDate || member.createdAt);
+    const currentDate = new Date();
+    
+    let totalFixedDeposit = 0;
+    let iterDate = new Date(joiningDate.getFullYear(), joiningDate.getMonth(), 1);
+    const stopDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+
+    while (iterDate <= stopDate) {
+        const year = iterDate.getFullYear();
+        const month = iterDate.getMonth(); // 0 = January, 6 = July ইত্যাদি
+
+        let monthlyRate = 2000; // ডিফল্ট বা ২০২৬ সালের জুলাই বা তার পরের হার
+        
+        if (year === 2023) {
+            if (month >= 6) { // জুলাই ২০২৩ থেকে ডিসেম্বর ২০২৩
+                monthlyRate = 500;
+            } else {
+                monthlyRate = 0; // সমিতির শুরুর আগের মাস হলে ০
+            }
+        } else if (year === 2024) {
+            if (month <= 5) { // জানুয়ারি ২০২৪ থেকে জুন ২০২৪
+                monthlyRate = 500;
+            } else { // জুলাই ২০২৪ থেকে ডিসেম্বর ২০২৪
+                monthlyRate = 1000;
+            }
+        } else if (year === 2025) {
+            if (month <= 5) { // জানুয়ারি ২০২৫ থেকে জুন ২০২৫
+                monthlyRate = 1000;
+            } else { // জুলাই ২০২৫ থেকে ডিসেম্বর ২০২৫
+                monthlyRate = 1500;
+            }
+        } else if (year === 2026) {
+            if (month <= 5) { // জানুয়ারি ২০২৬ থেকে জুন ২০২৬
+                monthlyRate = 1500;
+            } else { // জুলাই ২০২৬ থেকে বর্তমান
+                monthlyRate = 2000;
+            }
+        } else if (year > 2026) {
+            monthlyRate = 2000;
+        }
+
+        const memberJoinYM = joiningDate.getFullYear() * 12 + joiningDate.getMonth();
+        const currentYM = year * 12 + month;
+
+        // সদস্যের জয়েনিং মাসের আগের মাসের টাকা যোগ হবে না
+        if (currentYM >= memberJoinYM) {
+            totalFixedDeposit += monthlyRate;
+        }
+
+        iterDate.setMonth(iterDate.getMonth() + 1);
+    }
+
+    return totalFixedDeposit;
+};
+
+
+// ======================================
 // Member Report Data
 // ======================================
 
@@ -99,12 +159,8 @@ const getMemberReport = async (req, res) => {
                 }
             ]);
 
-            // Fixed Deposit Amount Calculation (সদস্যের জয়েনিং মাস থেকে বর্তমান মাস পর্যন্ত প্রতি মাসের ফিক্সড জমার পরিমাণ স্বয়ংক্রিয়ভাবে হিসাব হবে)
-            let fixedDepositAmount = member.monthlyDeposit || member.fixedDeposit || 1000; 
-            const joiningDate = new Date(member.joiningDate || member.createdAt);
-            const currentDate = new Date();
-            const monthsPassed = (currentDate.getFullYear() - joiningDate.getFullYear()) * 12 + (currentDate.getMonth() - joiningDate.getMonth()) + 1;
-            const totalFixedDeposit = fixedDepositAmount * (monthsPassed > 0 ? monthsPassed : 1);
+            // সমিতির নিয়ম অনুযায়ী ফিক্সড ডিপোজিট ক্যালকুলেশন
+            const totalFixedDeposit = calculateTotalFixedDeposit(member);
 
             report.push({
                 sl: i + 1,
@@ -250,14 +306,14 @@ const exportMemberPDF = async (req, res) => {
     } catch (error) {
         console.log(error);
         res.status(500).json({
-            success: false
+            error: "PDF Export Failed"
         });
     }
 };
 
 
 // ======================================
-// Common Data Function
+// Common Data Function (Excel/PDF helper)
 // ======================================
 
 const getReportData = async () => {
@@ -336,11 +392,7 @@ const getReportData = async () => {
             }
         ]);
 
-        let fixedDepositAmount = member.monthlyDeposit || member.fixedDeposit || 1000;
-        const joiningDate = new Date(member.joiningDate || member.createdAt);
-        const currentDate = new Date();
-        const monthsPassed = (currentDate.getFullYear() - joiningDate.getFullYear()) * 12 + (currentDate.getMonth() - joiningDate.getMonth()) + 1;
-        const totalFixedDeposit = fixedDepositAmount * (monthsPassed > 0 ? monthsPassed : 1);
+        const totalFixedDeposit = calculateTotalFixedDeposit(member);
 
         result.push({
             sl: i + 1,
