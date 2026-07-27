@@ -45,12 +45,17 @@ function Penalties() {
       const res = await axios.get(`${API}/penalties`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      const data = res.data?.penalties || res.data?.data || res.data;
-      if (Array.isArray(data)) {
-        setPenalties(data);
-      } else {
-        setPenalties([]);
+      
+      const responseData = res.data;
+      let dataList = [];
+      if (Array.isArray(responseData)) {
+        dataList = responseData;
+      } else if (Array.isArray(responseData?.penalties)) {
+        dataList = responseData.penalties;
+      } else if (Array.isArray(responseData?.data)) {
+        dataList = responseData.data;
       }
+      setPenalties(dataList);
     } catch (error) {
       console.error("Error fetching penalties:", error);
       setPenalties([]);
@@ -63,10 +68,16 @@ function Penalties() {
       const response = await axios.get(`${API}/members`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      const memberData = response.data?.members || response.data?.data || response.data;
-      if (Array.isArray(memberData)) {
-        setMembers(memberData);
+      const responseData = response.data;
+      let memberList = [];
+      if (Array.isArray(responseData)) {
+        memberList = responseData;
+      } else if (Array.isArray(responseData?.members)) {
+        memberList = responseData.members;
+      } else if (Array.isArray(responseData?.data)) {
+        memberList = responseData.data;
       }
+      setMembers(memberList);
     } catch (error) {
       console.error("Error fetching members:", error);
     }
