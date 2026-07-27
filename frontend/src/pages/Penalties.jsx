@@ -144,7 +144,7 @@ function Penalties() {
 
     setEditingId(item._id);
     setForm({
-      memberId: item.member?._id || item.memberId?._id || item.member || item.memberId || "",
+      memberId: item.memberId?._id || item.memberId || "",
       amount: item.amount || "",
       reason: item.reason || item.note || "",
       status: item.status || "Paid",
@@ -175,7 +175,7 @@ function Penalties() {
 
   const filteredData = penalties.filter((item) => {
     const reasonStr = (item.reason || item.note || "").toLowerCase();
-    const memberName = item.member?.name || item.member?.fullName || item.memberId?.name || item.memberId?.fullName || "";
+    const memberName = item.memberId?.name || item.memberId?.fullName || "";
     const receiptStr = (item.receiptNo || "").toLowerCase();
     return reasonStr.includes(search.toLowerCase()) || memberName.toLowerCase().includes(search.toLowerCase()) || receiptStr.includes(search.toLowerCase());
   });
@@ -265,8 +265,8 @@ function Penalties() {
                   </tr>
                 ) : (
                   currentData.map((item, index) => {
-                    const memberName = item.member?.name || item.member?.fullName || item.memberId?.name || item.memberId?.fullName || "N/A";
-                    const memberCode = item.member?.memberId || item.memberId?.memberId ? ` (${item.member?.memberId || item.memberId?.memberId})` : "";
+                    const memberName = item.memberId?.name || item.memberId?.fullName || "N/A";
+                    const memberCode = item.memberId?.memberId ? ` (${item.memberId.memberId})` : "";
                     const description = item.reason || item.note || "-";
                     const statusVal = item.status || "Paid";
                     const receiptNo = item.receiptNo || "N/A";
