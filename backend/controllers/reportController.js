@@ -10,14 +10,14 @@ const PDFDocument = require("pdfkit");
 
 
 // ======================================
-// Helper Function: সমিতির নিয়ম অনুযায়ী ফিক্সড ডিপোজিট হিসাব
+// Helper Function: সমিতির নিয়ম অনুযায়ী সবার জন্য জুলাই ২০২৩ থেকে বর্তমান পর্যন্ত ফিক্সড ডিপোজিট হিসাব
 // ======================================
-const calculateTotalFixedDeposit = (member) => {
-    const joiningDate = new Date(member.joiningDate || member.createdAt);
+const calculateTotalFixedDeposit = () => {
+    const startDate = new Date(2023, 6, 1); // জুলাই ২০২৩ (মাস ৬ মানে জুলাই)
     const currentDate = new Date();
     
     let totalFixedDeposit = 0;
-    let iterDate = new Date(joiningDate.getFullYear(), joiningDate.getMonth(), 1);
+    let iterDate = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
     const stopDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
 
     while (iterDate <= stopDate) {
@@ -30,7 +30,7 @@ const calculateTotalFixedDeposit = (member) => {
             if (month >= 6) { // জুলাই ২০২৩ থেকে ডিসেম্বর ২০২৩
                 monthlyRate = 500;
             } else {
-                monthlyRate = 0; // সমিতির শুরুর আগের মাস হলে ০
+                monthlyRate = 0;
             }
         } else if (year === 2024) {
             if (month <= 5) { // জানুয়ারি ২০২৪ থেকে জুন ২০২৪
@@ -54,14 +54,7 @@ const calculateTotalFixedDeposit = (member) => {
             monthlyRate = 2000;
         }
 
-        const memberJoinYM = joiningDate.getFullYear() * 12 + joiningDate.getMonth();
-        const currentYM = year * 12 + month;
-
-        // সদস্যের জয়েনিং মাসের আগের মাসের টাকা যোগ হবে না
-        if (currentYM >= memberJoinYM) {
-            totalFixedDeposit += monthlyRate;
-        }
-
+        totalFixedDeposit += monthlyRate;
         iterDate.setMonth(iterDate.getMonth() + 1);
     }
 
@@ -81,6 +74,7 @@ const getMemberReport = async (req, res) => {
         });
 
         const report = [];
+        const totalFixedDeposit = calculateTotalFixedDeposit();
 
         for (let i = 0; i < members.length; i++) {
             const member = members[i];
@@ -158,9 +152,6 @@ const getMemberReport = async (req, res) => {
                     }
                 }
             ]);
-
-            // সমিতির নিয়ম অনুযায়ী ফিক্সড ডিপোজিট ক্যালকুলেশন
-            const totalFixedDeposit = calculateTotalFixedDeposit(member);
 
             report.push({
                 sl: i + 1,
@@ -319,6 +310,7 @@ const exportMemberPDF = async (req, res) => {
 const getReportData = async () => {
     const members = await Member.find();
     const result = [];
+    const totalFixedDeposit = calculateTotalFixedDeposit();
 
     for (let i = 0; i < members.length; i++) {
         const member = members[i];
@@ -391,8 +383,6 @@ const getReportData = async () => {
                 }
             }
         ]);
-
-        const totalFixedDeposit = calculateTotalFixedDeposit(member);
 
         result.push({
             sl: i + 1,
