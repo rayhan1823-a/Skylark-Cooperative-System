@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Deposit = require("../models/Deposit");
+const Withdrawal = require("../models/Withdrawal"); // উইথড্রল মডেলটি এখানে যুক্ত করা হলো
 const Member = require("../models/Member");
 
 // ======================================
@@ -53,11 +54,24 @@ const calculateMemberSummary = async (memberId) => {
             totalDeposit += Number(item.amount || 0);
         });
 
+        // ===============================
+        // Get Withdrawal History (নতুন যুক্ত করা হয়েছে)
+        // ===============================
+        const withdrawals = await Withdrawal.find({ memberId: memberObjectId });
+
+        let totalWithdrawal = 0;
+        withdrawals.forEach(item => {
+            totalWithdrawal += Number(item.amount || 0);
+        });
+
+        // কার্যকর জমা বা কারেন্ট ব্যালেন্স = মোট জমা - মোট উত্তোলন (যেমন: 59000 - 26000 = 33000)
+        let effectiveDeposit = totalDeposit - totalWithdrawal;
+
         let monthlyDetails = [];
         let totalDue = 0;
         
-        // মেম্বারের মোট জমা রাখা টাকা একটি ভেরিয়েবলে নিলাম যা থেকে প্রতি মাসের খরচ কাটবো
-        let remainingDepositPool = totalDeposit; 
+        // জমার পুল হিসেবে এখন কার্যকর জমা ব্যবহার করা হবে
+        let remainingDepositPool = effectiveDeposit; 
 
         // ===============================
         // Start July 2023
@@ -76,25 +90,19 @@ const calculateMemberSummary = async (memberId) => {
                 month: "long",
             });
 
-            // ========================================================
-            // নতুন লজিক: টোটাল জমার পুল (Pool) থেকে টাকা কেটে মাসের হিসাব করা
-            // ========================================================
             let paidAmountForThisMonth = 0;
 
             if (remainingDepositPool >= monthlyAmount) {
-                // যদি পুলে পর্যাপ্ত টাকা থাকে, তবে এই মাসের পুরো টাকা পরিশোধ
                 paidAmountForThisMonth = monthlyAmount;
                 remainingDepositPool -= monthlyAmount;
             } else if (remainingDepositPool > 0) {
-                // যদি পুলে কিছু টাকা থাকে কিন্তু তা মাসের ফিক্সড অ্যামাউন্টের চেয়ে কম হয়
                 paidAmountForThisMonth = remainingDepositPool;
                 remainingDepositPool = 0;
             } else {
-                // পুলে কোনো টাকাই অবশিষ্ট না থাকলে পেইড ০
                 paidAmountForThisMonth = 0;
             }
 
-            // বকেয়া হিসাব
+            // বকেয়া হিসাব
             const dueAmount = Math.max(monthlyAmount - paidAmountForThisMonth, 0);
             totalDue += dueAmount;
 
@@ -117,9 +125,11 @@ const calculateMemberSummary = async (memberId) => {
 
         return {
             totalDeposit,
+            totalWithdrawal,
+            currentBalance: effectiveDeposit, // সঠিক কারেন্ট ব্যালেন্স রিটার্ন করবে
             totalDue,
             totalPenalty: 0,
-            advanceBalance: remainingDepositPool, // যদি সব মাস কাটার পরও পুলে টাকা বাঁচে, তা অ্যাডভান্স
+            advanceBalance: remainingDepositPool, 
             monthlyDetails
         };
 
@@ -127,6 +137,8 @@ const calculateMemberSummary = async (memberId) => {
         console.log("Due Calculator Error:", error.message);
         return {
             totalDeposit: 0,
+            totalWithdrawal: 0,
+            currentBalance: 0,
             totalDue: 0,
             totalPenalty: 0,
             advanceBalance: 0,
