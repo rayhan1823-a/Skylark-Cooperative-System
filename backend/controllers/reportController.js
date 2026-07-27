@@ -22,7 +22,8 @@ const getMemberReport = async (req, res) => {
 
         const report = [];
 
-        for (const member of members) {
+        for (let i = 0; i < members.length; i++) {
+            const member = members[i];
             const memberMongoId = member._id;
 
             // Summary from Due Calculator service
@@ -98,12 +99,21 @@ const getMemberReport = async (req, res) => {
                 }
             ]);
 
+            // Fixed Deposit Amount Calculation (সদস্যের জয়েনিং মাস থেকে বর্তমান মাস পর্যন্ত প্রতি মাসের ফিক্সড জমার পরিমাণ স্বয়ংক্রিয়ভাবে হিসাব হবে)
+            let fixedDepositAmount = member.monthlyDeposit || member.fixedDeposit || 1000; 
+            const joiningDate = new Date(member.joiningDate || member.createdAt);
+            const currentDate = new Date();
+            const monthsPassed = (currentDate.getFullYear() - joiningDate.getFullYear()) * 12 + (currentDate.getMonth() - joiningDate.getMonth()) + 1;
+            const totalFixedDeposit = fixedDepositAmount * (monthsPassed > 0 ? monthsPassed : 1);
+
             report.push({
+                sl: i + 1,
                 memberId: member.memberId,
                 name: member.name,
                 phone: member.phone,
                 joiningDate: member.joiningDate,
                 status: member.status,
+                fixedDeposit: totalFixedDeposit,
                 totalDeposit: deposit.length ? deposit[0].total : 0,
                 totalWithdrawal: withdrawal.length ? withdrawal[0].total : 0,
                 totalLoan: loan.length ? loan[0].total : 0,
@@ -147,9 +157,11 @@ const exportMemberExcel = async (req, res) => {
         );
 
         sheet.columns = [
-            { header: "Member Name", key: "name", width: 25 },
+            { header: "SL", key: "sl", width: 10 },
             { header: "Member ID", key: "memberId", width: 15 },
+            { header: "Member Name", key: "name", width: 25 },
             { header: "Phone", key: "phone", width: 15 },
+            { header: "Fixed Deposit", key: "fixedDeposit", width: 15 },
             { header: "Total Deposit", key: "totalDeposit", width: 15 },
             { header: "Total Withdrawal", key: "totalWithdrawal", width: 15 },
             { header: "Total Loan", key: "totalLoan", width: 15 },
@@ -227,9 +239,9 @@ const exportMemberPDF = async (req, res) => {
 
         doc.moveDown();
 
-        members.forEach((item, index) => {
+        members.forEach((item) => {
             doc.text(
-                `${index + 1}. Name: ${item.name} | ID: ${item.memberId} | Phone: ${item.phone} | Deposit: ${item.totalDeposit} | Withdrawal: ${item.totalWithdrawal} | Loan: ${item.totalLoan} | Penalty: ${item.totalPenalty} | Advance: ${item.advance} | Due: ${item.totalDue} | Status: ${item.status}`
+                `SL: ${item.sl} | ID: ${item.memberId} | Name: ${item.name} | Phone: ${item.phone} | Fixed Dep: ${item.fixedDeposit} | Dep: ${item.totalDeposit} | With: ${item.totalWithdrawal} | Loan: ${item.totalLoan} | Pen: ${item.totalPenalty} | Adv: ${item.advance} | Due: ${item.totalDue} | Status: ${item.status}`
             );
         });
 
@@ -252,7 +264,8 @@ const getReportData = async () => {
     const members = await Member.find();
     const result = [];
 
-    for (const member of members) {
+    for (let i = 0; i < members.length; i++) {
+        const member = members[i];
         const memberMongoId = member._id;
 
         const summary = await calculateMemberSummary(
@@ -323,10 +336,18 @@ const getReportData = async () => {
             }
         ]);
 
+        let fixedDepositAmount = member.monthlyDeposit || member.fixedDeposit || 1000;
+        const joiningDate = new Date(member.joiningDate || member.createdAt);
+        const currentDate = new Date();
+        const monthsPassed = (currentDate.getFullYear() - joiningDate.getFullYear()) * 12 + (currentDate.getMonth() - joiningDate.getMonth()) + 1;
+        const totalFixedDeposit = fixedDepositAmount * (monthsPassed > 0 ? monthsPassed : 1);
+
         result.push({
+            sl: i + 1,
             memberId: member.memberId,
             name: member.name,
             phone: member.phone,
+            fixedDeposit: totalFixedDeposit,
             totalDeposit: deposit.length ? deposit[0].total : 0,
             totalWithdrawal: withdrawal.length ? withdrawal[0].total : 0,
             totalLoan: loan.length ? loan[0].total : 0,

@@ -82,9 +82,11 @@ function Reports(){
       startY: 38,
       head: [
         [
+          "SL",
           "Member ID",
           "Name",
           "Phone",
+          "Fixed Deposit",
           "Deposit",
           "Withdrawal",
           "Loan",
@@ -93,10 +95,12 @@ function Reports(){
           "Due"
         ]
       ],
-      body: report.map(item=>[
+      body: report.map((item, index)=>[
+        index + 1,
         item.memberId,
         item.name,
         item.phone,
+        `৳ ${item.fixedDeposit || 0}`,
         `৳ ${item.totalDeposit || 0}`,
         `৳ ${item.totalWithdrawal || 0}`,
         `৳ ${item.totalLoan || 0}`,
@@ -114,11 +118,13 @@ function Reports(){
   // Excel Export
   // ============================
   const exportExcel = ()=>{
-    const data = report.map(item=>({
+    const data = report.map((item, index)=>({
+      "SL": index + 1,
       "Member ID": item.memberId,
       "Name": item.name,
       "Phone": item.phone,
       "Status": item.status,
+      "Fixed Deposit": item.fixedDeposit || 0,
       "Total Deposit": item.totalDeposit || 0,
       "Total Withdrawal": item.totalWithdrawal || 0,
       "Total Loan": item.totalLoan || 0,
@@ -228,9 +234,11 @@ function Reports(){
         <table className="w-full border text-sm">
           <thead>
             <tr className="bg-gray-100">
+              <th className="border p-3">SL</th>
               <th className="border p-3">Member ID</th>
               <th className="border p-3">Name</th>
               <th className="border p-3">Phone</th>
+              <th className="border p-3 text-center">Fixed Deposit</th>
               <th className="border p-3 text-center">Deposit</th>
               <th className="border p-3 text-center">Withdrawal</th>
               <th className="border p-3 text-center">Loan</th>
@@ -243,9 +251,11 @@ function Reports(){
             {
               report.map((item,index)=>(
                 <tr key={index} className="hover:bg-gray-50">
+                  <td className="border p-3 text-center">{index + 1}</td>
                   <td className="border p-3">{item.memberId}</td>
                   <td className="border p-3 font-medium">{item.name}</td>
                   <td className="border p-3">{item.phone}</td>
+                  <td className="border p-3 text-center text-indigo-600 font-semibold">৳ {item.fixedDeposit || 0}</td>
                   <td className="border p-3 text-center text-emerald-600 font-semibold">৳ {item.totalDeposit || 0}</td>
                   <td className="border p-3 text-center text-amber-600 font-semibold">৳ {item.totalWithdrawal || 0}</td>
                   <td className="border p-3 text-center text-blue-600 font-semibold">৳ {item.totalLoan || 0}</td>
