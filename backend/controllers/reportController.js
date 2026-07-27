@@ -10,7 +10,7 @@ const PDFDocument = require("pdfkit");
 
 
 // ======================================
-// Helper Function: সমিতির নিয়ম অনুযায়ী সবার জন্য জুলাই ২০২৩ থেকে বর্তমান পর্যন্ত ফিক্সড ডিপোজিট হিসাব
+// Helper Function: সমিতির নিয়ম অনুযায়ী সবার জন্য জুলাই ২০২৩ থেকে বর্তমান পর্যন্ত ফিক্সড ডিপোজিট হিসাব
 // ======================================
 const calculateTotalFixedDeposit = () => {
     const startDate = new Date(2023, 6, 1); // জুলাই ২০২৩ (মাস ৬ মানে জুলাই)
@@ -33,19 +33,19 @@ const calculateTotalFixedDeposit = () => {
                 monthlyRate = 0;
             }
         } else if (year === 2024) {
-            if (month <= 5) { // জানুয়ারি ২০২৪ থেকে জুন ২০২৪
+            if (month <= 5) { // জানুয়ারি ২০২৪ থেকে জুন ২০২৪
                 monthlyRate = 500;
             } else { // জুলাই ২০২৪ থেকে ডিসেম্বর ২০২৪
                 monthlyRate = 1000;
             }
         } else if (year === 2025) {
-            if (month <= 5) { // জানুয়ারি ২০২৫ থেকে জুন ২০২৫
+            if (month <= 5) { // জানুয়ারি ২০২৫ থেকে জুন ২০২৫
                 monthlyRate = 1000;
             } else { // জুলাই ২০২৫ থেকে ডিসেম্বর ২০২৫
                 monthlyRate = 1500;
             }
         } else if (year === 2026) {
-            if (month <= 5) { // জানুয়ারি ২০২৬ থেকে জুন ২০২৬
+            if (month <= 5) { // জানুয়ারি ২০২৬ থেকে জুন ২০২৬
                 monthlyRate = 1500;
             } else { // জুলাই ২০২৬ থেকে বর্তমান
                 monthlyRate = 2000;
@@ -153,6 +153,16 @@ const getMemberReport = async (req, res) => {
                 }
             ]);
 
+            const totalDep = deposit.length ? deposit[0].total : 0;
+            const totalWith = withdrawal.length ? withdrawal[0].total : 0;
+            const totalLn = loan.length ? loan[0].total : 0;
+            const totalPen = penalty.length ? penalty[0].total : (summary.totalPenalty || 0);
+            const advance = summary.advance || 0;
+            const totalDue = summary.totalDue || 0;
+
+            // Current Balance Calculation: (Deposit + Loan - Withdrawal) [Penalty বাদ থাকবে কারণ এটা সমিতির প্রফিট]
+            const currentBalance = totalDep + totalLn - totalWith;
+
             report.push({
                 sl: i + 1,
                 memberId: member.memberId,
@@ -161,12 +171,13 @@ const getMemberReport = async (req, res) => {
                 joiningDate: member.joiningDate,
                 status: member.status,
                 fixedDeposit: totalFixedDeposit,
-                totalDeposit: deposit.length ? deposit[0].total : 0,
-                totalWithdrawal: withdrawal.length ? withdrawal[0].total : 0,
-                totalLoan: loan.length ? loan[0].total : 0,
-                totalPenalty: penalty.length ? penalty[0].total : (summary.totalPenalty || 0),
-                advance: summary.advance || 0,
-                totalDue: summary.totalDue || 0
+                totalDeposit: totalDep,
+                totalWithdrawal: totalWith,
+                totalLoan: totalLn,
+                totalPenalty: totalPen,
+                advance: advance,
+                totalDue: totalDue,
+                currentBalance: currentBalance
             });
         }
 
@@ -215,6 +226,7 @@ const exportMemberExcel = async (req, res) => {
             { header: "Total Penalty", key: "totalPenalty", width: 15 },
             { header: "Advance", key: "advance", width: 15 },
             { header: "Total Due", key: "totalDue", width: 15 },
+            { header: "Current Balance", key: "currentBalance", width: 15 },
             { header: "Status", key: "status", width: 15 }
         ];
 
@@ -288,7 +300,7 @@ const exportMemberPDF = async (req, res) => {
 
         members.forEach((item) => {
             doc.text(
-                `SL: ${item.sl} | ID: ${item.memberId} | Name: ${item.name} | Phone: ${item.phone} | Fixed Dep: ${item.fixedDeposit} | Dep: ${item.totalDeposit} | With: ${item.totalWithdrawal} | Loan: ${item.totalLoan} | Pen: ${item.totalPenalty} | Adv: ${item.advance} | Due: ${item.totalDue} | Status: ${item.status}`
+                `SL: ${item.sl} | ID: ${item.memberId} | Name: ${item.name} | Phone: ${item.phone} | Fixed Dep: ${item.fixedDeposit} | Dep: ${item.totalDeposit} | With: ${item.totalWithdrawal} | Loan: ${item.totalLoan} | Pen: ${item.totalPenalty} | Adv: ${item.advance} | Due: ${item.totalDue} | Balance: ${item.currentBalance} | Status: ${item.status}`
             );
         });
 
@@ -384,18 +396,27 @@ const getReportData = async () => {
             }
         ]);
 
+        const totalDep = deposit.length ? deposit[0].total : 0;
+        const totalWith = withdrawal.length ? withdrawal[0].total : 0;
+        const totalLn = loan.length ? loan[0].total : 0;
+        const totalPen = penalty.length ? penalty[0].total : (summary.totalPenalty || 0);
+        const advance = summary.advance || 0;
+        const totalDue = summary.totalDue || 0;
+        const currentBalance = totalDep + totalLn - totalWith;
+
         result.push({
             sl: i + 1,
             memberId: member.memberId,
             name: member.name,
             phone: member.phone,
             fixedDeposit: totalFixedDeposit,
-            totalDeposit: deposit.length ? deposit[0].total : 0,
-            totalWithdrawal: withdrawal.length ? withdrawal[0].total : 0,
-            totalLoan: loan.length ? loan[0].total : 0,
-            totalPenalty: penalty.length ? penalty[0].total : (summary.totalPenalty || 0),
-            advance: summary.advance || 0,
-            totalDue: summary.totalDue || 0,
+            totalDeposit: totalDep,
+            totalWithdrawal: totalWith,
+            totalLoan: totalLn,
+            totalPenalty: totalPen,
+            advance: advance,
+            totalDue: totalDue,
+            currentBalance: currentBalance,
             status: member.status
         });
     }
