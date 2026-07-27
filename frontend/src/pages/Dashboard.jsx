@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import MainLayout from "../layouts/MainLayout";
 import { useNavigate } from "react-router-dom";
 import { Users, UserCheck, UserX, DollarSign, Wallet, TrendingDown, Building, ArrowUpRight, PiggyBank, ArrowDownRight, LogOut, ShieldCheck, AlertTriangle } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from "recharts";
@@ -200,317 +199,315 @@ function Dashboard() {
   const totalProfit = Number(stats.bankProfit || 0) + Number(totalFundIncome || 0) + Number(totalPenaltyAmount || 0) - Number(totalExpense);
 
   return (
-    <MainLayout>
-      <div className="p-6 space-y-6 bg-slate-900 min-h-screen text-slate-100">
-        
-        {/* Top Header Card */}
-        <div className="bg-gradient-to-r from-slate-800 via-indigo-950 to-slate-900 p-6 rounded-3xl shadow-2xl border border-slate-700/60 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="px-3 py-1 bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[11px] font-black tracking-widest uppercase rounded-full">
-                Secure Core System
-              </span>
-              <span className="flex items-center gap-1 text-emerald-400 text-xs font-bold">
-                <ShieldCheck size={14} /> Verified Enterprise
-              </span>
-            </div>
-            <h1 className="text-3xl font-black bg-gradient-to-r from-blue-400 via-indigo-300 to-white bg-clip-text text-transparent tracking-tight">
-              Skylark Cooperative Society
-            </h1>
-            <p className="text-slate-400 mt-1 font-medium text-sm">Professional Cooperative Management & Financial Core</p>
+    <div className="p-6 space-y-6 bg-slate-900 min-h-screen text-slate-100">
+      
+      {/* Top Header Card */}
+      <div className="bg-gradient-to-r from-slate-800 via-indigo-950 to-slate-900 p-6 rounded-3xl shadow-2xl border border-slate-700/60 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="px-3 py-1 bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[11px] font-black tracking-widest uppercase rounded-full">
+              Secure Core System
+            </span>
+            <span className="flex items-center gap-1 text-emerald-400 text-xs font-bold">
+              <ShieldCheck size={14} /> Verified Enterprise
+            </span>
           </div>
-          <div className="flex items-center gap-3">
-            {isAdmin && (
-              <button 
-                onClick={() => navigate("/deposit-withdrawal")} 
-                className="flex items-center gap-2 bg-gradient-to-r from-rose-600 to-pink-600 text-white px-5 py-2.5 rounded-2xl text-sm font-bold shadow-lg shadow-rose-600/30 hover:shadow-rose-600/50 transition-all transform hover:-translate-y-0.5 active:translate-y-0"
-              >
-                <LogOut size={16} />
-                <span>Withdraw Money</span>
-              </button>
-            )}
-            <div className="flex items-center gap-2 bg-blue-900/40 backdrop-blur-md text-blue-300 px-4 py-2.5 rounded-2xl text-sm font-bold border border-blue-700/40 shadow-inner">
-              <Building size={18} />
-              <span>Live System</span>
+          <h1 className="text-3xl font-black bg-gradient-to-r from-blue-400 via-indigo-300 to-white bg-clip-text text-transparent tracking-tight">
+            Skylark Cooperative Society
+          </h1>
+          <p className="text-slate-400 mt-1 font-medium text-sm">Professional Cooperative Management & Financial Core</p>
+        </div>
+        <div className="flex items-center gap-3">
+          {isAdmin && (
+            <button 
+              onClick={() => navigate("/deposit-withdrawal")} 
+              className="flex items-center gap-2 bg-gradient-to-r from-rose-600 to-pink-600 text-white px-5 py-2.5 rounded-2xl text-sm font-bold shadow-lg shadow-rose-600/30 hover:shadow-rose-600/50 transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+            >
+              <LogOut size={16} />
+              <span>Withdraw Money</span>
+            </button>
+          )}
+          <div className="flex items-center gap-2 bg-blue-900/40 backdrop-blur-md text-blue-300 px-4 py-2.5 rounded-2xl text-sm font-bold border border-blue-700/40 shadow-inner">
+            <Building size={18} />
+            <span>Live System</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Top Navigation / Quick Action Cards */}
+      {isAdmin && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div 
+            onClick={() => navigate("/reports")} 
+            className="group relative bg-gradient-to-br from-blue-900 via-blue-950 to-slate-900 border border-blue-700/40 text-white p-7 rounded-3xl shadow-[0_10px_35px_rgba(15,23,42,0.5)] hover:shadow-[0_15px_45px_rgba(37,99,235,0.4)] transition-all duration-300 cursor-pointer overflow-hidden transform hover:-translate-y-1"
+          >
+            <div className="absolute -right-6 -bottom-6 text-blue-500/10 transform group-hover:scale-125 transition duration-500 pointer-events-none">
+              <Building size={150} />
+            </div>
+            <div className="relative z-10">
+              <div className="p-4 bg-blue-600/20 w-fit rounded-2xl backdrop-blur-xl mb-4 text-blue-400 shadow-inner border border-blue-500/30">
+                <Building size={28} />
+              </div>
+              <h3 className="text-2xl font-black tracking-tight text-white">Reports</h3>
+              <p className="text-slate-300 text-sm mt-1 font-medium">Generate Reports & Print Statements</p>
+            </div>
+          </div>
+
+          <div 
+            onClick={() => navigate("/members")} 
+            className="group relative bg-gradient-to-br from-indigo-900 via-indigo-950 to-slate-900 border border-indigo-700/40 text-white p-7 rounded-3xl shadow-[0_10px_35px_rgba(15,23,42,0.5)] hover:shadow-[0_15px_45px_rgba(79,70,229,0.4)] transition-all duration-300 cursor-pointer overflow-hidden transform hover:-translate-y-1"
+          >
+            <div className="absolute -right-6 -bottom-6 text-indigo-500/10 transform group-hover:scale-125 transition duration-500 pointer-events-none">
+              <Users size={150} />
+            </div>
+            <div className="relative z-10">
+              <div className="p-4 bg-indigo-600/20 w-fit rounded-2xl backdrop-blur-xl mb-4 text-indigo-400 shadow-inner border border-indigo-500/30">
+                <Users size={28} />
+              </div>
+              <h3 className="text-2xl font-black tracking-tight text-white">Members</h3>
+              <p className="text-slate-300 text-sm mt-1 font-medium">Manage All Cooperative Members</p>
+            </div>
+          </div>
+
+          <div 
+            onClick={() => navigate("/deposits")} 
+            className="group relative bg-gradient-to-br from-teal-900 via-teal-950 to-slate-900 border border-teal-700/40 text-white p-7 rounded-3xl shadow-[0_10px_35px_rgba(15,23,42,0.5)] hover:shadow-[0_15px_45px_rgba(13,148,136,0.4)] transition-all duration-300 cursor-pointer overflow-hidden transform hover:-translate-y-1"
+          >
+            <div className="absolute -right-6 -bottom-6 text-teal-500/10 transform group-hover:scale-125 transition duration-500 pointer-events-none">
+              <Wallet size={150} />
+            </div>
+            <div className="relative z-10">
+              <div className="p-4 bg-teal-600/20 w-fit rounded-2xl backdrop-blur-xl mb-4 text-teal-400 shadow-inner border border-teal-500/30">
+                <Wallet size={28} />
+              </div>
+              <h3 className="text-2xl font-black tracking-tight text-white">Deposits</h3>
+              <p className="text-slate-300 text-sm mt-1 font-medium">Manage Member Savings & Deposits</p>
             </div>
           </div>
         </div>
+      )}
 
-        {/* Top Navigation / Quick Action Cards */}
+      {/* Statistics Metric Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        
+        <div className="bg-gradient-to-br from-slate-800 via-slate-900 to-blue-950 border border-slate-700/80 p-6 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 flex justify-between items-center group transform hover:-translate-y-1">
+          <div>
+            <p className="text-[11px] font-black text-blue-400 tracking-wider uppercase">Total Members</p>
+            <h3 className="text-3xl font-black text-white mt-2 group-hover:text-blue-300 transition">{stats.totalMembers}</h3>
+          </div>
+          <div className="p-4 bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-2xl group-hover:scale-110 transition duration-300 shadow-lg shadow-blue-600/40">
+            <Users size={24} />
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-slate-800 via-slate-900 to-emerald-950 border border-slate-700/80 p-6 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 flex justify-between items-center group transform hover:-translate-y-1">
+          <div>
+            <p className="text-[11px] font-black text-emerald-400 tracking-wider uppercase">Active Members</p>
+            <h3 className="text-3xl font-black text-white mt-2 group-hover:text-emerald-300 transition">{stats.activeMembers}</h3>
+          </div>
+          <div className="p-4 bg-gradient-to-br from-emerald-600 to-emerald-700 text-white rounded-2xl group-hover:scale-110 transition duration-300 shadow-lg shadow-emerald-600/40">
+            <UserCheck size={24} />
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-slate-800 via-slate-900 to-rose-950 border border-slate-700/80 p-6 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 flex justify-between items-center group transform hover:-translate-y-1">
+          <div>
+            <p className="text-[11px] font-black text-rose-400 tracking-wider uppercase">Inactive Members</p>
+            <h3 className="text-3xl font-black text-white mt-2 group-hover:text-rose-300 transition">{stats.inactiveMembers}</h3>
+          </div>
+          <div className="p-4 bg-gradient-to-br from-rose-600 to-rose-700 text-white rounded-2xl group-hover:scale-110 transition duration-300 shadow-lg shadow-rose-600/40">
+            <UserX size={24} />
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-slate-800 via-slate-900 to-purple-950 border border-slate-700/80 p-6 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 flex justify-between items-center group transform hover:-translate-y-1">
+          <div>
+            <p className="text-[11px] font-black text-purple-400 tracking-wider uppercase">Total Loan Given</p>
+            <h3 className="text-2xl font-black text-white mt-2">৳ {totalLoanGiven.toLocaleString()}</h3>
+          </div>
+          <div className="p-4 bg-gradient-to-br from-purple-600 to-purple-700 text-white rounded-2xl group-hover:scale-110 transition duration-300 shadow-lg shadow-purple-600/40">
+            <DollarSign size={24} />
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-blue-900 via-indigo-950 to-blue-950 border border-blue-700/50 text-white p-6 rounded-3xl shadow-[0_10px_35px_rgba(30,58,138,0.4)] hover:shadow-2xl transition-all duration-300 flex justify-between items-center group transform hover:-translate-y-1">
+          <div>
+            <p className="text-[11px] font-black text-blue-300 tracking-wider uppercase">Main Cash Balance</p>
+            <h3 className="text-2xl font-black mt-2 text-white">৳ {currentMainCashBalance.toLocaleString()}</h3>
+          </div>
+          <div className="p-4 bg-white/10 text-white rounded-2xl backdrop-blur-xl group-hover:scale-110 transition duration-300 shadow-inner border border-white/20">
+            <Wallet size={24} />
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-indigo-900 via-slate-900 to-indigo-950 border border-indigo-700/50 text-white p-6 rounded-3xl shadow-[0_10px_35px_rgba(49,46,129,0.4)] hover:shadow-2xl transition-all duration-300 flex justify-between items-center group transform hover:-translate-y-1">
+          <div>
+            <p className="text-[11px] font-black text-indigo-300 tracking-wider uppercase">Total Deposit Balance</p>
+            <h3 className="text-2xl font-black mt-2 text-white">৳ {totalDepositBalance.toLocaleString()}</h3>
+          </div>
+          <div className="p-4 bg-white/10 text-white rounded-2xl backdrop-blur-xl group-hover:scale-110 transition duration-300 shadow-inner border border-white/20">
+            <PiggyBank size={24} />
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-rose-950 via-red-950 to-slate-900 border border-rose-800/50 text-white p-6 rounded-3xl shadow-[0_10px_35px_rgba(159,18,57,0.4)] hover:shadow-2xl transition-all duration-300 flex justify-between items-center group transform hover:-translate-y-1">
+          <div>
+            <p className="text-[11px] font-black text-rose-300 tracking-wider uppercase">Total Due</p>
+            <h3 className="text-2xl font-black mt-2 text-white">৳ {calculatedTotalDue.toLocaleString()}</h3>
+          </div>
+          <div className="p-4 bg-white/10 text-white rounded-2xl backdrop-blur-xl group-hover:scale-110 transition duration-300 shadow-inner border border-white/20">
+            <TrendingDown size={24} />
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-slate-800 via-slate-900 to-teal-950 border border-slate-700/80 p-6 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 flex justify-between items-center group transform hover:-translate-y-1">
+          <div>
+            <p className="text-[11px] font-black text-teal-400 tracking-wider uppercase">Bank Profit</p>
+            <h3 className="text-2xl font-black text-white mt-2">৳ {Number(stats.bankProfit).toLocaleString()}</h3>
+          </div>
+          <div className="p-4 bg-gradient-to-br from-teal-600 to-teal-700 text-white rounded-2xl group-hover:scale-110 transition duration-300 shadow-lg shadow-teal-600/40">
+            <Building size={24} />
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-slate-800 via-slate-900 to-emerald-950 border border-slate-700/80 p-6 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 flex justify-between items-center group transform hover:-translate-y-1">
+          <div>
+            <p className="text-[11px] font-black text-emerald-400 tracking-wider uppercase">Total Income</p>
+            <h3 className="text-2xl font-black text-white mt-2">৳ {totalFundIncome.toLocaleString()}</h3>
+          </div>
+          <div className="p-4 bg-gradient-to-br from-emerald-600 to-emerald-700 text-white rounded-2xl group-hover:scale-110 transition duration-300 shadow-lg shadow-emerald-600/40">
+            <ArrowUpRight size={24} />
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 border border-indigo-700/50 text-white p-6 rounded-3xl shadow-[0_10px_35px_rgba(15,23,42,0.6)] hover:shadow-2xl transition-all duration-300 flex justify-between items-center group transform hover:-translate-y-1">
+          <div>
+            <p className="text-[11px] font-black text-indigo-300 tracking-wider uppercase">Total Profit</p>
+            <h3 className="text-2xl font-black mt-2 text-white">৳ {totalProfit.toLocaleString()}</h3>
+          </div>
+          <div className="p-4 bg-white/10 text-white rounded-2xl backdrop-blur-xl group-hover:scale-110 transition duration-300 shadow-inner border border-white/20">
+            <DollarSign size={24} />
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-red-950 via-rose-950 to-slate-900 border border-red-800/50 text-white p-6 rounded-3xl shadow-[0_10px_35px_rgba(127,29,29,0.4)] hover:shadow-2xl transition-all duration-300 flex justify-between items-center group transform hover:-translate-y-1">
+          <div>
+            <p className="text-[11px] font-black text-rose-300 tracking-wider uppercase">Total Expense</p>
+            <h3 className="text-2xl font-black mt-2 text-white">৳ {totalExpense.toLocaleString()}</h3>
+          </div>
+          <div className="p-4 bg-white/10 text-white rounded-2xl backdrop-blur-xl group-hover:scale-110 transition duration-300 shadow-inner border border-white/20">
+            <ArrowDownRight size={24} />
+          </div>
+        </div>
+
         {isAdmin && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div 
-              onClick={() => navigate("/reports")} 
-              className="group relative bg-gradient-to-br from-blue-900 via-blue-950 to-slate-900 border border-blue-700/40 text-white p-7 rounded-3xl shadow-[0_10px_35px_rgba(15,23,42,0.5)] hover:shadow-[0_15px_45px_rgba(37,99,235,0.4)] transition-all duration-300 cursor-pointer overflow-hidden transform hover:-translate-y-1"
-            >
-              <div className="absolute -right-6 -bottom-6 text-blue-500/10 transform group-hover:scale-125 transition duration-500 pointer-events-none">
-                <Building size={150} />
-              </div>
-              <div className="relative z-10">
-                <div className="p-4 bg-blue-600/20 w-fit rounded-2xl backdrop-blur-xl mb-4 text-blue-400 shadow-inner border border-blue-500/30">
-                  <Building size={28} />
-                </div>
-                <h3 className="text-2xl font-black tracking-tight text-white">Reports</h3>
-                <p className="text-slate-300 text-sm mt-1 font-medium">Generate Reports & Print Statements</p>
-              </div>
+          <div className="bg-gradient-to-br from-purple-950 via-violet-950 to-slate-900 border border-purple-800/50 text-white p-6 rounded-3xl shadow-[0_10px_35px_rgba(88,28,135,0.4)] hover:shadow-2xl transition-all duration-300 flex justify-between items-center group transform hover:-translate-y-1">
+            <div>
+              <p className="text-[11px] font-black text-purple-300 tracking-wider uppercase">Total Withdrawal</p>
+              <h3 className="text-2xl font-black mt-2 text-white">৳ {totalWithdrawal.toLocaleString()}</h3>
             </div>
-
-            <div 
-              onClick={() => navigate("/members")} 
-              className="group relative bg-gradient-to-br from-indigo-900 via-indigo-950 to-slate-900 border border-indigo-700/40 text-white p-7 rounded-3xl shadow-[0_10px_35px_rgba(15,23,42,0.5)] hover:shadow-[0_15px_45px_rgba(79,70,229,0.4)] transition-all duration-300 cursor-pointer overflow-hidden transform hover:-translate-y-1"
-            >
-              <div className="absolute -right-6 -bottom-6 text-indigo-500/10 transform group-hover:scale-125 transition duration-500 pointer-events-none">
-                <Users size={150} />
-              </div>
-              <div className="relative z-10">
-                <div className="p-4 bg-indigo-600/20 w-fit rounded-2xl backdrop-blur-xl mb-4 text-indigo-400 shadow-inner border border-indigo-500/30">
-                  <Users size={28} />
-                </div>
-                <h3 className="text-2xl font-black tracking-tight text-white">Members</h3>
-                <p className="text-slate-300 text-sm mt-1 font-medium">Manage All Cooperative Members</p>
-              </div>
-            </div>
-
-            <div 
-              onClick={() => navigate("/deposits")} 
-              className="group relative bg-gradient-to-br from-teal-900 via-teal-950 to-slate-900 border border-teal-700/40 text-white p-7 rounded-3xl shadow-[0_10px_35px_rgba(15,23,42,0.5)] hover:shadow-[0_15px_45px_rgba(13,148,136,0.4)] transition-all duration-300 cursor-pointer overflow-hidden transform hover:-translate-y-1"
-            >
-              <div className="absolute -right-6 -bottom-6 text-teal-500/10 transform group-hover:scale-125 transition duration-500 pointer-events-none">
-                <Wallet size={150} />
-              </div>
-              <div className="relative z-10">
-                <div className="p-4 bg-teal-600/20 w-fit rounded-2xl backdrop-blur-xl mb-4 text-teal-400 shadow-inner border border-teal-500/30">
-                  <Wallet size={28} />
-                </div>
-                <h3 className="text-2xl font-black tracking-tight text-white">Deposits</h3>
-                <p className="text-slate-300 text-sm mt-1 font-medium">Manage Member Savings & Deposits</p>
-              </div>
+            <div className="p-4 bg-white/10 text-white rounded-2xl backdrop-blur-xl group-hover:scale-110 transition duration-300 shadow-inner border border-white/20">
+              <LogOut size={24} />
             </div>
           </div>
         )}
 
-        {/* Statistics Metric Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          
-          <div className="bg-gradient-to-br from-slate-800 via-slate-900 to-blue-950 border border-slate-700/80 p-6 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 flex justify-between items-center group transform hover:-translate-y-1">
-            <div>
-              <p className="text-[11px] font-black text-blue-400 tracking-wider uppercase">Total Members</p>
-              <h3 className="text-3xl font-black text-white mt-2 group-hover:text-blue-300 transition">{stats.totalMembers}</h3>
-            </div>
-            <div className="p-4 bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-2xl group-hover:scale-110 transition duration-300 shadow-lg shadow-blue-600/40">
-              <Users size={24} />
-            </div>
+        <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 border border-indigo-500/40 text-white p-6 rounded-3xl shadow-[0_10px_35px_rgba(79,70,229,0.4)] hover:shadow-2xl transition-all duration-300 flex justify-between items-center group transform hover:-translate-y-1">
+          <div>
+            <p className="text-[11px] font-black text-indigo-300 tracking-wider uppercase">Total Penalty Collection</p>
+            <h3 className="text-2xl font-black mt-2 text-white">৳ {totalPenaltyAmount.toLocaleString()}</h3>
           </div>
-
-          <div className="bg-gradient-to-br from-slate-800 via-slate-900 to-emerald-950 border border-slate-700/80 p-6 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 flex justify-between items-center group transform hover:-translate-y-1">
-            <div>
-              <p className="text-[11px] font-black text-emerald-400 tracking-wider uppercase">Active Members</p>
-              <h3 className="text-3xl font-black text-white mt-2 group-hover:text-emerald-300 transition">{stats.activeMembers}</h3>
-            </div>
-            <div className="p-4 bg-gradient-to-br from-emerald-600 to-emerald-700 text-white rounded-2xl group-hover:scale-110 transition duration-300 shadow-lg shadow-emerald-600/40">
-              <UserCheck size={24} />
-            </div>
+          <div className="p-4 bg-gradient-to-tr from-indigo-600 to-violet-600 text-white rounded-2xl group-hover:scale-110 transition duration-300 shadow-lg shadow-indigo-600/40">
+            <AlertTriangle size={24} />
           </div>
-
-          <div className="bg-gradient-to-br from-slate-800 via-slate-900 to-rose-950 border border-slate-700/80 p-6 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 flex justify-between items-center group transform hover:-translate-y-1">
-            <div>
-              <p className="text-[11px] font-black text-rose-400 tracking-wider uppercase">Inactive Members</p>
-              <h3 className="text-3xl font-black text-white mt-2 group-hover:text-rose-300 transition">{stats.inactiveMembers}</h3>
-            </div>
-            <div className="p-4 bg-gradient-to-br from-rose-600 to-rose-700 text-white rounded-2xl group-hover:scale-110 transition duration-300 shadow-lg shadow-rose-600/40">
-              <UserX size={24} />
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-slate-800 via-slate-900 to-purple-950 border border-slate-700/80 p-6 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 flex justify-between items-center group transform hover:-translate-y-1">
-            <div>
-              <p className="text-[11px] font-black text-purple-400 tracking-wider uppercase">Total Loan Given</p>
-              <h3 className="text-2xl font-black text-white mt-2">৳ {totalLoanGiven.toLocaleString()}</h3>
-            </div>
-            <div className="p-4 bg-gradient-to-br from-purple-600 to-purple-700 text-white rounded-2xl group-hover:scale-110 transition duration-300 shadow-lg shadow-purple-600/40">
-              <DollarSign size={24} />
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-blue-900 via-indigo-950 to-blue-950 border border-blue-700/50 text-white p-6 rounded-3xl shadow-[0_10px_35px_rgba(30,58,138,0.4)] hover:shadow-2xl transition-all duration-300 flex justify-between items-center group transform hover:-translate-y-1">
-            <div>
-              <p className="text-[11px] font-black text-blue-300 tracking-wider uppercase">Main Cash Balance</p>
-              <h3 className="text-2xl font-black mt-2 text-white">৳ {currentMainCashBalance.toLocaleString()}</h3>
-            </div>
-            <div className="p-4 bg-white/10 text-white rounded-2xl backdrop-blur-xl group-hover:scale-110 transition duration-300 shadow-inner border border-white/20">
-              <Wallet size={24} />
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-indigo-900 via-slate-900 to-indigo-950 border border-indigo-700/50 text-white p-6 rounded-3xl shadow-[0_10px_35px_rgba(49,46,129,0.4)] hover:shadow-2xl transition-all duration-300 flex justify-between items-center group transform hover:-translate-y-1">
-            <div>
-              <p className="text-[11px] font-black text-indigo-300 tracking-wider uppercase">Total Deposit Balance</p>
-              <h3 className="text-2xl font-black mt-2 text-white">৳ {totalDepositBalance.toLocaleString()}</h3>
-            </div>
-            <div className="p-4 bg-white/10 text-white rounded-2xl backdrop-blur-xl group-hover:scale-110 transition duration-300 shadow-inner border border-white/20">
-              <PiggyBank size={24} />
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-rose-950 via-red-950 to-slate-900 border border-rose-800/50 text-white p-6 rounded-3xl shadow-[0_10px_35px_rgba(159,18,57,0.4)] hover:shadow-2xl transition-all duration-300 flex justify-between items-center group transform hover:-translate-y-1">
-            <div>
-              <p className="text-[11px] font-black text-rose-300 tracking-wider uppercase">Total Due</p>
-              <h3 className="text-2xl font-black mt-2 text-white">৳ {calculatedTotalDue.toLocaleString()}</h3>
-            </div>
-            <div className="p-4 bg-white/10 text-white rounded-2xl backdrop-blur-xl group-hover:scale-110 transition duration-300 shadow-inner border border-white/20">
-              <TrendingDown size={24} />
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-slate-800 via-slate-900 to-teal-950 border border-slate-700/80 p-6 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 flex justify-between items-center group transform hover:-translate-y-1">
-            <div>
-              <p className="text-[11px] font-black text-teal-400 tracking-wider uppercase">Bank Profit</p>
-              <h3 className="text-2xl font-black text-white mt-2">৳ {Number(stats.bankProfit).toLocaleString()}</h3>
-            </div>
-            <div className="p-4 bg-gradient-to-br from-teal-600 to-teal-700 text-white rounded-2xl group-hover:scale-110 transition duration-300 shadow-lg shadow-teal-600/40">
-              <Building size={24} />
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-slate-800 via-slate-900 to-emerald-950 border border-slate-700/80 p-6 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 flex justify-between items-center group transform hover:-translate-y-1">
-            <div>
-              <p className="text-[11px] font-black text-emerald-400 tracking-wider uppercase">Total Income</p>
-              <h3 className="text-2xl font-black text-white mt-2">৳ {totalFundIncome.toLocaleString()}</h3>
-            </div>
-            <div className="p-4 bg-gradient-to-br from-emerald-600 to-emerald-700 text-white rounded-2xl group-hover:scale-110 transition duration-300 shadow-lg shadow-emerald-600/40">
-              <ArrowUpRight size={24} />
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 border border-indigo-700/50 text-white p-6 rounded-3xl shadow-[0_10px_35px_rgba(15,23,42,0.6)] hover:shadow-2xl transition-all duration-300 flex justify-between items-center group transform hover:-translate-y-1">
-            <div>
-              <p className="text-[11px] font-black text-indigo-300 tracking-wider uppercase">Total Profit</p>
-              <h3 className="text-2xl font-black mt-2 text-white">৳ {totalProfit.toLocaleString()}</h3>
-            </div>
-            <div className="p-4 bg-white/10 text-white rounded-2xl backdrop-blur-xl group-hover:scale-110 transition duration-300 shadow-inner border border-white/20">
-              <DollarSign size={24} />
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-red-950 via-rose-950 to-slate-900 border border-red-800/50 text-white p-6 rounded-3xl shadow-[0_10px_35px_rgba(127,29,29,0.4)] hover:shadow-2xl transition-all duration-300 flex justify-between items-center group transform hover:-translate-y-1">
-            <div>
-              <p className="text-[11px] font-black text-rose-300 tracking-wider uppercase">Total Expense</p>
-              <h3 className="text-2xl font-black mt-2 text-white">৳ {totalExpense.toLocaleString()}</h3>
-            </div>
-            <div className="p-4 bg-white/10 text-white rounded-2xl backdrop-blur-xl group-hover:scale-110 transition duration-300 shadow-inner border border-white/20">
-              <ArrowDownRight size={24} />
-            </div>
-          </div>
-
-          {isAdmin && (
-            <div className="bg-gradient-to-br from-purple-950 via-violet-950 to-slate-900 border border-purple-800/50 text-white p-6 rounded-3xl shadow-[0_10px_35px_rgba(88,28,135,0.4)] hover:shadow-2xl transition-all duration-300 flex justify-between items-center group transform hover:-translate-y-1">
-              <div>
-                <p className="text-[11px] font-black text-purple-300 tracking-wider uppercase">Total Withdrawal</p>
-                <h3 className="text-2xl font-black mt-2 text-white">৳ {totalWithdrawal.toLocaleString()}</h3>
-              </div>
-              <div className="p-4 bg-white/10 text-white rounded-2xl backdrop-blur-xl group-hover:scale-110 transition duration-300 shadow-inner border border-white/20">
-                <LogOut size={24} />
-              </div>
-            </div>
-          )}
-
-          <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 border border-indigo-500/40 text-white p-6 rounded-3xl shadow-[0_10px_35px_rgba(79,70,229,0.4)] hover:shadow-2xl transition-all duration-300 flex justify-between items-center group transform hover:-translate-y-1">
-            <div>
-              <p className="text-[11px] font-black text-indigo-300 tracking-wider uppercase">Total Penalty Collection</p>
-              <h3 className="text-2xl font-black mt-2 text-white">৳ {totalPenaltyAmount.toLocaleString()}</h3>
-            </div>
-            <div className="p-4 bg-gradient-to-tr from-indigo-600 to-violet-600 text-white rounded-2xl group-hover:scale-110 transition duration-300 shadow-lg shadow-indigo-600/40">
-              <AlertTriangle size={24} />
-            </div>
-          </div>
-
-        </div>
-
-        {/* Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-4">
-          
-          <div className="bg-gradient-to-br from-slate-800 via-slate-900 to-slate-900 border border-slate-700/80 p-7 rounded-3xl shadow-xl">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-black text-white flex items-center gap-2">
-                <span className="w-3 h-3 bg-blue-500 rounded-full inline-block shadow-md shadow-blue-500/50"></span>
-                Monthly Deposit Overview
-              </h3>
-              <span className="text-xs font-bold bg-blue-950 text-blue-400 px-3.5 py-1.5 rounded-full border border-blue-800/60">
-                Jul 2023 - Present
-              </span>
-            </div>
-            <div className="h-64 w-full overflow-x-auto">
-              <div style={{ width: Math.max(600, depositChartData.length * 65) }} className="h-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={depositChartData} margin={{ top: 10, right: 10, left: 0, bottom: 25 }}>
-                    <defs>
-                      <linearGradient id="colorDeposit" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={1}/>
-                        <stop offset="95%" stopColor="#1d4ed8" stopOpacity={0.8}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" />
-                    <XAxis dataKey="month" stroke="#94a3b8" fontSize={11} interval={0} angle={-35} textAnchor="end" tick={{ fontWeight: 600 }} />
-                    <YAxis stroke="#94a3b8" fontSize={12} tick={{ fontWeight: 600 }} />
-                    <Tooltip 
-                      contentStyle={{ backgroundColor: '#020617', color: '#ffffff', borderRadius: '16px', border: '1px solid #1e293b', boxShadow: '0 10px 25px -3px rgb(0 0 0 / 0.5)' }}
-                      itemStyle={{ color: '#60a5fa', fontWeight: 'bold' }}
-                      formatter={(value) => [`৳ ${value.toLocaleString()}`, 'Deposit Amount']}
-                    />
-                    <Bar dataKey="amount" fill="url(#colorDeposit)" radius={[8, 8, 0, 0]}>
-                      {depositChartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={index % 2 === 0 ? '#3b82f6' : '#6366f1'} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-slate-800 via-slate-900 to-slate-900 border border-slate-700/80 p-7 rounded-3xl shadow-xl">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-black text-white flex items-center gap-2">
-                <span className="w-3 h-3 bg-rose-500 rounded-full inline-block shadow-md shadow-rose-500/50"></span>
-                Monthly Due Overview
-              </h3>
-              <span className="text-xs font-bold bg-rose-950 text-rose-400 px-3.5 py-1.5 rounded-full border border-rose-800/60">
-                Jul 2023 - Present
-              </span>
-            </div>
-            <div className="h-64 w-full overflow-x-auto">
-              <div style={{ width: Math.max(600, dueChartData.length * 65) }} className="h-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={dueChartData} margin={{ top: 10, right: 10, left: 0, bottom: 25 }}>
-                    <defs>
-                      <linearGradient id="colorDue" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#f43f5e" stopOpacity={1}/>
-                        <stop offset="95%" stopColor="#be123c" stopOpacity={0.8}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" />
-                    <XAxis dataKey="month" stroke="#94a3b8" fontSize={11} interval={0} angle={-35} textAnchor="end" tick={{ fontWeight: 600 }} />
-                    <YAxis stroke="#94a3b8" fontSize={12} tick={{ fontWeight: 600 }} />
-                    <Tooltip 
-                      contentStyle={{ backgroundColor: '#020617', color: '#ffffff', borderRadius: '16px', border: '1px solid #1e293b', boxShadow: '0 10px 25px -3px rgb(0 0 0 / 0.5)' }}
-                      itemStyle={{ color: '#fb7185', fontWeight: 'bold' }}
-                      formatter={(value) => [`৳ ${value.toLocaleString()}`, 'Due Amount']}
-                    />
-                    <Bar dataKey="amount" fill="url(#colorDue)" radius={[8, 8, 0, 0]}>
-                      {dueChartData.map((entry, index) => (
-                        <Cell key={`cell-due-${index}`} fill={index % 2 === 0 ? '#e11d48' : '#f43f5e'} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </div>
-
         </div>
 
       </div>
-    </MainLayout>
+
+      {/* Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-4">
+        
+        <div className="bg-gradient-to-br from-slate-800 via-slate-900 to-slate-900 border border-slate-700/80 p-7 rounded-3xl shadow-xl">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-black text-white flex items-center gap-2">
+              <span className="w-3 h-3 bg-blue-500 rounded-full inline-block shadow-md shadow-blue-500/50"></span>
+              Monthly Deposit Overview
+            </h3>
+            <span className="text-xs font-bold bg-blue-950 text-blue-400 px-3.5 py-1.5 rounded-full border border-blue-800/60">
+              Jul 2023 - Present
+            </span>
+          </div>
+          <div className="h-64 w-full overflow-x-auto">
+            <div style={{ width: Math.max(600, depositChartData.length * 65) }} className="h-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={depositChartData} margin={{ top: 10, right: 10, left: 0, bottom: 25 }}>
+                  <defs>
+                    <linearGradient id="colorDeposit" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={1}/>
+                      <stop offset="95%" stopColor="#1d4ed8" stopOpacity={0.8}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" />
+                  <XAxis dataKey="month" stroke="#94a3b8" fontSize={11} interval={0} angle={-35} textAnchor="end" tick={{ fontWeight: 600 }} />
+                  <YAxis stroke="#94a3b8" fontSize={12} tick={{ fontWeight: 600 }} />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#020617', color: '#ffffff', borderRadius: '16px', border: '1px solid #1e293b', boxShadow: '0 10px 25px -3px rgb(0 0 0 / 0.5)' }}
+                    itemStyle={{ color: '#60a5fa', fontWeight: 'bold' }}
+                    formatter={(value) => [`৳ ${value.toLocaleString()}`, 'Deposit Amount']}
+                  />
+                  <Bar dataKey="amount" fill="url(#colorDeposit)" radius={[8, 8, 0, 0]}>
+                    {depositChartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={index % 2 === 0 ? '#3b82f6' : '#6366f1'} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-slate-800 via-slate-900 to-slate-900 border border-slate-700/80 p-7 rounded-3xl shadow-xl">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-black text-white flex items-center gap-2">
+              <span className="w-3 h-3 bg-rose-500 rounded-full inline-block shadow-md shadow-rose-500/50"></span>
+              Monthly Due Overview
+            </h3>
+            <span className="text-xs font-bold bg-rose-950 text-rose-400 px-3.5 py-1.5 rounded-full border border-rose-800/60">
+              Jul 2023 - Present
+            </span>
+          </div>
+          <div className="h-64 w-full overflow-x-auto">
+            <div style={{ width: Math.max(600, dueChartData.length * 65) }} className="h-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={dueChartData} margin={{ top: 10, right: 10, left: 0, bottom: 25 }}>
+                  <defs>
+                    <linearGradient id="colorDue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#f43f5e" stopOpacity={1}/>
+                      <stop offset="95%" stopColor="#be123c" stopOpacity={0.8}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" />
+                  <XAxis dataKey="month" stroke="#94a3b8" fontSize={11} interval={0} angle={-35} textAnchor="end" tick={{ fontWeight: 600 }} />
+                  <YAxis stroke="#94a3b8" fontSize={12} tick={{ fontWeight: 600 }} />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#020617', color: '#ffffff', borderRadius: '16px', border: '1px solid #1e293b', boxShadow: '0 10px 25px -3px rgb(0 0 0 / 0.5)' }}
+                    itemStyle={{ color: '#fb7185', fontWeight: 'bold' }}
+                    formatter={(value) => [`৳ ${value.toLocaleString()}`, 'Due Amount']}
+                  />
+                  <Bar dataKey="amount" fill="url(#colorDue)" radius={[8, 8, 0, 0]}>
+                    {dueChartData.map((entry, index) => (
+                      <Cell key={`cell-due-${index}`} fill={index % 2 === 0 ? '#e11d48' : '#f43f5e'} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
   );
 }
 
