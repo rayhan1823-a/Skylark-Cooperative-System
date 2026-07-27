@@ -3,10 +3,14 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 function MemberProfile() {
-  const { id } = useParams();
+  const params = useParams();
   const navigate = useNavigate();
   const API = "https://skylark-cooperative-system.onrender.com/api";
   const BASE_URL = "https://skylark-cooperative-system.onrender.com";
+
+  // ── নিজস্ব বা নির্দিষ্ট মেম্বার আইডি বের করার লজিক (ফিক্সড) ──
+  const loggedInMemberId = localStorage.getItem("memberId") || localStorage.getItem("userId") || localStorage.getItem("id");
+  const id = params.id || loggedInMemberId;
 
   const [member, setMember] = useState(null);
   const [summary, setSummary] = useState(null);
@@ -18,19 +22,20 @@ function MemberProfile() {
   const [loading, setLoading] = useState(true);
   const [loanAmount, setLoanAmount] = useState(0);
 
-  // ── সাধারণ সদস্য হলে সে কেবল নিজের প্রোফাইল দেখবে তা নিশ্চিত করা (ফিক্সড) ──
+  // ── সাধারণ সদস্য হলে সে কেবল নিজের প্রোফাইল দেখবে তা নিশ্চিত করা ──
   useEffect(() => {
     const role = (localStorage.getItem("role") || "").toLowerCase();
-    const loggedInMemberId = localStorage.getItem("memberId") || localStorage.getItem("userId") || localStorage.getItem("id");
 
-    if (role === "member" && loggedInMemberId && id !== loggedInMemberId) {
+    if (role === "member" && loggedInMemberId && params.id && params.id !== loggedInMemberId) {
       navigate(`/members/${loggedInMemberId}`, { replace: true });
       return;
     }
-  }, [id, navigate]);
+  }, [params.id, navigate, loggedInMemberId]);
 
   useEffect(() => {
-    loadMemberProfile();
+    if (id) {
+      loadMemberProfile();
+    }
   }, [id]);
 
   const loadMemberProfile = async () => {
@@ -76,8 +81,6 @@ function MemberProfile() {
   const totalPenalty = summary?.totalPenalty ?? penalties.reduce((sum, p) => sum + Number(p.amount || p.fineAmount || p.total || p.penaltyAmount || 0), 0);
 
   const currentBalance = totalDeposit - totalWithdrawal - loanAmount;
-  
-  // ✅ ব্যাকএন্ড থেকে আসা টোটাল ডিউ সরাসরি ব্যবহার করা হলো (অতিরিক্ত যোগ-বিয়োগ বাদ দেওয়া হয়েছে)
   const totalDueAmount = summary?.totalDue ?? 0;
 
   if (loading) {
@@ -171,7 +174,7 @@ function MemberProfile() {
           </div>
         </div>
 
-        {/* Summary Cards (Total Deposit Due কার্ড বাদ দিয়ে ৭টি কার্ড রাখা হলো) */}
+        {/* Summary Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-8">
           {[
             { label: 'Total Deposit', val: totalDeposit, color: 'bg-green-600' },
