@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import MainLayout from "../layouts/MainLayout";
 import { Plus, Search, Pencil, Trash2, X, AlertTriangle, Wallet } from "lucide-react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
@@ -185,8 +184,8 @@ function Penalties() {
   const currentData = filteredData.slice((page - 1) * limit, page * limit);
 
   return (
-    <MainLayout>
-      <div className="space-y-6">
+    <div className="flex-1 p-6 overflow-y-auto w-full bg-slate-50 min-h-screen">
+      <div className="space-y-6 max-w-7xl mx-auto">
         
         {/* Colorful Header Banner */}
         <div className="relative overflow-hidden bg-gradient-to-r from-blue-700 via-indigo-600 to-purple-700 p-6 rounded-2xl shadow-xl text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -371,7 +370,7 @@ function Penalties() {
           </div>
         )}
       </div>
-    </MainLayout>
+    </div>
   );
 }
 
