@@ -151,13 +151,13 @@ function MemberProfile() {
 
           <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
             
-            {/* ফিক্সড: ইমেজ সুন্দরভাবে জুম ও পারফেক্ট ফিট করার জন্য object-cover এবং object-top ব্যবহার করা হয়েছে */}
+            {/* ফিক্সড: ইমেজ সুন্দরভাবে জুম ও পারফেক্ট ফিট করার জন্য object-cover এবং scale-110 ব্যবহার করা হয়েছে */}
             <div className="relative flex-shrink-0 group">
               <div className="absolute -inset-1.5 bg-gradient-to-r from-indigo-500 via-blue-600 to-purple-600 rounded-full blur-md opacity-40 group-hover:opacity-75 transition duration-500"></div>
               {profileImageUrl ? (
                 <img 
                   src={profileImageUrl} 
-                  className="w-40 h-40 rounded-full object-cover object-top border-4 border-white shadow-2xl bg-slate-100 relative transform transition duration-500 group-hover:scale-[1.02]" 
+                  className="w-40 h-40 rounded-full object-cover scale-110 border-4 border-white shadow-2xl bg-slate-100 relative transform transition duration-500 group-hover:scale-[1.15]" 
                   alt={member.name}
                   onError={(e) => {
                     e.target.onerror = null; 
