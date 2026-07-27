@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
-import MainLayout from "../layouts/MainLayout";
 
 function AddMember() {
   const navigate = useNavigate();
@@ -160,7 +159,7 @@ function AddMember() {
   // ======================================
 
   return (
-    <MainLayout>
+    <div>
       <h1 className="text-3xl font-bold mb-6">
         Add New Member
       </h1>
@@ -645,7 +644,7 @@ function AddMember() {
         </div>
 
       </div>
-    </MainLayout>
+    </div>
   );
 }
 
