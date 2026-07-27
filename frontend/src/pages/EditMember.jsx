@@ -20,12 +20,14 @@ function EditMember() {
     try {
       const token = localStorage.getItem("token") || localStorage.getItem("authToken");
       const res = await axios.get(
-        `https://skylark-cooperative-system.onrender.com/api/members/profile/${id}`,
+        `https://skylark-cooperative-system.onrender.com/api/members/${id}`,
         {
           headers: { Authorization: `Bearer ${token}` }
         }
       );
-      setFormData(res.data.member);
+      // ব্যাকএন্ড থেকে ডেটা যেভাবে আসুক না কেন তা ধরার জন্য সেফ চেক
+      const memberData = res.data.member || res.data.data || res.data;
+      setFormData(memberData || {});
     } catch (error) {
       console.log(error);
     } finally {
@@ -102,7 +104,7 @@ function EditMember() {
 
   return (
     <MainLayout>
-      <div className="flex-1 p-6 bg-slate-50 min-h-screen overflow-y-auto w-full">
+      <div className="p-6 bg-slate-50 min-h-screen w-full">
         <div className="max-w-7xl mx-auto space-y-6">
           <h1 className="text-3xl font-bold mb-6 text-blue-900">Edit Member</h1>
           <div className="bg-white shadow rounded-xl p-6 border border-gray-200">
