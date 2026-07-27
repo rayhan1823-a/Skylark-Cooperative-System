@@ -85,15 +85,18 @@ function MemberProfile() {
 
   if (loading) {
     return (
-      <div className="flex-1 p-10 text-center text-2xl font-bold text-blue-600 bg-slate-50 min-h-screen flex items-center justify-center">
-        Loading Member Profile...
+      <div className="flex-1 p-10 text-center text-2xl font-bold text-indigo-600 bg-gradient-to-br from-slate-50 to-indigo-50 min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+          <span>Loading Member Profile...</span>
+        </div>
       </div>
     );
   }
 
   if (!member) {
     return (
-      <div className="flex-1 p-10 text-center text-red-600 text-xl font-bold bg-slate-50 min-h-screen flex items-center justify-center">
+      <div className="flex-1 p-10 text-center text-rose-600 text-xl font-bold bg-slate-50 min-h-screen flex items-center justify-center">
         Member Not Found
       </div>
     );
@@ -114,34 +117,42 @@ function MemberProfile() {
   }
 
   return (
-    <div className="flex-1 p-6 overflow-y-auto w-full bg-slate-50 min-h-screen">
+    <div className="flex-1 p-6 lg:p-8 overflow-y-auto w-full bg-gradient-to-br from-slate-50 via-indigo-50/20 to-blue-50/30 min-h-screen">
       <div className="profile-print-container max-w-7xl mx-auto space-y-6">
         
-        <div className="flex justify-end mb-4 no-print">
+        {/* Top Print Button */}
+        <div className="flex justify-end mb-2 no-print">
           <button 
             onClick={() => window.print()} 
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 font-bold shadow-lg transition"
+            className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-blue-600 text-white px-6 py-2.5 rounded-xl hover:from-indigo-700 hover:to-blue-700 font-bold shadow-md shadow-indigo-200 transition-all transform hover:-translate-y-0.5"
           >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
             Print Profile
           </button>
         </div>
 
-        {/* Profile Details */}
-        <div className="bg-white shadow rounded-xl p-6 mb-8 border border-gray-200">
-          <div className="flex items-center gap-4 mb-6 border-b pb-4">
-              <img src="/logo.png" alt="Logo" className="w-16 h-16 object-contain" />
+        {/* Profile Details Card */}
+        <div className="bg-white/90 backdrop-blur-md shadow-xl rounded-3xl p-6 lg:p-8 mb-8 border border-white relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-br from-indigo-500/5 to-blue-500/10 rounded-full blur-3xl -z-10 pointer-events-none"></div>
+
+          <div className="flex items-center gap-4 mb-8 border-b border-slate-100 pb-6">
+              <div className="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center p-2 shadow-inner border border-indigo-100">
+                <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
+              </div>
               <div>
-                  <h1 className="text-3xl font-extrabold text-blue-900 tracking-tight">Skylark Cooperative Society</h1>
-                  <h2 className="text-xl font-bold text-gray-700 mt-1">Member Profile</h2>
+                  <h1 className="text-2xl lg:text-3xl font-black text-slate-900 tracking-tight">Skylark Cooperative Society</h1>
+                  <p className="text-indigo-600 font-bold text-sm uppercase tracking-wider mt-0.5">Member Profile Record</p>
               </div>
           </div>
+
           <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
             
-            <div className="relative">
+            <div className="relative flex-shrink-0">
+              <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-blue-600 rounded-full blur opacity-30"></div>
               {profileImageUrl ? (
                 <img 
                   src={profileImageUrl} 
-                  className="w-40 h-40 rounded-full object-cover border-4 border-gray-100 shadow-md bg-gray-100" 
+                  className="w-40 h-40 rounded-full object-cover border-4 border-white shadow-xl bg-slate-100 relative" 
                   alt={member.name}
                   onError={(e) => {
                     e.target.onerror = null; 
@@ -154,67 +165,77 @@ function MemberProfile() {
 
               <div 
                 id="fallback-avatar" 
-                className={`w-40 h-40 rounded-full bg-blue-100 text-blue-600 font-extrabold items-center justify-center text-5xl border-4 border-gray-100 shadow-md ${profileImageUrl ? 'hidden' : 'flex'}`}
+                className={`w-40 h-40 rounded-full bg-gradient-to-tr from-indigo-600 to-blue-500 text-white font-black items-center justify-center text-5xl border-4 border-white shadow-xl relative ${profileImageUrl ? 'hidden' : 'flex'}`}
               >
                 {member.name ? member.name.charAt(0).toUpperCase() : "U"}
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-6 flex-1 w-full">
-              <div><p className="text-gray-500 text-sm">Member ID</p><p className="font-bold text-lg text-blue-600">{member.memberId}</p></div>
-              <div><p className="text-gray-500 text-sm">Name</p><p className="font-bold text-lg">{member.name}</p></div>
-              <div><p className="text-gray-500 text-sm">Father Name</p><p className="font-semibold text-base">{member.fatherName || "-"}</p></div>
-              <div><p className="text-gray-500 text-sm">Mother Name</p><p className="font-semibold text-base">{member.motherName || "-"}</p></div>
-              <div><p className="text-gray-500 text-sm">Phone</p><p className="font-semibold text-base">{member.phone}</p></div>
-              <div><p className="text-gray-500 text-sm">Blood Group</p><p className="font-semibold text-base">{member.bloodGroup || "-"}</p></div>
-              <div><p className="text-gray-500 text-sm">Joining Date</p><p className="font-semibold text-base">{member.joiningDate ? new Date(member.joiningDate).toLocaleDateString() : "-"}</p></div>
-              <div><p className="text-gray-500 text-sm">Status</p><span className="bg-green-600 text-white px-3 py-1 rounded text-sm font-semibold">{member.status}</span></div>
-              <div className="col-span-2"><p className="text-gray-500 text-sm">Address</p><p className="font-semibold text-base">{member.presentAddress || member.address || "-"}</p></div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 flex-1 w-full bg-slate-50/70 p-6 rounded-2xl border border-slate-100">
+              <div><p className="text-slate-400 text-xs font-bold uppercase tracking-wider">Member ID</p><p className="font-extrabold text-lg text-indigo-600 mt-0.5">{member.memberId}</p></div>
+              <div><p className="text-slate-400 text-xs font-bold uppercase tracking-wider">Name</p><p className="font-extrabold text-lg text-slate-800 mt-0.5">{member.name}</p></div>
+              <div><p className="text-slate-400 text-xs font-bold uppercase tracking-wider">Father Name</p><p className="font-semibold text-base text-slate-700 mt-0.5">{member.fatherName || "-"}</p></div>
+              <div><p className="text-slate-400 text-xs font-bold uppercase tracking-wider">Mother Name</p><p className="font-semibold text-base text-slate-700 mt-0.5">{member.motherName || "-"}</p></div>
+              <div><p className="text-slate-400 text-xs font-bold uppercase tracking-wider">Phone</p><p className="font-semibold text-base text-slate-700 mt-0.5">{member.phone}</p></div>
+              <div><p className="text-slate-400 text-xs font-bold uppercase tracking-wider">Blood Group</p><p className="font-semibold text-base text-rose-600 mt-0.5">{member.bloodGroup || "-"}</p></div>
+              <div><p className="text-slate-400 text-xs font-bold uppercase tracking-wider">Joining Date</p><p className="font-semibold text-base text-slate-700 mt-0.5">{member.joiningDate ? new Date(member.joiningDate).toLocaleDateString() : "-"}</p></div>
+              <div>
+                <p className="text-slate-400 text-xs font-bold uppercase tracking-wider">Status</p>
+                <div className="mt-1">
+                  <span className="inline-flex items-center gap-1.5 bg-emerald-500 text-white px-3 py-1 rounded-full text-xs font-extrabold shadow-sm shadow-emerald-200">
+                    <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+                    {member.status}
+                  </span>
+                </div>
+              </div>
+              <div className="sm:col-span-2"><p className="text-slate-400 text-xs font-bold uppercase tracking-wider">Address</p><p className="font-semibold text-base text-slate-700 mt-0.5">{member.presentAddress || member.address || "-"}</p></div>
             </div>
           </div>
         </div>
 
-        {/* Summary Cards */}
+        {/* Summary Cards with Vibrant Gradients */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-8">
           {[
-            { label: 'Total Deposit', val: totalDeposit, color: 'bg-green-600' },
-            { label: 'Total Withdrawal', val: totalWithdrawal, color: 'bg-pink-600' },
-            { label: 'Total Loan', val: loanAmount, color: 'bg-purple-700' },
-            { label: 'Penalty', val: totalPenalty, color: 'bg-yellow-500' },
-            { label: 'Advance', val: summary?.advanceBalance ?? 0, color: 'bg-blue-600' },
-            { label: 'Current Balance', val: currentBalance, color: 'bg-teal-700' },
-            { label: 'Total Due', val: totalDueAmount, color: 'bg-red-800' },
+            { label: 'Total Deposit', val: totalDeposit, bg: 'from-emerald-500 to-teal-600', shadow: 'shadow-emerald-100' },
+            { label: 'Total Withdrawal', val: totalWithdrawal, bg: 'from-pink-500 to-rose-600', shadow: 'shadow-pink-100' },
+            { label: 'Total Loan', val: loanAmount, bg: 'from-purple-600 to-indigo-700', shadow: 'shadow-purple-100' },
+            { label: 'Penalty', val: totalPenalty, bg: 'from-amber-500 to-orange-600', shadow: 'shadow-amber-100' },
+            { label: 'Advance', val: summary?.advanceBalance ?? 0, bg: 'from-blue-500 to-cyan-600', shadow: 'shadow-blue-100' },
+            { label: 'Current Balance', val: currentBalance, bg: 'from-teal-600 to-emerald-700', shadow: 'shadow-teal-100' },
+            { label: 'Total Due', val: totalDueAmount, bg: 'from-rose-600 to-red-700', shadow: 'shadow-rose-100' },
           ].map((item, index) => (
-            <div key={index} className={`${item.color} text-white rounded-lg p-4 text-center shadow-md`}>
-              <p className="text-[11px] opacity-90 uppercase font-bold tracking-wider">{item.label}</p>
-              <h2 className="text-xl font-extrabold mt-1">৳ {item.val}</h2>
+            <div key={index} className={`bg-gradient-to-br ${item.bg} text-white rounded-2xl p-4 text-center shadow-lg ${item.shadow} transform hover:-translate-y-1 transition-all duration-300`}>
+              <p className="text-[10px] opacity-90 uppercase font-black tracking-wider">{item.label}</p>
+              <h2 className="text-lg lg:text-xl font-black mt-2">৳ {item.val}</h2>
             </div>
           ))}
         </div>
 
         {/* 1. Deposit History */}
-        <div className="bg-white border rounded-xl mb-8 overflow-hidden shadow-sm">
-            <h2 className="text-xl font-bold p-4 bg-blue-600 text-white">Deposit History</h2>
+        <div className="bg-white border border-slate-100 rounded-2xl mb-8 overflow-hidden shadow-md">
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4">
+              <h2 className="text-lg font-extrabold text-white">Deposit History</h2>
+            </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-blue-50 text-blue-800">
-                  <tr><th className="p-3">Month</th><th>Year</th><th>Amount</th><th>Receipt</th></tr>
+                <thead className="bg-slate-50 text-slate-700 font-bold border-b border-slate-100">
+                  <tr><th className="p-3 text-center">Month</th><th className="text-center">Year</th><th className="text-center">Amount</th><th className="text-center">Receipt</th></tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-slate-100">
                   {deposits.length > 0 ? deposits.map((d, index) => (
-                    <tr key={d._id || index} className={`border-t text-center ${index % 2 === 0 ? 'bg-white' : 'bg-blue-50/30'} hover:bg-blue-100 transition-colors`}>
-                        <td className="p-3">{d.month}</td>
-                        <td>{d.year}</td>
-                        <td className="font-bold text-green-700">৳ {d.amount || d.paidAmount || 0}</td>
+                    <tr key={d._id || index} className={`text-center ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'} hover:bg-indigo-50/40 transition-colors`}>
+                        <td className="p-3 font-semibold text-slate-700">{d.month}</td>
+                        <td className="text-slate-600">{d.year}</td>
+                        <td className="font-extrabold text-emerald-600">৳ {d.amount || d.paidAmount || 0}</td>
                         <td className="p-2">
                           <a href={`${API}/deposit-receipt/${d._id}`} 
-                             target="_blank" rel="noopener noreferrer" className="text-blue-600 font-bold hover:underline cursor-pointer">
+                             target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 bg-indigo-50 text-indigo-600 font-bold px-3 py-1 rounded-lg hover:bg-indigo-100 transition">
                              {d.receiptNo || "View"}
                           </a>
                         </td>
                     </tr>
                   )) : (
-                    <tr><td colSpan="4" className="py-4 text-center text-gray-500">No deposit history found.</td></tr>
+                    <tr><td colSpan="4" className="py-6 text-center text-slate-400 font-medium">No deposit history found.</td></tr>
                   )}
                 </tbody>
               </table>
@@ -222,23 +243,25 @@ function MemberProfile() {
         </div>
 
         {/* 2. Loan History */}
-        <div className="bg-white border rounded-xl mb-8 overflow-hidden shadow-sm">
-            <h2 className="text-xl font-bold p-4 bg-purple-700 text-white">Loan History</h2>
+        <div className="bg-white border border-slate-100 rounded-2xl mb-8 overflow-hidden shadow-md">
+            <div className="bg-gradient-to-r from-purple-700 to-indigo-700 p-4">
+              <h2 className="text-lg font-extrabold text-white">Loan History</h2>
+            </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-purple-50 text-purple-800">
-                  <tr><th className="p-3">Date</th><th>Amount</th><th>Receipt No</th><th>Note</th></tr>
+                <thead className="bg-slate-50 text-slate-700 font-bold border-b border-slate-100">
+                  <tr><th className="p-3 text-center">Date</th><th className="text-center">Amount</th><th className="text-center">Receipt No</th><th className="text-center">Note</th></tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-slate-100">
                   {loans.length > 0 ? loans.map((l, index) => (
-                    <tr key={l._id || index} className={`border-t text-center ${index % 2 === 0 ? 'bg-white' : 'bg-purple-50/30'} hover:bg-purple-100 transition-colors`}>
-                        <td className="p-3">{new Date(l.issueDate || l.date || l.createdAt).toLocaleDateString()}</td>
-                        <td className="font-bold text-purple-700">৳ {l.amount || 0}</td>
-                        <td className="font-semibold text-blue-600">{l.receiptNo || "N/A"}</td>
-                        <td className="italic text-gray-500">{l.remarks || l.note || "N/A"}</td>
+                    <tr key={l._id || index} className={`text-center ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'} hover:bg-purple-50/40 transition-colors`}>
+                        <td className="p-3 text-slate-700 font-medium">{new Date(l.issueDate || l.date || l.createdAt).toLocaleDateString()}</td>
+                        <td className="font-extrabold text-purple-700">৳ {l.amount || 0}</td>
+                        <td className="font-bold text-indigo-600">{l.receiptNo || "N/A"}</td>
+                        <td className="italic text-slate-500">{l.remarks || l.note || "N/A"}</td>
                     </tr>
                   )) : (
-                    <tr><td colSpan="4" className="py-4 text-center text-gray-500">No loan history found.</td></tr>
+                    <tr><td colSpan="4" className="py-6 text-center text-slate-400 font-medium">No loan history found.</td></tr>
                   )}
                 </tbody>
               </table>
@@ -246,23 +269,25 @@ function MemberProfile() {
         </div>
 
         {/* 3. Penalty History */}
-        <div className="bg-white border rounded-xl mb-8 overflow-hidden shadow-sm">
-            <h2 className="text-xl font-bold p-4 bg-yellow-600 text-white">Penalty History</h2>
+        <div className="bg-white border border-slate-100 rounded-2xl mb-8 overflow-hidden shadow-md">
+            <div className="bg-gradient-to-r from-amber-500 to-orange-600 p-4">
+              <h2 className="text-lg font-extrabold text-white">Penalty History</h2>
+            </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-yellow-50 text-yellow-800">
-                  <tr><th className="p-3">Date</th><th>Amount</th><th>Receipt No</th><th>Note</th></tr>
+                <thead className="bg-slate-50 text-slate-700 font-bold border-b border-slate-100">
+                  <tr><th className="p-3 text-center">Date</th><th className="text-center">Amount</th><th className="text-center">Receipt No</th><th className="text-center">Note</th></tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-slate-100">
                   {penalties.length > 0 ? penalties.map((p, index) => (
-                    <tr key={p._id || index} className={`border-t text-center ${index % 2 === 0 ? 'bg-white' : 'bg-yellow-50/30'} hover:bg-yellow-100 transition-colors`}>
-                        <td className="p-3">{new Date(p.date || p.penaltyDate || p.createdAt).toLocaleDateString()}</td>
-                        <td className="font-bold text-yellow-700">৳ {p.amount || p.fineAmount || p.total || p.penaltyAmount || 0}</td>
-                        <td className="font-semibold text-blue-600">{p.receiptNo || "N/A"}</td>
-                        <td className="italic text-gray-500">{p.note || p.reason || p.description || "N/A"}</td>
+                    <tr key={p._id || index} className={`text-center ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'} hover:bg-amber-50/40 transition-colors`}>
+                        <td className="p-3 text-slate-700 font-medium">{new Date(p.date || p.penaltyDate || p.createdAt).toLocaleDateString()}</td>
+                        <td className="font-extrabold text-amber-600">৳ {p.amount || p.fineAmount || p.total || p.penaltyAmount || 0}</td>
+                        <td className="font-bold text-indigo-600">{p.receiptNo || "N/A"}</td>
+                        <td className="italic text-slate-500">{p.note || p.reason || p.description || "N/A"}</td>
                     </tr>
                   )) : (
-                    <tr><td colSpan="4" className="py-4 text-center text-gray-500">No penalty history found.</td></tr>
+                    <tr><td colSpan="4" className="py-6 text-center text-slate-400 font-medium">No penalty history found.</td></tr>
                   )}
                 </tbody>
               </table>
@@ -270,23 +295,25 @@ function MemberProfile() {
         </div>
 
         {/* 4. Withdrawal History */}
-        <div className="bg-white border rounded-xl mb-8 overflow-hidden shadow-sm">
-            <h2 className="text-xl font-bold p-4 bg-pink-600 text-white">Withdrawal History</h2>
+        <div className="bg-white border border-slate-100 rounded-2xl mb-8 overflow-hidden shadow-md">
+            <div className="bg-gradient-to-r from-pink-600 to-rose-600 p-4">
+              <h2 className="text-lg font-extrabold text-white">Withdrawal History</h2>
+            </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-pink-50 text-pink-800">
-                  <tr><th className="p-3">Date</th><th>Amount</th><th>Receipt No</th><th>Note</th></tr>
+                <thead className="bg-slate-50 text-slate-700 font-bold border-b border-slate-100">
+                  <tr><th className="p-3 text-center">Date</th><th className="text-center">Amount</th><th className="text-center">Receipt No</th><th className="text-center">Note</th></tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-slate-100">
                   {withdrawals.length > 0 ? withdrawals.map((w, index) => (
-                    <tr key={w._id || index} className={`border-t text-center ${index % 2 === 0 ? 'bg-white' : 'bg-pink-50/30'} hover:bg-pink-100 transition-colors`}>
-                        <td className="p-3">{new Date(w.date || w.createdAt).toLocaleDateString()}</td>
-                        <td className="font-bold text-red-600">৳ {w.amount}</td>
-                        <td className="font-semibold text-blue-600">{w.receiptNo || "N/A"}</td>
-                        <td className="italic text-gray-500">{w.note || "N/A"}</td>
+                    <tr key={w._id || index} className={`text-center ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'} hover:bg-pink-50/40 transition-colors`}>
+                        <td className="p-3 text-slate-700 font-medium">{new Date(w.date || w.createdAt).toLocaleDateString()}</td>
+                        <td className="font-extrabold text-rose-600">৳ {w.amount}</td>
+                        <td className="font-bold text-indigo-600">{w.receiptNo || "N/A"}</td>
+                        <td className="italic text-slate-500">{w.note || "N/A"}</td>
                     </tr>
                   )) : (
-                    <tr><td colSpan="4" className="py-4 text-center text-gray-500">No withdrawal history found.</td></tr>
+                    <tr><td colSpan="4" className="py-6 text-center text-slate-400 font-medium">No withdrawal history found.</td></tr>
                   )}
                 </tbody>
               </table>
@@ -294,29 +321,31 @@ function MemberProfile() {
         </div>
 
         {/* 5. Payment Allocation History */}
-        <div className="bg-white border rounded-xl mb-12 overflow-hidden shadow-sm">
-            <h2 className="text-xl font-bold p-4 bg-purple-600 text-white">Payment Allocation History</h2>
+        <div className="bg-white border border-slate-100 rounded-2xl mb-12 overflow-hidden shadow-md">
+            <div className="bg-gradient-to-r from-indigo-600 to-blue-700 p-4">
+              <h2 className="text-lg font-extrabold text-white">Payment Allocation History</h2>
+            </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-purple-50 text-purple-800">
-                  <tr><th className="p-3">Year</th><th>Month</th><th>Amount</th><th>Paid</th><th>Due</th><th>Status</th></tr>
+                <thead className="bg-slate-50 text-slate-700 font-bold border-b border-slate-100">
+                  <tr><th className="p-3 text-center">Year</th><th className="text-center">Month</th><th className="text-center">Amount</th><th className="text-center">Paid</th><th className="text-center">Due</th><th className="text-center">Status</th></tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-slate-100">
                   {allocation.length > 0 ? allocation.map((item, index) => (
-                    <tr key={item._id || index} className={`border-t text-center ${index % 2 === 0 ? 'bg-white' : 'bg-purple-50/30'} hover:bg-purple-100 transition-colors`}>
-                        <td className="p-3">{item.year}</td>
-                        <td>{item.monthName || item.month}</td>
-                        <td>৳ {item.monthlyAmount || item.amount || 0}</td>
-                        <td className="text-green-600 font-bold">৳ {item.paidAmount || 0}</td>
-                        <td className="text-red-600 font-bold">৳ {item.dueAmount || 0}</td>
+                    <tr key={item._id || index} className={`text-center ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'} hover:bg-indigo-50/40 transition-colors`}>
+                        <td className="p-3 text-slate-700 font-medium">{item.year}</td>
+                        <td className="font-semibold text-slate-800">{item.monthName || item.month}</td>
+                        <td className="font-bold text-slate-600">৳ {item.monthlyAmount || item.amount || 0}</td>
+                        <td className="text-emerald-600 font-extrabold">৳ {item.paidAmount || 0}</td>
+                        <td className="text-rose-600 font-extrabold">৳ {item.dueAmount || 0}</td>
                         <td>
-                          <span className={`px-2 py-1 rounded text-xs font-bold ${item.status === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                          <span className={`px-3 py-1 rounded-full text-xs font-black shadow-sm ${item.status === 'Paid' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
                               {item.status || "Due"}
                           </span>
                         </td>
                     </tr>
                   )) : (
-                    <tr><td colSpan="6" className="py-4 text-center text-gray-500">No allocation history found.</td></tr>
+                    <tr><td colSpan="6" className="py-6 text-center text-slate-400 font-medium">No allocation history found.</td></tr>
                   )}
                 </tbody>
               </table>
@@ -324,16 +353,16 @@ function MemberProfile() {
         </div>
 
         {/* Signature - Fixed with page-break protection for printing */}
-        <div className="signature-section mt-16 pt-6 flex justify-between items-end px-8 pb-10 page-break-inside-avoid">
+        <div className="signature-section mt-16 pt-6 flex justify-between items-end px-8 pb-10 page-break-inside-avoid border-t border-slate-200">
           <div className="text-center">
-            <div className="border-t-2 border-black w-48 mb-2"></div>
+            <div className="border-t-2 border-slate-800 w-48 mb-2"></div>
             <p className="font-bold text-sm text-black print:text-black">Member Signature</p>
           </div>
           <div className="text-center">
             <div className="mb-1">
               <img src="/signature.png" alt="Authorized Signature" className="w-32 mx-auto h-12 object-contain" />
             </div>
-            <div className="border-t-2 border-black w-48 mb-2"></div>
+            <div className="border-t-2 border-slate-800 w-48 mb-2"></div>
             <p className="font-bold text-sm text-black print:text-black">Authorized Signature</p>
           </div>
         </div>
