@@ -191,7 +191,6 @@ function Dashboard() {
     .filter(t => t && t.type === "EXPENSE")
     .reduce((sum, t) => sum + Number(t.amount || 0), 0);
 
-  // অটোমেটিক ডাইনামিক ক্যালকুলেশন
   const memberCountForTarget = stats.totalMembers > 0 ? stats.totalMembers : 5;
   const targetPerMember = 38000;
   const totalTargetDeposit = memberCountForTarget * targetPerMember;
