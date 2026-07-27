@@ -68,24 +68,28 @@ function Reports(){
   // PDF Export
   // ============================
   const exportPDF = ()=>{
-    const doc = new jsPDF();
+    const doc = new jsPDF('l', 'mm', 'a4'); // Landscape mode for wider table
 
-    doc.setFontSize(18);
+    doc.setFontSize(16);
     doc.text("Skylark Cooperative Society", 14, 15);
 
     doc.setFontSize(12);
-    doc.text("Member Financial Report", 14, 25);
+    doc.text("Comprehensive Member Financial Report", 14, 23);
 
-    doc.text(`Date: ${new Date().toLocaleDateString()}`, 14, 33);
+    doc.text(`Date: ${new Date().toLocaleDateString()}`, 14, 30);
 
     autoTable(doc,{
-      startY: 45,
+      startY: 38,
       head: [
         [
           "Member ID",
           "Name",
           "Phone",
           "Deposit",
+          "Withdrawal",
+          "Loan",
+          "Penalty",
+          "Advance",
           "Due"
         ]
       ],
@@ -93,9 +97,14 @@ function Reports(){
         item.memberId,
         item.name,
         item.phone,
-        `৳ ${item.totalDeposit}`,
-        `৳ ${item.totalDue}`
-      ])
+        `৳ ${item.totalDeposit || 0}`,
+        `৳ ${item.totalWithdrawal || 0}`,
+        `৳ ${item.totalLoan || 0}`,
+        `৳ ${item.totalPenalty || 0}`,
+        `৳ ${item.advance || 0}`,
+        `৳ ${item.totalDue || 0}`
+      ]),
+      styles: { fontSize: 8 }
     });
 
     doc.save("Skylark-Member-Report.pdf");
@@ -110,8 +119,12 @@ function Reports(){
       "Name": item.name,
       "Phone": item.phone,
       "Status": item.status,
-      "Total Deposit": item.totalDeposit,
-      "Total Due": item.totalDue
+      "Total Deposit": item.totalDeposit || 0,
+      "Total Withdrawal": item.totalWithdrawal || 0,
+      "Total Loan": item.totalLoan || 0,
+      "Total Penalty": item.totalPenalty || 0,
+      "Advance": item.advance || 0,
+      "Total Due": item.totalDue || 0
     }));
 
     const sheet = XLSX.utils.json_to_sheet(data);
@@ -212,25 +225,33 @@ function Reports(){
 
       {/* Table */}
       <div className="bg-white rounded-xl shadow overflow-auto p-5">
-        <table className="w-full border">
+        <table className="w-full border text-sm">
           <thead>
             <tr className="bg-gray-100">
               <th className="border p-3">Member ID</th>
               <th className="border p-3">Name</th>
               <th className="border p-3">Phone</th>
-              <th className="border p-3">Deposit</th>
-              <th className="border p-3">Due</th>
+              <th className="border p-3 text-center">Deposit</th>
+              <th className="border p-3 text-center">Withdrawal</th>
+              <th className="border p-3 text-center">Loan</th>
+              <th className="border p-3 text-center">Penalty</th>
+              <th className="border p-3 text-center">Advance</th>
+              <th className="border p-3 text-center">Due</th>
             </tr>
           </thead>
           <tbody>
             {
               report.map((item,index)=>(
-                <tr key={index}>
+                <tr key={index} className="hover:bg-gray-50">
                   <td className="border p-3">{item.memberId}</td>
-                  <td className="border p-3">{item.name}</td>
+                  <td className="border p-3 font-medium">{item.name}</td>
                   <td className="border p-3">{item.phone}</td>
-                  <td className="border p-3">৳ {item.totalDeposit}</td>
-                  <td className="border p-3">৳ {item.totalDue}</td>
+                  <td className="border p-3 text-center text-emerald-600 font-semibold">৳ {item.totalDeposit || 0}</td>
+                  <td className="border p-3 text-center text-amber-600 font-semibold">৳ {item.totalWithdrawal || 0}</td>
+                  <td className="border p-3 text-center text-blue-600 font-semibold">৳ {item.totalLoan || 0}</td>
+                  <td className="border p-3 text-center text-rose-600 font-semibold">৳ {item.totalPenalty || 0}</td>
+                  <td className="border p-3 text-center font-semibold">৳ {item.advance || 0}</td>
+                  <td className="border p-3 text-center text-red-600 font-semibold">৳ {item.totalDue || 0}</td>
                 </tr>
               ))
             }
