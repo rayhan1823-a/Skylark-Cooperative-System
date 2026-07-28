@@ -283,7 +283,7 @@ const getMemberProfile = async (req, res) => {
 };
 
 // ==========================================
-// 3. Create New Member (Super Admin Only)
+// 3. Create New Member (Super Admin Only) - Manual ID Input
 // ==========================================
 const createMember = async (req, res) => {
     try {
@@ -294,12 +294,16 @@ const createMember = async (req, res) => {
             });
         }
 
-        const { memberId, userId, password, mobile, phone, email } = req.body;
+        let { memberId, userId, password, mobile, phone, email } = req.body;
         
-        if (!memberId) {
+        // মেম্বার আইডি বাধ্যতামূলক করা হলো, ফ্রন্টএন্ড থেকে যা পাঠানো হবে তাই ইনপুট হিসেবে নেওয়া হবে
+        if (!memberId || String(memberId).trim() === "") {
             return res.status(400).json({ success: false, message: "Member ID is required!" });
         }
 
+        memberId = String(memberId).trim();
+
+        // ডুপ্লিকেট মেম্বার আইডি চেক
         const existingMember = await Member.findOne({ memberId });
         if (existingMember) {
             return res.status(400).json({ success: false, message: "Member ID already exists!" });
@@ -317,6 +321,7 @@ const createMember = async (req, res) => {
 
         const memberData = {
             ...req.body,
+            memberId,
             userId: finalUserId,
             password: hashedPassword,
             email: email || undefined
@@ -337,7 +342,7 @@ const createMember = async (req, res) => {
 
         return res.status(201).json({ 
             success: true, 
-            message: "Member created successfully with login credentials!", 
+            message: "Member created successfully with your custom ID!", 
             member: newMember 
         });
     } catch (error) {
@@ -473,17 +478,15 @@ const reorderMemberIds = async (req, res) => {
             });
         }
 
-        // সব মেম্বারকে তৈরির ক্রমানুসারে ফেচ করা হলো
         const members = await Member.find().sort({ createdAt: 1, _id: 1 });
 
         if (!members || members.length === 0) {
             return res.status(404).json({ success: false, message: "No members found" });
         }
 
-        // প্রতিটি মেম্বারের আসল প্রিফিক্স বা সাল আগে থেকেই সংগ্রহ করে রাখা হচ্ছে যাতে হারিয়ে না যায়
         const memberOriginalData = members.map(m => {
             const currentId = String(m.memberId || '').trim();
-            let year = 2023; // ডিফল্ট বছর ২০২৩
+            let year = 2023;
             
             if (currentId.includes('2024')) year = 2024;
             else if (currentId.includes('2025')) year = 2025;
@@ -499,16 +502,13 @@ const reorderMemberIds = async (req, res) => {
             };
         });
 
-        // ধাপ ১: ডুপ্লিকেট এড়াতে সাময়িকভাবে সবার আইডিতে TEMP বসানো
         for (let i = 0; i < members.length; i++) {
             members[i].memberId = `TEMP-${members[i]._id}`;
             await members[i].save();
         }
 
-        // সাল অনুযায়ী আলাদা কাউন্টার
         const yearCounters = {};
 
-        // ধাপ ২: সঠিক সাল ও সিরিয়াল অনুযায়ী আইডি রি-অ্যাসাইন করা
         for (const item of memberOriginalData) {
             const prefix = `SKY-${item.year}`;
 
