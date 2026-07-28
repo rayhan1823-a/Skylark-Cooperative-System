@@ -462,7 +462,7 @@ const getDashboardStats = async (req, res) => {
 };
 
 // ==========================================
-// 7. Reorder Member IDs (Maintaining Year/Prefix with 3-Digit Serial)
+// 7. Reorder Member IDs (Safe & Duplicate Free)
 // ==========================================
 const reorderMemberIds = async (req, res) => {
     try {
@@ -473,48 +473,61 @@ const reorderMemberIds = async (req, res) => {
             });
         }
 
-        // সব মেম্বারকে তাদের তৈরির ক্রমানুসারে বা ডাটাবেস সিকোয়েন্সে ফেচ করুন
+        // সব মেম্বারকে তাদের তৈরির ক্রমানুসারে ফেচ করা হলো
         const members = await Member.find().sort({ createdAt: 1, _id: 1 });
 
-        // প্রতি বছর বা প্রিফিক্সের জন্য আলাদা সিরিয়াল কাউন্টার রাখার অবজেক্ট
+        if (!members || members.length === 0) {
+            return res.status(404).json({ success: false, message: "No members found" });
+        }
+
+        // ধাপ ১: ডুপ্লিকেট এরর এড়াতে সবার আইডিতে সাময়িকভাবে TEMP- যুক্ত করা হলো
+        for (let i = 0; i < members.length; i++) {
+            members[i].memberId = `TEMP-${members[i]._id}`;
+            await members[i].save();
+        }
+
+        // প্রতি বছর বা প্রিফিক্সের জন্য আলাদা সিরিয়াল কাউন্টার
         const yearCounters = {};
 
+        // ধাপ ২: এবার সঠিক প্রিফিক্স ও সিকোয়েন্স অনুযায়ী আইডি সেট করা হচ্ছে
         for (const member of members) {
-            const currentId = String(member.memberId || '').trim();
+            // অরিজিনাল আইডি বা জয়েনিং ইয়ার বের করা
+            const originalId = String(member.memberId || '').trim();
             
-            // আইডি থেকে সাল বা মূল প্রিফিক্স বের করা (যেমন: 2023001 থেকে '2023' অথবা SKY-2023001 থেকে 'SKY-2023')
-            let prefix = '';
-            const match = currentId.match(/^(.*?)(\d{3})$/);
+            // সাল বের করার চেষ্টা (যেমন createdAt থেকে অথবা আইডি থেকে)
+            let prefix = 'SKY-2023';
+            const joinedYear = member.createdAt ? new Date(member.createdAt).getFullYear() : 2023;
             
-            if (match) {
-                prefix = match[1]; // যেমন: '2023', '2024', 'SKY-2023' ইত্যাদি
-            } else if (currentId.length >= 4) {
-                // যদি শুধু সাল বা নাম্বার থাকে, যেমন 2023011 হলে প্রথম ৪ ডিজিট সাল ধরে বাকিটা প্রিফিক্স
-                prefix = currentId.slice(0, -3);
+            if (originalId.includes('SKY-2023') || joinedYear === 2023) {
+                prefix = 'SKY-2023';
+            } else if (originalId.includes('SKY-2024') || joinedYear === 2024) {
+                prefix = 'SKY-2024';
+            } else if (originalId.includes('SKY-2025') || joinedYear === 2025) {
+                prefix = 'SKY-2025';
+            } else if (originalId.includes('SKY-2026') || joinedYear === 2026) {
+                prefix = 'SKY-2026';
             } else {
-                prefix = '2026'; // ডিফল্ট ফলব্যাক
+                prefix = `SKY-${joinedYear}`;
             }
 
-            // উক্ত প্রিফিক্সের জন্য সিরিয়াল কাউন্টার ইনিশিয়ালাইজ বা ইনক্রিমেন্ট করা
             if (!yearCounters[prefix]) {
                 yearCounters[prefix] = 1;
             } else {
                 yearCounters[prefix]++;
             }
 
-            // ৩ ডিজিটের প্যাডিং সহ নতুন আইডি তৈরি (যেমন: 1 -> 001, 2 -> 002)
             const paddedSerial = String(yearCounters[prefix]).padStart(3, '0');
             const newMemberId = `${prefix}${paddedSerial}`;
 
-            // ডাটাবেসে আপডেট করা
             await Member.findByIdAndUpdate(member._id, { memberId: newMemberId });
         }
 
         return res.status(200).json({
             success: true,
-            message: `Successfully reordered all member IDs keeping their years/prefixes intact with sequential 3-digit numbers!`,
+            message: "Successfully reordered all member IDs safely without duplicate errors!",
         });
     } catch (error) {
+        console.error("Reorder IDs Error:", error);
         return res.status(500).json({ success: false, message: "Server Error", error: error.message });
     }
 };
