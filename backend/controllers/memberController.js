@@ -283,7 +283,7 @@ const getMemberProfile = async (req, res) => {
 };
 
 // ==========================================
-// 3. Create New Member (Super Admin Only) - Manual ID Input
+// 3. Create New Member (Super Admin Only) - Manual ID & Cloudinary Support
 // ==========================================
 const createMember = async (req, res) => {
     try {
@@ -296,14 +296,12 @@ const createMember = async (req, res) => {
 
         let { memberId, userId, password, mobile, phone, email } = req.body;
         
-        // মেম্বার আইডি বাধ্যতামূলক করা হলো, ফ্রন্টএন্ড থেকে যা পাঠানো হবে তাই ইনপুট হিসেবে নেওয়া হবে
         if (!memberId || String(memberId).trim() === "") {
             return res.status(400).json({ success: false, message: "Member ID is required!" });
         }
 
         memberId = String(memberId).trim();
 
-        // ডুপ্লিকেট মেম্বার আইডি চেক
         const existingMember = await Member.findOne({ memberId });
         if (existingMember) {
             return res.status(400).json({ success: false, message: "Member ID already exists!" });
@@ -327,14 +325,15 @@ const createMember = async (req, res) => {
             email: email || undefined
         };
 
+        // Cloudinary file URL support for Vercel/Cloud deployment
         if (req.files) {
-            if (req.files.photo?.[0]) memberData.photo = req.files.photo[0].path;
-            if (req.files.nidFile?.[0]) memberData.nidFile = req.files.nidFile[0].path;
-            if (req.files.signature?.[0]) memberData.signature = req.files.signature[0].path;
-            if (req.files.nomineePhoto?.[0]) memberData.nomineePhoto = req.files.nomineePhoto[0].path;
-            if (req.files.nomineeNid?.[0]) memberData.nomineeNid = req.files.nomineeNid[0].path;
+            if (req.files.photo?.[0]) memberData.photo = req.files.photo[0].path || req.files.photo[0].secure_url;
+            if (req.files.nidFile?.[0]) memberData.nidFile = req.files.nidFile[0].path || req.files.nidFile[0].secure_url;
+            if (req.files.signature?.[0]) memberData.signature = req.files.signature[0].path || req.files.signature[0].secure_url;
+            if (req.files.nomineePhoto?.[0]) memberData.nomineePhoto = req.files.nomineePhoto[0].path || req.files.nomineePhoto[0].secure_url;
+            if (req.files.nomineeNid?.[0]) memberData.nomineeNid = req.files.nomineeNid[0].path || req.files.nomineeNid[0].secure_url;
         } else if (req.file) {
-            memberData.photo = req.file.path;
+            memberData.photo = req.file.path || req.file.secure_url;
         }
 
         const newMember = new Member(memberData);
@@ -374,13 +373,13 @@ const updateMember = async (req, res) => {
         }
 
         if (req.files) {
-            if (req.files.photo?.[0]) updateData.photo = req.files.photo[0].path;
-            if (req.files.nidFile?.[0]) updateData.nidFile = req.files.nidFile[0].path;
-            if (req.files.signature?.[0]) updateData.signature = req.files.signature[0].path;
-            if (req.files.nomineePhoto?.[0]) updateData.nomineePhoto = req.files.nomineePhoto[0].path;
-            if (req.files.nomineeNid?.[0]) updateData.nomineeNid = req.files.nomineeNid[0].path;
+            if (req.files.photo?.[0]) updateData.photo = req.files.photo[0].path || req.files.photo[0].secure_url;
+            if (req.files.nidFile?.[0]) updateData.nidFile = req.files.nidFile[0].path || req.files.nidFile[0].secure_url;
+            if (req.files.signature?.[0]) updateData.signature = req.files.signature[0].path || req.files.signature[0].secure_url;
+            if (req.files.nomineePhoto?.[0]) updateData.nomineePhoto = req.files.nomineePhoto[0].path || req.files.nomineePhoto[0].secure_url;
+            if (req.files.nomineeNid?.[0]) updateData.nomineeNid = req.files.nomineeNid[0].path || req.files.nomineeNid[0].secure_url;
         } else if (req.file) {
-            updateData.photo = req.file.path;
+            updateData.photo = req.file.path || req.file.secure_url;
         }
 
         let updatedMember;
