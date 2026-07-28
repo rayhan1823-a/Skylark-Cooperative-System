@@ -361,7 +361,8 @@ const updateMember = async (req, res) => {
         let { id } = req.params;
         if (id) id = id.trim();
 
-        const { _id, memberId, password, ...restData } = req.body;
+        // ফিক্সড: memberId কে বাদ দেওয়া থেকে বাদ দেওয়া হলো, যাতে মেম্বার আইডি আপডেট করা যায়
+        const { _id, password, ...restData } = req.body;
         let updateData = { ...restData };
 
         if (password) {
