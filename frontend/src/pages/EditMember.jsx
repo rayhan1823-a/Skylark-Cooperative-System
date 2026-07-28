@@ -24,7 +24,6 @@ function EditMember() {
           headers: { Authorization: `Bearer ${token}` }
         }
       );
-      // ব্যাকএন্ড থেকে ডেটা যেভাবে আসুক না কেন তা ধরার জন্য সেফ চেক
       const memberData = res.data.member || res.data.data || res.data;
       setFormData(memberData || {});
     } catch (error) {
@@ -57,12 +56,13 @@ function EditMember() {
       const token = localStorage.getItem("token") || localStorage.getItem("authToken");
       const data = new FormData();
       
+      // ফিক্সড: টাইপ অবজেক্ট চেক সরিয়ে সাধারণ ভ্যালিডেশন দেওয়া হয়েছে যাতে আইডি বা টেক্সট ফিল্ডগুলো মিসিং না হয়
       Object.keys(formData).forEach((key) => {
         if (
           key !== '_id' && 
           key !== '__v' && 
           formData[key] !== null && 
-          typeof formData[key] !== 'object'
+          formData[key] !== undefined
         ) {
           data.append(key, formData[key]);
         }
