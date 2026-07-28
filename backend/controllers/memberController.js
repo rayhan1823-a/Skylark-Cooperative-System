@@ -361,7 +361,6 @@ const updateMember = async (req, res) => {
         let { id } = req.params;
         if (id) id = id.trim();
 
-        // ফিক্সড: memberId কে বাদ দেওয়া থেকে বাদ দেওয়া হলো, যাতে মেম্বার আইডি আপডেট করা যায়
         const { _id, password, ...restData } = req.body;
         let updateData = { ...restData };
 
@@ -462,11 +461,70 @@ const getDashboardStats = async (req, res) => {
     }
 };
 
+// ==========================================
+// 7. Reorder Member IDs (Maintaining Year/Prefix with 3-Digit Serial)
+// ==========================================
+const reorderMemberIds = async (req, res) => {
+    try {
+        if (req.user?.role !== 'SUPER_ADMIN') {
+            return res.status(403).json({
+                success: false,
+                message: "Access Denied! Only SUPER_ADMIN can reorder member IDs.",
+            });
+        }
+
+        // সব মেম্বারকে তাদের তৈরির ক্রমানুসারে বা ডাটাবেস সিকোয়েন্সে ফেচ করুন
+        const members = await Member.find().sort({ createdAt: 1, _id: 1 });
+
+        // প্রতি বছর বা প্রিফিক্সের জন্য আলাদা সিরিয়াল কাউন্টার রাখার অবজেক্ট
+        const yearCounters = {};
+
+        for (const member of members) {
+            const currentId = String(member.memberId || '').trim();
+            
+            // আইডি থেকে সাল বা মূল প্রিফিক্স বের করা (যেমন: 2023001 থেকে '2023' অথবা SKY-2023001 থেকে 'SKY-2023')
+            let prefix = '';
+            const match = currentId.match(/^(.*?)(\d{3})$/);
+            
+            if (match) {
+                prefix = match[1]; // যেমন: '2023', '2024', 'SKY-2023' ইত্যাদি
+            } else if (currentId.length >= 4) {
+                // যদি শুধু সাল বা নাম্বার থাকে, যেমন 2023011 হলে প্রথম ৪ ডিজিট সাল ধরে বাকিটা প্রিফিক্স
+                prefix = currentId.slice(0, -3);
+            } else {
+                prefix = '2026'; // ডিফল্ট ফলব্যাক
+            }
+
+            // উক্ত প্রিফিক্সের জন্য সিরিয়াল কাউন্টার ইনিশিয়ালাইজ বা ইনক্রিমেন্ট করা
+            if (!yearCounters[prefix]) {
+                yearCounters[prefix] = 1;
+            } else {
+                yearCounters[prefix]++;
+            }
+
+            // ৩ ডিজিটের প্যাডিং সহ নতুন আইডি তৈরি (যেমন: 1 -> 001, 2 -> 002)
+            const paddedSerial = String(yearCounters[prefix]).padStart(3, '0');
+            const newMemberId = `${prefix}${paddedSerial}`;
+
+            // ডাটাবেসে আপডেট করা
+            await Member.findByIdAndUpdate(member._id, { memberId: newMemberId });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: `Successfully reordered all member IDs keeping their years/prefixes intact with sequential 3-digit numbers!`,
+        });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: "Server Error", error: error.message });
+    }
+};
+
 module.exports = {
     getAllMembers,
     getMemberProfile,
     createMember,
     updateMember,
     deleteMember,
-    getDashboardStats
+    getDashboardStats,
+    reorderMemberIds
 };
