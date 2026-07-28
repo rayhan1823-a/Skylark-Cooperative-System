@@ -462,7 +462,7 @@ const getDashboardStats = async (req, res) => {
 };
 
 // ==========================================
-// 7. Reorder Member IDs (Safe & Duplicate Free)
+// 7. Reorder Member IDs (Safe & Correct Year Retention)
 // ==========================================
 const reorderMemberIds = async (req, res) => {
     try {
@@ -473,42 +473,44 @@ const reorderMemberIds = async (req, res) => {
             });
         }
 
-        // সব মেম্বারকে তাদের তৈরির ক্রমানুসারে ফেচ করা হলো
+        // সব মেম্বারকে তৈরির ক্রমানুসারে ফেচ করা হলো
         const members = await Member.find().sort({ createdAt: 1, _id: 1 });
 
         if (!members || members.length === 0) {
             return res.status(404).json({ success: false, message: "No members found" });
         }
 
-        // ধাপ ১: ডুপ্লিকেট এরর এড়াতে সবার আইডিতে সাময়িকভাবে TEMP- যুক্ত করা হলো
+        // প্রতিটি মেম্বারের আসল প্রিফিক্স বা সাল আগে থেকেই সংগ্রহ করে রাখা হচ্ছে যাতে হারিয়ে না যায়
+        const memberOriginalData = members.map(m => {
+            const currentId = String(m.memberId || '').trim();
+            let year = 2023; // ডিফল্ট বছর ২০২৩
+            
+            if (currentId.includes('2024')) year = 2024;
+            else if (currentId.includes('2025')) year = 2025;
+            else if (currentId.includes('2026')) year = 2026;
+            else if (currentId.includes('2023')) year = 2023;
+            else if (m.createdAt) {
+                year = new Date(m.createdAt).getFullYear();
+            }
+
+            return {
+                _id: m._id,
+                year: year
+            };
+        });
+
+        // ধাপ ১: ডুপ্লিকেট এড়াতে সাময়িকভাবে সবার আইডিতে TEMP বসানো
         for (let i = 0; i < members.length; i++) {
             members[i].memberId = `TEMP-${members[i]._id}`;
             await members[i].save();
         }
 
-        // প্রতি বছর বা প্রিফিক্সের জন্য আলাদা সিরিয়াল কাউন্টার
+        // সাল অনুযায়ী আলাদা কাউন্টার
         const yearCounters = {};
 
-        // ধাপ ২: এবার সঠিক প্রিফিক্স ও সিকোয়েন্স অনুযায়ী আইডি সেট করা হচ্ছে
-        for (const member of members) {
-            // অরিজিনাল আইডি বা জয়েনিং ইয়ার বের করা
-            const originalId = String(member.memberId || '').trim();
-            
-            // সাল বের করার চেষ্টা (যেমন createdAt থেকে অথবা আইডি থেকে)
-            let prefix = 'SKY-2023';
-            const joinedYear = member.createdAt ? new Date(member.createdAt).getFullYear() : 2023;
-            
-            if (originalId.includes('SKY-2023') || joinedYear === 2023) {
-                prefix = 'SKY-2023';
-            } else if (originalId.includes('SKY-2024') || joinedYear === 2024) {
-                prefix = 'SKY-2024';
-            } else if (originalId.includes('SKY-2025') || joinedYear === 2025) {
-                prefix = 'SKY-2025';
-            } else if (originalId.includes('SKY-2026') || joinedYear === 2026) {
-                prefix = 'SKY-2026';
-            } else {
-                prefix = `SKY-${joinedYear}`;
-            }
+        // ধাপ ২: সঠিক সাল ও সিরিয়াল অনুযায়ী আইডি রি-অ্যাসাইন করা
+        for (const item of memberOriginalData) {
+            const prefix = `SKY-${item.year}`;
 
             if (!yearCounters[prefix]) {
                 yearCounters[prefix] = 1;
@@ -519,12 +521,12 @@ const reorderMemberIds = async (req, res) => {
             const paddedSerial = String(yearCounters[prefix]).padStart(3, '0');
             const newMemberId = `${prefix}${paddedSerial}`;
 
-            await Member.findByIdAndUpdate(member._id, { memberId: newMemberId });
+            await Member.findByIdAndUpdate(item._id, { memberId: newMemberId });
         }
 
         return res.status(200).json({
             success: true,
-            message: "Successfully reordered all member IDs safely without duplicate errors!",
+            message: "Successfully restored original year-based member IDs correctly!",
         });
     } catch (error) {
         console.error("Reorder IDs Error:", error);
