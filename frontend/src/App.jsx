@@ -131,9 +131,12 @@ function App() {
             </ProtectedRoute>
           }
         >
-          {/* MainLayout এর ভেতরে Outlet হিসেবে এই পেজগুলো রেন্ডার হবে */}
+          {/* মূল রুট বা লগইন করার পর হোম পেজ আসবে */}
           <Route path="/" element={<Home />} />
+          
+          {/* ড্যাশবোর্ড থাকবে আলাদা পাতে */}
           <Route path="/dashboard" element={<Dashboard />} />
+          
           <Route path="/notice" element={<Notice />} />
           <Route path="/members" element={<Members />} />
           <Route
