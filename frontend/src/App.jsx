@@ -61,7 +61,7 @@ function NotFound() {
           onClick={() => (window.location.href = "/")}
           className="mt-6 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg"
         >
-          Back to Dashboard
+          Back to Home
         </button>
       </div>
     </div>
@@ -132,8 +132,8 @@ function App() {
           }
         >
           {/* MainLayout এর ভেতরে Outlet হিসেবে এই পেজগুলো রেন্ডার হবে */}
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/home" element={<Home />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/notice" element={<Notice />} />
           <Route path="/members" element={<Members />} />
           <Route
