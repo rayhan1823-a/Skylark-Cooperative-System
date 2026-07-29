@@ -177,12 +177,15 @@ function MainLayout() {
                           </div>
                         </div>
                       </div>
-                      <button
+
+                      {/* My Profile Link (Updated to dynamically link to member profile) */}
+                      <Link
+                        to={`/member/${user?.memberId || user?._id}`}
                         onClick={() => setShowMenu(false)}
-                        className="w-full text-left px-5 py-3 hover:bg-gray-100 transition block"
+                        className="w-full text-left px-5 py-3 hover:bg-gray-100 transition block text-gray-800"
                       >
                         👤 My Profile
-                      </button>
+                      </Link>
                       
                       {/* Change Password লিঙ্ক */}
                       <Link
