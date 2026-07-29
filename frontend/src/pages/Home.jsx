@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaBullhorn, FaUniversity, FaShieldAlt, FaCalendarAlt, FaMobileAlt, FaCopy, FaCheck, FaCrown, FaGem, FaShieldAlt as FaShield } from "react-icons/fa";
+import { FaBullhorn, FaUniversity, FaShieldAlt, FaCalendarAlt, FaMobileAlt, FaCopy, FaCheck, FaCrown, FaGem, FaShieldAlt as FaShield, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
 function Home() {
   // ৫-স্টার গোল্ডেন প্রিমিয়াম ব্যানার ডেটা
@@ -42,12 +42,20 @@ function Home() {
     setTimeout(() => setCopiedText(""), 2000);
   };
 
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % banners.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + banners.length) % banners.length);
+  };
+
   useEffect(() => {
     const slideInterval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % banners.length);
-    }, 5000);
+      nextSlide();
+    }, 6000);
     return () => clearInterval(slideInterval);
-  }, [banners.length]);
+  }, [currentSlide]);
 
   return (
     <div className="space-y-8 pb-10">
@@ -55,40 +63,58 @@ function Home() {
       {/* ==========================================
           1. 5-STAR GOLDEN PREMIUM BANNER SECTION
       ========================================== */}
-      <div className={`relative rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-tr ${banners[currentSlide].bg} text-white transition-all duration-700 p-8 lg:p-12 border ${banners[currentSlide].borderGlow} backdrop-blur-xl`}>
+      <div className={`relative rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-tr ${banners[currentSlide].bg} text-white transition-all duration-700 p-8 lg:p-14 border ${banners[currentSlide].borderGlow} backdrop-blur-xl group`}>
         
         {/* Background Royal Lighting Effects */}
-        <div className="absolute -top-24 -right-24 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-yellow-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute -top-32 -right-32 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-yellow-500/10 rounded-full blur-3xl pointer-events-none"></div>
         
         {/* Subtle Luxury Pattern Overlay */}
         <div className="absolute inset-0 bg-[radial-gradient(#fbbf24_1px,transparent_1px)] [background-size:24px_24px] opacity-10 pointer-events-none"></div>
 
-        <div className="relative z-10 max-w-3xl space-y-4">
+        {/* Left & Right Navigation Arrows */}
+        <button 
+          onClick={prevSlide}
+          className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-amber-500 hover:text-slate-950 text-amber-300 p-3 rounded-full border border-amber-500/30 transition-all duration-300 opacity-0 group-hover:opacity-100 z-20 shadow-lg backdrop-blur-md"
+          title="Previous Slide"
+        >
+          <FaChevronLeft size={16} />
+        </button>
+
+        <button 
+          onClick={nextSlide}
+          className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-amber-500 hover:text-slate-950 text-amber-300 p-3 rounded-full border border-amber-500/30 transition-all duration-300 opacity-0 group-hover:opacity-100 z-20 shadow-lg backdrop-blur-md"
+          title="Next Slide"
+        >
+          <FaChevronRight size={16} />
+        </button>
+
+        {/* Centered Content Wrapper */}
+        <div className="relative z-10 max-w-4xl mx-auto text-center flex flex-col items-center space-y-5">
           
           {/* Golden Badge */}
           <div className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500/20 via-yellow-500/20 to-amber-500/20 border border-amber-400/40 text-amber-300 text-xs px-4 py-1.5 rounded-full font-bold uppercase tracking-widest backdrop-blur-md shadow-lg shadow-amber-500/10">
             <FaCrown className="text-amber-400 animate-pulse" /> {banners[currentSlide].badge}
           </div>
 
-          <h1 className="text-3xl lg:text-5xl font-black tracking-tight leading-tight bg-gradient-to-r from-white via-amber-100 to-amber-300 bg-clip-text text-transparent drop-shadow-sm">
+          <h1 className="text-3xl lg:text-5xl font-black tracking-tight leading-tight bg-gradient-to-r from-white via-amber-100 to-amber-300 bg-clip-text text-transparent drop-shadow-md">
             {banners[currentSlide].title}
           </h1>
 
-          <p className="text-slate-300 text-sm lg:text-base font-normal leading-relaxed">
+          <p className="text-slate-300 text-sm lg:text-base font-normal leading-relaxed max-w-2xl">
             {banners[currentSlide].subtitle}
           </p>
 
-          <div className="pt-1 flex items-center gap-2 text-amber-400 text-xs lg:text-sm font-semibold">
-            <span className="bg-amber-400/20 p-1.5 rounded-lg border border-amber-400/30">✨</span> 
+          <div className="pt-2 inline-flex items-center gap-2 text-amber-400 text-xs lg:text-sm font-semibold bg-amber-500/10 px-4 py-2 rounded-xl border border-amber-500/20 backdrop-blur-sm">
+            <span>✨</span> 
             <span className="text-amber-200">{banners[currentSlide].description}</span>
           </div>
 
         </div>
 
         {/* Slider Dots & Indicators */}
-        <div className="flex items-center justify-between mt-8 relative z-10 pt-4 border-t border-amber-500/20">
-          <div className="flex gap-2">
+        <div className="flex items-center justify-between mt-10 relative z-10 pt-4 border-t border-amber-500/20 max-w-5xl mx-auto">
+          <div className="flex gap-2 mx-auto sm:mx-0">
             {banners.map((_, index) => (
               <button
                 key={index}
