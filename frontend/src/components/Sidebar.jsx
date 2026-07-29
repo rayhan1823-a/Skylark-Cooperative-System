@@ -26,7 +26,7 @@ function Sidebar() {
   const menu = [
     {
       title: "Home",
-      path: "/home",
+      path: "/",
       icon: <FaHome />,
     },
     {
@@ -36,7 +36,7 @@ function Sidebar() {
     },
     {
       title: "Dashboard",
-      path: "/",
+      path: "/dashboard",
       icon: <FaChartBar />,
     },
     {
