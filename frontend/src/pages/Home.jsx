@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { FaBullhorn, FaUniversity, FaCreditCard, FaShieldAlt, FaCalendarAlt } from "react-icons/fa";
+import { FaBullhorn, FaUniversity, FaShieldAlt, FaCalendarAlt, FaMobileAlt } from "react-icons/fa";
 
 function Home() {
-  // আপনার দেওয়া প্রফেশনাল ৩টি ব্যানার ডেটা
+  // প্রফেশনাল ৩টি ব্যানার ডেটা
   const banners = [
     {
       title: "Skylark Cooperative Society",
@@ -35,11 +35,11 @@ function Home() {
 
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // স্লাইডার অটো চেঞ্জ হওয়ার ইফেক্ট (৪ সেকেন্ড পর পর)
+  // স্লাইডার অটো চেঞ্জ হওয়ার ইফেক্ট (৫ সেকেন্ড বা ৫০০০ মিলিসেকেন্ড পর পর)
   useEffect(() => {
     const slideInterval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % banners.length);
-    }, 4000);
+    }, 5000);
     return () => clearInterval(slideInterval);
   }, [banners.length]);
 
@@ -95,7 +95,7 @@ function Home() {
       </div>
 
       {/* ==========================================
-          3. BANK ACCOUNT INFORMATION SECTION
+          3. BANK & MOBILE FINANCIAL INFORMATION
       ========================================== */}
       <div>
         <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
@@ -104,35 +104,45 @@ function Home() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           
-          {/* Bank Card 1 */}
+          {/* Bank Card (IFIC Bank) */}
           <div className="bg-white p-6 rounded-2xl shadow-md border border-slate-100 hover:shadow-lg transition">
             <div className="flex items-center justify-between mb-4">
               <span className="bg-blue-100 text-blue-700 p-3 rounded-xl">
                 <FaUniversity size={22} />
               </span>
-              <span className="text-xs font-semibold bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-full">Active</span>
+              <span className="text-xs font-semibold bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-full">Active Bank</span>
             </div>
-            <h4 className="font-bold text-slate-800 text-lg">Dutch-Bangla Bank PLC</h4>
-            <p className="text-xs text-slate-500 mt-1">Branch: Principal Branch</p>
-            <div className="mt-4 pt-4 border-t border-slate-100 space-y-1">
-              <p className="text-sm font-medium text-slate-600">A/C Name: <span className="text-slate-900 font-bold">Skylark Cooperative</span></p>
-              <p className="text-sm font-medium text-slate-600">A/C No: <span className="text-blue-600 font-mono font-bold">123.150.4589</span></p>
+            <h4 className="font-bold text-slate-800 text-lg">IFIC Bank PLC</h4>
+            <p className="text-xs text-slate-500 mt-1">Branch: Darus Salam Road, Mirpur</p>
+            <div className="mt-4 pt-4 border-t border-slate-100 space-y-1.5">
+              <p className="text-xs font-medium text-slate-600">A/C Name: <span className="text-slate-900 font-bold block text-xs mt-0.5">MD Hasan Al Mamun, MD Mahidul Mollla, MD Ahsanul Islam</span></p>
+              <p className="text-xs font-medium text-slate-600 pt-1">A/C No: <span className="text-blue-600 font-mono font-bold text-sm">0200044702812</span></p>
             </div>
           </div>
 
-          {/* Bank Card 2 */}
+          {/* MFS Card (Bkash, Nagad, Rocket) */}
           <div className="bg-white p-6 rounded-2xl shadow-md border border-slate-100 hover:shadow-lg transition">
             <div className="flex items-center justify-between mb-4">
               <span className="bg-pink-100 text-pink-600 p-3 rounded-xl">
-                <FaCreditCard size={22} />
+                <FaMobileAlt size={22} />
               </span>
-              <span className="text-xs font-semibold bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-full">Merchant</span>
+              <span className="text-xs font-semibold bg-pink-100 text-pink-700 px-2.5 py-1 rounded-full">Personal Wallets</span>
             </div>
-            <h4 className="font-bold text-slate-800 text-lg">bKash / Nagad (Merchant)</h4>
-            <p className="text-xs text-slate-500 mt-1">Personal / Business Wallet</p>
-            <div className="mt-4 pt-4 border-t border-slate-100 space-y-1">
-              <p className="text-sm font-medium text-slate-600">Account Type: <span className="text-slate-900 font-bold">Merchant Wallet</span></p>
-              <p className="text-sm font-medium text-slate-600">Number: <span className="text-pink-600 font-mono font-bold">01700-000000</span></p>
+            <h4 className="font-bold text-slate-800 text-lg">bKash / Nagad / Rocket</h4>
+            <p className="text-xs text-slate-500 mt-1">Official Personal Numbers</p>
+            <div className="mt-4 pt-4 border-t border-slate-100 space-y-2 text-xs">
+              <div className="flex justify-between items-center">
+                <span className="font-medium text-slate-600">bKash (Personal):</span>
+                <span className="text-pink-600 font-mono font-bold">01314533222</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="font-medium text-slate-600">Nagad (Personal):</span>
+                <span className="text-orange-600 font-mono font-bold">01400444424</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="font-medium text-slate-600">Rocket (Personal):</span>
+                <span className="text-purple-600 font-mono font-bold">01400444424</span>
+              </div>
             </div>
           </div>
 
