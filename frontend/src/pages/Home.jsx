@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaBullhorn, FaUniversity, FaShieldAlt, FaCalendarAlt, FaMobileAlt, FaCopy, FaCheck, FaGem, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { FaBullhorn, FaUniversity, FaShieldAlt, FaCalendarAlt, FaMobileAlt, FaCopy, FaCheck, FaGem, FaChevronLeft, FaChevronRight, FaExclamationCircle } from "react-icons/fa";
 
 function Home() {
   const banners = [
@@ -127,7 +127,7 @@ function Home() {
       </div>
 
       {/* ==========================================
-          3. PREMIUM BANK & MFS INFORMATION SECTION (SMART & LARGER TEXT)
+          3. PREMIUM BANK & MFS INFORMATION SECTION
       ========================================== */}
       <div>
         <div className="flex items-center justify-between mb-4">
@@ -281,6 +281,36 @@ function Home() {
               <span>সিস্টেম সিকিউরিটি</span>
               <span className="text-blue-400 font-semibold">Skylark Management</span>
             </div>
+          </div>
+
+        </div>
+
+        {/* ==========================================
+            EYE-CATCHING HIGHLIGHT BANNER (খরচসহ টাকা প্রদান করুন)
+        ========================================== */}
+        <div className="mt-6 bg-gradient-to-r from-blue-700 via-indigo-700 to-slate-900 p-5 lg:p-6 rounded-3xl shadow-xl border border-blue-400/30 text-white flex flex-col md:flex-row items-center justify-between gap-4 relative overflow-hidden">
+          
+          {/* Background glowing aura */}
+          <div className="absolute -right-10 -top-10 w-48 h-48 bg-blue-400/20 rounded-full blur-2xl pointer-events-none"></div>
+
+          <div className="flex items-center gap-4 relative z-10 text-center md:text-left flex-col md:flex-row">
+            <div className="bg-white/10 p-4 rounded-2xl border border-white/20 text-yellow-300 shadow-inner">
+              <FaExclamationCircle size={28} />
+            </div>
+            <div>
+              <span className="bg-amber-400 text-slate-950 font-black text-[11px] px-3 py-1 rounded-full uppercase tracking-wider inline-block mb-1.5 shadow-sm">
+                জরুরি নির্দেশনা
+              </span>
+              <h3 className="text-lg lg:text-xl font-black tracking-tight text-white">
+                যেকোনো মাধ্যমে টাকা পাঠানোর সময় ক্যাশ আউট বা সেন্ড মানির অতিরিক্ত <span className="text-yellow-300 underline decoration-yellow-300/50">খরচসহ (Charge)</span> মোট টাকা প্রদান করুন।
+              </h3>
+            </div>
+          </div>
+
+          <div className="relative z-10 shrink-0">
+            <span className="bg-white/10 hover:bg-white/20 text-blue-100 font-semibold text-xs px-4 py-2.5 rounded-xl border border-white/15 backdrop-blur-md transition block text-center">
+              ধন্যবাদান্তে, অফিস কর্তৃপক্ষ
+            </span>
           </div>
 
         </div>
