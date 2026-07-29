@@ -1,49 +1,47 @@
 import React, { useState, useEffect } from "react";
-import { FaBullhorn, FaUniversity, FaShieldAlt, FaCalendarAlt, FaMobileAlt, FaCopy, FaCheck } from "react-icons/fa";
+import { FaBullhorn, FaUniversity, FaShieldAlt, FaCalendarAlt, FaMobileAlt, FaCopy, FaCheck, FaCrown, FaGem, FaShieldAlt as FaShield } from "react-icons/fa";
 
 function Home() {
-  // প্রফেশনাল ৩টি ব্যানার ডেটা
+  // ৫-স্টার গোল্ডেন প্রিমিয়াম ব্যানার ডেটা
   const banners = [
     {
       title: "Skylark Cooperative Society",
-      subtitle:
-        "Empowering Members Through Secure, Transparent & Smart Financial Management.",
-      description:
-        "সমিতির প্রতিটি সদস্যের জন্য আধুনিক, নিরাপদ ও নির্ভরযোগ্য ডিজিটাল আর্থিক সেবা।",
-      badge: "🏆 Trusted Cooperative",
-      bg: "from-blue-950 via-indigo-900 to-sky-700",
+      subtitle: "Empowering Members Through Secure, Transparent & Smart Financial Management.",
+      description: "সমিতির প্রতিটি সদস্যের জন্য আধুনিক, নিরাপদ ও নির্ভরযোগ্য ডিজিটাল আর্থিক সেবা।",
+      badge: "👑 Royal Golden Standard",
+      bg: "from-slate-950 via-zinc-900 to-amber-950",
+      accent: "text-amber-400",
+      borderGlow: "border-amber-500/40 shadow-amber-500/10"
     },
     {
       title: "Complete Digital Cooperative Solution",
-      subtitle:
-        "Manage Deposits, Loans, Withdrawals, Penalties, Reports & Member Information in One Secure Platform.",
-      description:
-        "একটি প্ল্যাটফর্মেই সমিতির সকল কার্যক্রম পরিচালনার আধুনিক সমাধান।",
-      badge: "⚡ Smart Management",
-      bg: "from-emerald-900 via-green-800 to-teal-700",
+      subtitle: "Manage Deposits, Loans, Withdrawals, Penalties, Reports & Member Information in One Secure Platform.",
+      description: "একটি প্ল্যাটফর্মেই সমিতির সকল কার্যক্রম পরিচালনার আধুনিক সমাধান।",
+      badge: "⚡ Elite Management System",
+      bg: "from-slate-950 via-neutral-900 to-yellow-950",
+      accent: "text-yellow-400",
+      borderGlow: "border-yellow-500/40 shadow-yellow-500/10"
     },
     {
       title: "Professional Financial Management",
-      subtitle:
-        "Ensuring Transparency, Accountability and Sustainable Growth for Every Member.",
-      description:
-        "প্রতিটি সদস্যের আর্থিক নিরাপত্তা ও সমিতির দীর্ঘমেয়াদি উন্নয়নের জন্য নিবেদিত।",
-      badge: "🔐 Secure & Reliable",
-      bg: "from-purple-900 via-violet-800 to-fuchsia-700",
+      subtitle: "Ensuring Transparency, Accountability and Sustainable Growth for Every Member.",
+      description: "প্রতিটি সদস্যের আর্থিক নিরাপত্তা ও সমিতির দীর্ঘমেয়াদি উন্নয়নের জন্য নিবেদিত।",
+      badge: "💎 5-Star Certified Security",
+      bg: "from-slate-950 via-stone-900 to-orange-950",
+      accent: "text-amber-300",
+      borderGlow: "border-orange-500/40 shadow-orange-500/10"
     },
   ];
 
   const [currentSlide, setCurrentSlide] = useState(0);
   const [copiedText, setCopiedText] = useState("");
 
-  // কপি করার ফাংশন
   const handleCopy = (text) => {
     navigator.clipboard.writeText(text);
     setCopiedText(text);
     setTimeout(() => setCopiedText(""), 2000);
   };
 
-  // স্লাইডার অটো চেঞ্জ হওয়ার ইফেক্ট (৫ সেকেন্ড পর পর)
   useEffect(() => {
     const slideInterval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % banners.length);
@@ -55,36 +53,58 @@ function Home() {
     <div className="space-y-8 pb-10">
       
       {/* ==========================================
-          1. SLIDER BANNER SECTION
+          1. 5-STAR GOLDEN PREMIUM BANNER SECTION
       ========================================== */}
-      <div className={`relative rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-r ${banners[currentSlide].bg} text-white transition-all duration-700 p-8 lg:p-12`}>
-        <div className="relative z-10 max-w-3xl space-y-3">
-          <span className="inline-block bg-white/20 text-white text-xs px-3.5 py-1.5 rounded-full font-bold uppercase tracking-wider backdrop-blur-md shadow-sm">
-            {banners[currentSlide].badge}
-          </span>
-          <h1 className="text-2xl lg:text-4xl font-black tracking-tight leading-tight">
+      <div className={`relative rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-tr ${banners[currentSlide].bg} text-white transition-all duration-700 p-8 lg:p-12 border ${banners[currentSlide].borderGlow} backdrop-blur-xl`}>
+        
+        {/* Background Royal Lighting Effects */}
+        <div className="absolute -top-24 -right-24 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-yellow-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        
+        {/* Subtle Luxury Pattern Overlay */}
+        <div className="absolute inset-0 bg-[radial-gradient(#fbbf24_1px,transparent_1px)] [background-size:24px_24px] opacity-10 pointer-events-none"></div>
+
+        <div className="relative z-10 max-w-3xl space-y-4">
+          
+          {/* Golden Badge */}
+          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500/20 via-yellow-500/20 to-amber-500/20 border border-amber-400/40 text-amber-300 text-xs px-4 py-1.5 rounded-full font-bold uppercase tracking-widest backdrop-blur-md shadow-lg shadow-amber-500/10">
+            <FaCrown className="text-amber-400 animate-pulse" /> {banners[currentSlide].badge}
+          </div>
+
+          <h1 className="text-3xl lg:text-5xl font-black tracking-tight leading-tight bg-gradient-to-r from-white via-amber-100 to-amber-300 bg-clip-text text-transparent drop-shadow-sm">
             {banners[currentSlide].title}
           </h1>
-          <p className="text-slate-200 text-sm lg:text-base font-medium">
+
+          <p className="text-slate-300 text-sm lg:text-base font-normal leading-relaxed">
             {banners[currentSlide].subtitle}
           </p>
-          <p className="text-amber-300 text-xs lg:text-sm font-semibold pt-1">
-            ✨ {banners[currentSlide].description}
-          </p>
+
+          <div className="pt-1 flex items-center gap-2 text-amber-400 text-xs lg:text-sm font-semibold">
+            <span className="bg-amber-400/20 p-1.5 rounded-lg border border-amber-400/30">✨</span> 
+            <span className="text-amber-200">{banners[currentSlide].description}</span>
+          </div>
+
         </div>
 
-        {/* Slider Dots */}
-        <div className="flex gap-2 mt-6 relative z-10">
-          {banners.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentSlide(index)}
-              className={`h-2.5 rounded-full transition-all duration-300 ${
-                currentSlide === index ? "w-8 bg-white" : "w-2.5 bg-white/40"
-              }`}
-            />
-          ))}
+        {/* Slider Dots & Indicators */}
+        <div className="flex items-center justify-between mt-8 relative z-10 pt-4 border-t border-amber-500/20">
+          <div className="flex gap-2">
+            {banners.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentSlide(index)}
+                className={`h-2 rounded-full transition-all duration-500 ${
+                  currentSlide === index ? "w-10 bg-gradient-to-r from-amber-400 to-yellow-300 shadow-md shadow-amber-400/50" : "w-2.5 bg-white/30 hover:bg-white/50"
+                }`}
+              />
+            ))}
+          </div>
+
+          <div className="hidden sm:flex items-center gap-1.5 text-xs text-amber-400/80 font-mono tracking-wider">
+            <FaGem /> PREMIER EDITION 2026
+          </div>
         </div>
+
       </div>
 
       {/* ==========================================
@@ -217,7 +237,7 @@ function Home() {
 
             <div>
               <div className="flex items-center gap-2 text-emerald-400 font-bold mb-3 bg-emerald-950/50 w-fit px-3 py-1 rounded-full border border-emerald-800/50 text-xs">
-                <FaShieldAlt /> নিরাপদ লেনদেন নির্দেশিকা
+                <FaShield /> নিরাপদ লেনদেন নির্দেশিকা
               </div>
               <p className="text-xs text-slate-300 leading-relaxed pt-1">
                 যেকোনো ব্যাংকিং বা মোবাইল ওয়ালেটে টাকা প্রেরণের পর অবশ্যই সঠিক ট্রানজাকশন আইডি (<span className="text-amber-300 font-mono font-bold">TrxID</span>) এবং রসিদ সংরক্ষণ করুন। পরবর্তীতে পেমেন্ট সেকশনে এটি সাবমিট করুন।
