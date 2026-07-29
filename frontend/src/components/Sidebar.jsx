@@ -12,6 +12,8 @@ import {
   FaMinusCircle,
   FaExclamationTriangle,
   FaUserShield,
+  FaHome,
+  FaBell,
 } from "react-icons/fa";
 
 function Sidebar() {
@@ -22,6 +24,16 @@ function Sidebar() {
   const role = user.role || "";
 
   const menu = [
+    {
+      title: "Home",
+      path: "/home",
+      icon: <FaHome />,
+    },
+    {
+      title: "Notice",
+      path: "/notice",
+      icon: <FaBell />,
+    },
     {
       title: "Dashboard",
       path: "/",

@@ -14,6 +14,10 @@ import ProtectedRoute from "./components/ProtectedRoute";
 // MainLayout সঠিক পাথ থেকে ইম্পোর্ট করা হলো (layouts ফোল্ডার থেকে)
 import MainLayout from "./layouts/MainLayout"; 
 
+// Home & Notice Pages
+import Home from "./pages/Home";
+import Notice from "./pages/Notice";
+
 // Dashboard
 import Dashboard from "./pages/Dashboard";
 
@@ -129,6 +133,8 @@ function App() {
         >
           {/* MainLayout এর ভেতরে Outlet হিসেবে এই পেজগুলো রেন্ডার হবে */}
           <Route path="/" element={<Dashboard />} />
+          <Route path="/home" element={<Home />} />
+          <Route path="/notice" element={<Notice />} />
           <Route path="/members" element={<Members />} />
           <Route
             path="/users-list"
