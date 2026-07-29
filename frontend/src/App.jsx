@@ -131,10 +131,13 @@ function App() {
             </ProtectedRoute>
           }
         >
-          {/* মূল রুট বা লগইন করার পর হোম পেজ আসবে */}
+          {/* মূল রুট তথা লগইন করার পর সরাসরি হোম পেজ আসবে */}
           <Route path="/" element={<Home />} />
           
-          {/* ড্যাশবোর্ড থাকবে আলাদা পাতে */}
+          {/* আলাদা করে /home রুটও যুক্ত করে দেওয়া হলো যাতে কোনো 404 এরর না আসে */}
+          <Route path="/home" element={<Home />} />
+
+          {/* ড্যাশবোর্ড থাকবে শুধুমাত্র /dashboard পাতে */}
           <Route path="/dashboard" element={<Dashboard />} />
           
           <Route path="/notice" element={<Notice />} />
