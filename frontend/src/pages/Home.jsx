@@ -196,7 +196,7 @@ function Home() {
             </div>
           </div>
 
-          {/* 2. bKash / Nagad / Rocket Card (With Notice Inside at Bottom) */}
+          {/* 2. bKash / Nagad Card (Without Rocket, Larger Text & Notice) */}
           <div className="bg-gradient-to-br from-white via-slate-50 to-pink-50/50 p-7 rounded-3xl shadow-xl border border-pink-100 hover:shadow-2xl transition-all duration-300 relative overflow-hidden flex flex-col justify-between group">
             <div className="absolute top-0 right-0 w-32 h-32 bg-pink-600/5 rounded-bl-full pointer-events-none transition group-hover:scale-110"></div>
 
@@ -210,62 +210,47 @@ function Home() {
                 </span>
               </div>
 
-              <h4 className="font-extrabold text-slate-900 text-2xl tracking-tight">bKash / Nagad / Rocket</h4>
+              <h4 className="font-extrabold text-slate-900 text-2xl tracking-tight">bKash / Nagad</h4>
               <p className="text-sm font-medium text-slate-600 mt-0.5">Official Personal Numbers</p>
             </div>
             
-            <div className="mt-5 pt-4 border-t border-slate-200/80 space-y-2.5">
+            <div className="mt-6 pt-5 border-t border-slate-200/80 space-y-4">
               
               {/* bKash */}
               <div 
                 onClick={() => handleCopy("01314533222")}
-                className="flex items-center justify-between bg-white px-3.5 py-2.5 rounded-2xl border border-slate-100 hover:border-pink-300 cursor-pointer shadow-sm transition group/item"
+                className="flex items-center justify-between bg-white px-4 py-3.5 rounded-2xl border border-slate-100 hover:border-pink-300 cursor-pointer shadow-sm transition group/item"
                 title="Click to copy bKash number"
               >
                 <div>
-                  <span className="font-bold text-slate-500 text-xs">bKash:</span>
-                  <span className="text-pink-600 font-mono font-extrabold text-sm ml-2">01314533222</span>
+                  <span className="font-bold text-slate-600 text-sm">bKash:</span>
+                  <span className="text-pink-600 font-mono font-extrabold text-lg ml-2">01314533222</span>
                 </div>
-                <span className="text-slate-400 group-hover/item:text-pink-600 transition">
-                  {copiedText === "01314533222" ? <FaCheck className="text-emerald-600 text-xs" /> : <FaCopy className="text-xs" />}
+                <span className="text-slate-400 group-hover/item:text-pink-600 transition text-lg">
+                  {copiedText === "01314533222" ? <FaCheck className="text-emerald-600 text-base" /> : <FaCopy className="text-base" />}
                 </span>
               </div>
 
               {/* Nagad */}
               <div 
                 onClick={() => handleCopy("01400444424")}
-                className="flex items-center justify-between bg-white px-3.5 py-2.5 rounded-2xl border border-slate-100 hover:border-orange-300 cursor-pointer shadow-sm transition group/item"
+                className="flex items-center justify-between bg-white px-4 py-3.5 rounded-2xl border border-slate-100 hover:border-orange-300 cursor-pointer shadow-sm transition group/item"
                 title="Click to copy Nagad number"
               >
                 <div>
-                  <span className="font-bold text-slate-500 text-xs">Nagad:</span>
-                  <span className="text-orange-600 font-mono font-extrabold text-sm ml-2">01400444424</span>
+                  <span className="font-bold text-slate-600 text-sm">Nagad:</span>
+                  <span className="text-orange-600 font-mono font-extrabold text-lg ml-2">01400444424</span>
                 </div>
-                <span className="text-slate-400 group-hover/item:text-orange-600 transition">
-                  {copiedText === "01400444424" ? <FaCheck className="text-emerald-600 text-xs" /> : <FaCopy className="text-xs" />}
+                <span className="text-slate-400 group-hover/item:text-orange-600 transition text-lg">
+                  {copiedText === "01400444424" ? <FaCheck className="text-emerald-600 text-base" /> : <FaCopy className="text-base" />}
                 </span>
               </div>
 
-              {/* Rocket */}
-              <div 
-                onClick={() => handleCopy("01400444424")}
-                className="flex items-center justify-between bg-white px-3.5 py-2.5 rounded-2xl border border-slate-100 hover:border-purple-300 cursor-pointer shadow-sm transition group/item"
-                title="Click to copy Rocket number"
-              >
-                <div>
-                  <span className="font-bold text-slate-500 text-xs">Rocket:</span>
-                  <span className="text-purple-600 font-mono font-extrabold text-sm ml-2">01400444424</span>
-                </div>
-                <span className="text-slate-400 group-hover/item:text-purple-600 transition">
-                  {copiedText === "01400444424" ? <FaCheck className="text-emerald-600 text-xs" /> : <FaCopy className="text-xs" />}
-                </span>
-              </div>
-
-              {/* Notice Inside bKash Card at the Bottom */}
-              <div className="mt-3 bg-gradient-to-r from-pink-600 to-rose-600 text-white p-3 rounded-2xl shadow-md flex items-start gap-2.5 border border-pink-400/30">
-                <FaExclamationCircle className="text-amber-200 shrink-0 mt-0.5 text-base" />
-                <p className="text-xs font-bold leading-snug text-pink-50">
-                  বিকাশ, নগদ বা রকেটে টাকা দিলে অবশ্যই খরচসহ দেবেন।
+              {/* Notice Inside bKash/Nagad Card (Without Rocket) */}
+              <div className="mt-4 bg-gradient-to-r from-pink-600 to-rose-600 text-white p-3.5 rounded-2xl shadow-md flex items-start gap-3 border border-pink-400/30">
+                <FaExclamationCircle className="text-yellow-200 shrink-0 mt-0.5 text-lg" />
+                <p className="text-xs lg:text-sm font-bold leading-snug text-pink-50">
+                  বিকাশ বা নগদে টাকা দিলে অবশ্যই খরচসহ দেবেন।
                 </p>
               </div>
 
