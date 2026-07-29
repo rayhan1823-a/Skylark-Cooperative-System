@@ -9,7 +9,9 @@ import {
   LogOut,
   UserCircle2,
   Menu,
-  X
+  X,
+  Home,
+  User
 } from "lucide-react";
 
 function MainLayout() {
@@ -20,6 +22,7 @@ function MainLayout() {
 
   const [currentTime, setCurrentTime] = useState(new Date());
   const [showMenu, setShowMenu] = useState(false);
+  const [showMobileProfileMenu, setShowMobileProfileMenu] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -30,9 +33,10 @@ function MainLayout() {
     return () => clearInterval(timer);
   }, []);
 
-  // লোকেশন পরিবর্তন হলে মোবাইল সাইডবার স্বয়ংক্রিয়ভাবে বন্ধ হয়ে যাবে
+  // লোকেশন পরিবর্তন হলে মোবাইল সাইডবার এবং মোবাইল প্রোফাইল মেনু স্বয়ংক্রিয়ভাবে বন্ধ হয়ে যাবে
   useEffect(() => {
     setIsMobileSidebarOpen(false);
+    setShowMobileProfileMenu(false);
   }, [location.pathname]);
 
   const logout = () => {
@@ -47,7 +51,7 @@ function MainLayout() {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-100 relative overflow-x-hidden">
+    <div className="flex min-h-screen bg-slate-100 relative overflow-x-hidden pb-16 lg:pb-0">
       
       {/* =========================
           MOBILE OVERLAY (Background shadow when mobile menu is open)
@@ -218,6 +222,84 @@ function MainLayout() {
           <Outlet />
         </main>
       </div>
+
+      {/* =========================================================
+          MOBILE BOTTOM NAVIGATION BAR (Only for mobile screens)
+      ========================================================= */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-40 flex justify-around items-center h-16 px-6">
+        
+        {/* 1st Button: Home Icon */}
+        <Link
+          to="/"
+          className={`flex flex-col items-center justify-center w-1/2 py-1 transition-colors ${
+            location.pathname === "/" ? "text-blue-600" : "text-gray-600 hover:text-blue-600"
+          }`}
+        >
+          <Home size={22} />
+          <span className="text-xs font-medium mt-1">Home</span>
+        </Link>
+
+        {/* Divider */}
+        <div className="w-[1px] h-8 bg-gray-200"></div>
+
+        {/* Right Button: My Profile Icon */}
+        <div className="relative w-1/2 flex justify-center">
+          <button
+            onClick={() => setShowMobileProfileMenu(!showMobileProfileMenu)}
+            className={`flex flex-col items-center justify-center w-full py-1 transition-colors ${
+              showMobileProfileMenu ? "text-blue-600" : "text-gray-600 hover:text-blue-600"
+            }`}
+          >
+            <User size={22} />
+            <span className="text-xs font-medium mt-1">My Profile</span>
+          </button>
+
+          {/* Mobile Profile PopUp Menu */}
+          {showMobileProfileMenu && (
+            <div className="absolute bottom-16 right-0 w-64 bg-white rounded-2xl shadow-2xl border overflow-hidden z-50 mb-2">
+              <div className="bg-blue-700 text-white p-4">
+                <div className="flex items-center gap-3">
+                  <UserCircle2 size={40} />
+                  <div>
+                    <h3 className="font-bold text-sm">
+                      {user?.name || "Administrator"}
+                    </h3>
+                    <p className="text-xs text-blue-100">
+                      {user?.role || "SUPER_ADMIN"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <Link
+                to={`/member/${user?.memberId || user?._id}`}
+                onClick={() => setShowMobileProfileMenu(false)}
+                className="w-full text-left px-5 py-3 hover:bg-gray-100 transition block text-gray-800 text-sm font-medium border-b border-gray-100"
+              >
+                👤 My Profile Data
+              </Link>
+              
+              <Link
+                to="/change-password"
+                onClick={() => setShowMobileProfileMenu(false)}
+                className="w-full text-left px-5 py-3 hover:bg-gray-100 transition block text-gray-800 text-sm font-medium border-b border-gray-100"
+              >
+                🔑 Change Password
+              </Link>
+
+              <button
+                onClick={logout}
+                className="w-full text-left px-5 py-3 text-red-600 hover:bg-red-50 transition flex items-center gap-2 text-sm font-medium"
+              >
+                <LogOut size={16} />
+                Logout
+              </button>
+            </div>
+          )}
+        </div>
+
+      </div>
+
     </div>
   );
 }
