@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaBullhorn, FaUniversity, FaShieldAlt, FaCalendarAlt, FaMobileAlt } from "react-icons/fa";
+import { FaBullhorn, FaUniversity, FaShieldAlt, FaCalendarAlt, FaMobileAlt, FaCopy, FaCheck } from "react-icons/fa";
 
 function Home() {
   // প্রফেশনাল ৩টি ব্যানার ডেটা
@@ -34,8 +34,16 @@ function Home() {
   ];
 
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [copiedText, setCopiedText] = useState("");
 
-  // স্লাইডার অটো চেঞ্জ হওয়ার ইফেক্ট (৫ সেকেন্ড বা ৫০০০ মিলিসেকেন্ড পর পর)
+  // কপি করার ফাংশন
+  const handleCopy = (text) => {
+    navigator.clipboard.writeText(text);
+    setCopiedText(text);
+    setTimeout(() => setCopiedText(""), 2000);
+  };
+
+  // স্লাইডার অটো চেঞ্জ হওয়ার ইফেক্ট (৫ সেকেন্ড পর পর)
   useEffect(() => {
     const slideInterval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % banners.length);
@@ -95,69 +103,129 @@ function Home() {
       </div>
 
       {/* ==========================================
-          3. BANK & MOBILE FINANCIAL INFORMATION
+          3. PREMIUM BANK & MFS INFORMATION SECTION
       ========================================== */}
       <div>
-        <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
-          <FaUniversity className="text-blue-600" /> সমিতির অফিশিয়াল ব্যাংক ও পেমেন্ট অ্যাকাউন্টস
-        </h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+            <FaUniversity className="text-blue-600" /> সমিতির অফিশিয়াল ব্যাংক ও পেমেন্ট অ্যাকাউন্টস
+          </h2>
+          <span className="text-xs text-slate-500 bg-white px-3 py-1 rounded-full shadow-sm border border-slate-200">
+            💡 অ্যাকাউন্টে ক্লিক করে নম্বর কপি করতে পারেন
+          </span>
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           
-          {/* Bank Card (IFIC Bank) */}
-          <div className="bg-white p-6 rounded-2xl shadow-md border border-slate-100 hover:shadow-lg transition">
+          {/* Premium Bank Card (IFIC Bank) */}
+          <div className="bg-gradient-to-br from-white via-slate-50 to-blue-50/40 p-6 rounded-3xl shadow-xl border border-blue-100/80 hover:shadow-2xl transition-all duration-300 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/5 rounded-bl-full pointer-events-none transition group-hover:scale-110"></div>
+            
             <div className="flex items-center justify-between mb-4">
-              <span className="bg-blue-100 text-blue-700 p-3 rounded-xl">
+              <div className="bg-gradient-to-tr from-blue-600 to-indigo-700 text-white p-3.5 rounded-2xl shadow-md shadow-blue-500/20">
                 <FaUniversity size={22} />
+              </div>
+              <span className="text-xs font-bold bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full border border-emerald-200">
+                ● Active Bank
               </span>
-              <span className="text-xs font-semibold bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-full">Active Bank</span>
             </div>
-            <h4 className="font-bold text-slate-800 text-lg">IFIC Bank PLC</h4>
-            <p className="text-xs text-slate-500 mt-1">Branch: Darus Salam Road, Mirpur</p>
-            <div className="mt-4 pt-4 border-t border-slate-100 space-y-1.5">
-              <p className="text-xs font-medium text-slate-600">A/C Name: <span className="text-slate-900 font-bold block text-xs mt-0.5">MD Hasan Al Mamun, MD Mahidul Mollla, MD Ahsanul Islam</span></p>
-              <p className="text-xs font-medium text-slate-600 pt-1">A/C No: <span className="text-blue-600 font-mono font-bold text-sm">0200044702812</span></p>
+
+            <h4 className="font-extrabold text-slate-900 text-xl tracking-tight">IFIC Bank PLC</h4>
+            <p className="text-xs font-medium text-slate-500 mt-0.5">Branch: Darus Salam Road, Mirpur</p>
+            
+            <div className="mt-5 pt-4 border-t border-slate-200/60 space-y-3">
+              <div>
+                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Account Name</p>
+                <p className="text-xs font-bold text-slate-800 mt-0.5 leading-snug">
+                  MD Hasan Al Mamun, MD Mahidul Mollla, MD Ahsanul Islam
+                </p>
+              </div>
+
+              <div className="bg-white p-3 rounded-2xl border border-blue-100 flex items-center justify-between shadow-sm">
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase">Account Number</p>
+                  <span className="text-blue-700 font-mono font-extrabold text-sm tracking-wider">0200044702812</span>
+                </div>
+                <button
+                  onClick={() => handleCopy("0200044702812")}
+                  className="bg-blue-50 hover:bg-blue-600 hover:text-white text-blue-600 p-2 rounded-xl transition text-xs flex items-center gap-1 font-semibold"
+                  title="Copy A/C No"
+                >
+                  {copiedText === "0200044702812" ? <FaCheck className="text-emerald-600" /> : <FaCopy />}
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* MFS Card (Bkash, Nagad, Rocket) */}
-          <div className="bg-white p-6 rounded-2xl shadow-md border border-slate-100 hover:shadow-lg transition">
+          {/* Premium MFS Card (bKash, Nagad, Rocket) */}
+          <div className="bg-gradient-to-br from-white via-slate-50 to-pink-50/40 p-6 rounded-3xl shadow-xl border border-pink-100/80 hover:shadow-2xl transition-all duration-300 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-pink-600/5 rounded-bl-full pointer-events-none transition group-hover:scale-110"></div>
+
             <div className="flex items-center justify-between mb-4">
-              <span className="bg-pink-100 text-pink-600 p-3 rounded-xl">
+              <div className="bg-gradient-to-tr from-pink-600 to-rose-700 text-white p-3.5 rounded-2xl shadow-md shadow-pink-500/20">
                 <FaMobileAlt size={22} />
+              </div>
+              <span className="text-xs font-bold bg-pink-100 text-pink-800 px-3 py-1 rounded-full border border-pink-200">
+                ● Personal Wallets
               </span>
-              <span className="text-xs font-semibold bg-pink-100 text-pink-700 px-2.5 py-1 rounded-full">Personal Wallets</span>
             </div>
-            <h4 className="font-bold text-slate-800 text-lg">bKash / Nagad / Rocket</h4>
-            <p className="text-xs text-slate-500 mt-1">Official Personal Numbers</p>
-            <div className="mt-4 pt-4 border-t border-slate-100 space-y-2 text-xs">
-              <div className="flex justify-between items-center">
-                <span className="font-medium text-slate-600">bKash (Personal):</span>
-                <span className="text-pink-600 font-mono font-bold">01314533222</span>
+
+            <h4 className="font-extrabold text-slate-900 text-xl tracking-tight">bKash / Nagad / Rocket</h4>
+            <p className="text-xs font-medium text-slate-500 mt-0.5">Official Personal Numbers</p>
+            
+            <div className="mt-5 pt-4 border-t border-slate-200/60 space-y-2.5 text-xs">
+              
+              {/* bKash */}
+              <div className="flex items-center justify-between bg-white px-3 py-2 rounded-xl border border-slate-100 shadow-sm">
+                <div>
+                  <span className="font-bold text-slate-500 text-[11px]">bKash:</span>
+                  <span className="text-pink-600 font-mono font-bold ml-2">01314533222</span>
+                </div>
+                <button onClick={() => handleCopy("01314533222")} className="text-slate-400 hover:text-pink-600 p-1">
+                  {copiedText === "01314533222" ? <FaCheck className="text-emerald-600 text-xs" /> : <FaCopy className="text-xs" />}
+                </button>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="font-medium text-slate-600">Nagad (Personal):</span>
-                <span className="text-orange-600 font-mono font-bold">01400444424</span>
+
+              {/* Nagad */}
+              <div className="flex items-center justify-between bg-white px-3 py-2 rounded-xl border border-slate-100 shadow-sm">
+                <div>
+                  <span className="font-bold text-slate-500 text-[11px]">Nagad:</span>
+                  <span className="text-orange-600 font-mono font-bold ml-2">01400444424</span>
+                </div>
+                <button onClick={() => handleCopy("01400444424")} className="text-slate-400 hover:text-orange-600 p-1">
+                  {copiedText === "01400444424" ? <FaCheck className="text-emerald-600 text-xs" /> : <FaCopy className="text-xs" />}
+                </button>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="font-medium text-slate-600">Rocket (Personal):</span>
-                <span className="text-purple-600 font-mono font-bold">01400444424</span>
+
+              {/* Rocket */}
+              <div className="flex items-center justify-between bg-white px-3 py-2 rounded-xl border border-slate-100 shadow-sm">
+                <div>
+                  <span className="font-bold text-slate-500 text-[11px]">Rocket:</span>
+                  <span className="text-purple-600 font-mono font-bold ml-2">01400444424</span>
+                </div>
+                <button onClick={() => handleCopy("01400444424")} className="text-slate-400 hover:text-purple-600 p-1">
+                  {copiedText === "01400444424" ? <FaCheck className="text-emerald-600 text-xs" /> : <FaCopy className="text-xs" />}
+                </button>
               </div>
+
             </div>
           </div>
 
-          {/* Security Note Card */}
-          <div className="bg-slate-900 text-white p-6 rounded-2xl shadow-md flex flex-col justify-between">
+          {/* Premium Security & Instruction Card */}
+          <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 text-white p-6 rounded-3xl shadow-xl flex flex-col justify-between border border-slate-800 relative overflow-hidden">
+            <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-blue-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
             <div>
-              <div className="flex items-center gap-2 text-blue-400 font-bold mb-2">
-                <FaShieldAlt /> নিরাপদ লেনদেন
+              <div className="flex items-center gap-2 text-emerald-400 font-bold mb-3 bg-emerald-950/50 w-fit px-3 py-1 rounded-full border border-emerald-800/50 text-xs">
+                <FaShieldAlt /> নিরাপদ লেনদেন নির্দেশিকা
               </div>
-              <p className="text-xs text-slate-300 leading-relaxed">
-                টাকা পাঠানোর পর অবশ্যই রসিদ বা ট্রানজাকশন আইডি (TrxID) সংরক্ষণ করুন এবং সিস্টেমের পেমেন্ট সেকশনে সাবমিট করুন।
+              <p className="text-xs text-slate-300 leading-relaxed pt-1">
+                যেকোনো ব্যাংকিং বা মোবাইল ওয়ালেটে টাকা প্রেরণের পর অবশ্যই সঠিক ট্রানজাকশন আইডি (<span className="text-amber-300 font-mono font-bold">TrxID</span>) এবং রসিদ সংরক্ষণ করুন। পরবর্তীতে পেমেন্ট সেকশনে এটি সাবমিট করুন।
               </p>
             </div>
-            <div className="mt-4 pt-4 border-t border-slate-800 text-xs text-slate-400">
-              কর্তৃপক্ষ: Skylark Management
+            <div className="mt-6 pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
+              <span>সিস্টেম সিকিউরিটি</span>
+              <span className="text-blue-400 font-semibold">Skylark Management</span>
             </div>
           </div>
 
