@@ -2,28 +2,40 @@ import React, { useState, useEffect } from "react";
 import { FaBullhorn, FaUniversity, FaCreditCard, FaShieldAlt, FaCalendarAlt } from "react-icons/fa";
 
 function Home() {
-  // স্লাইডার ব্যানারের জন্য কিছু স্যাম্পল ব্যানার/ইমেজ বা টেক্সট স্লাইড
+  // আপনার দেওয়া প্রফেশনাল ৩টি ব্যানার ডেটা
   const banners = [
     {
-      title: "স্বাগতম Skylark Cooperative Society-তে",
-      subtitle: "আপনার সঞ্চয় ও আর্থিক নিরাপত্তা আমাদের প্রধান প্রতিশ্রুতি।",
-      bg: "from-blue-700 to-indigo-900"
+      title: "Skylark Cooperative Society",
+      subtitle:
+        "Empowering Members Through Secure, Transparent & Smart Financial Management.",
+      description:
+        "সমিতির প্রতিটি সদস্যের জন্য আধুনিক, নিরাপদ ও নির্ভরযোগ্য ডিজিটাল আর্থিক সেবা।",
+      badge: "🏆 Trusted Cooperative",
+      bg: "from-blue-950 via-indigo-900 to-sky-700",
     },
     {
-      title: "ডিজিটাল কোঅপারেটিভ ম্যানেজমেন্ট সিস্টেম",
-      subtitle: "এখন ঘরে বসে আপনার ডিপোজিট, লোন এবং লেনদেনের হিসাব দেখুন সহজে।",
-      bg: "from-emerald-700 to-teal-900"
+      title: "Complete Digital Cooperative Solution",
+      subtitle:
+        "Manage Deposits, Loans, Withdrawals, Penalties, Reports & Member Information in One Secure Platform.",
+      description:
+        "একটি প্ল্যাটফর্মেই সমিতির সকল কার্যক্রম পরিচালনার আধুনিক সমাধান।",
+      badge: "⚡ Smart Management",
+      bg: "from-emerald-900 via-green-800 to-teal-700",
     },
     {
-      title: "স্বচ্ছতা ও আস্থার প্রতীক",
-      subtitle: "সমিতির সকল আপডেট এবং নোটিশ এখন এক ক্লিকেই উপলব্ধ।",
-      bg: "from-violet-700 to-purple-900"
-    }
+      title: "Professional Financial Management",
+      subtitle:
+        "Ensuring Transparency, Accountability and Sustainable Growth for Every Member.",
+      description:
+        "প্রতিটি সদস্যের আর্থিক নিরাপত্তা ও সমিতির দীর্ঘমেয়াদি উন্নয়নের জন্য নিবেদিত।",
+      badge: "🔐 Secure & Reliable",
+      bg: "from-purple-900 via-violet-800 to-fuchsia-700",
+    },
   ];
 
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // স্লাইডার অটো চেঞ্জ হওয়ার ইফেক্ট
+  // স্লাইডার অটো চেঞ্জ হওয়ার ইফেক্ট (৪ সেকেন্ড পর পর)
   useEffect(() => {
     const slideInterval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % banners.length);
@@ -38,15 +50,18 @@ function Home() {
           1. SLIDER BANNER SECTION
       ========================================== */}
       <div className={`relative rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-r ${banners[currentSlide].bg} text-white transition-all duration-700 p-8 lg:p-12`}>
-        <div className="relative z-10 max-w-2xl">
-          <span className="bg-white/20 text-white text-xs px-3 py-1 rounded-full font-semibold uppercase tracking-wider backdrop-blur-md">
-            Official Announcement
+        <div className="relative z-10 max-w-3xl space-y-3">
+          <span className="inline-block bg-white/20 text-white text-xs px-3.5 py-1.5 rounded-full font-bold uppercase tracking-wider backdrop-blur-md shadow-sm">
+            {banners[currentSlide].badge}
           </span>
-          <h1 className="text-2xl lg:text-4xl font-black mt-4 leading-tight">
+          <h1 className="text-2xl lg:text-4xl font-black tracking-tight leading-tight">
             {banners[currentSlide].title}
           </h1>
-          <p className="text-slate-200 text-sm lg:text-base mt-3">
+          <p className="text-slate-200 text-sm lg:text-base font-medium">
             {banners[currentSlide].subtitle}
+          </p>
+          <p className="text-amber-300 text-xs lg:text-sm font-semibold pt-1">
+            ✨ {banners[currentSlide].description}
           </p>
         </div>
 
@@ -65,7 +80,7 @@ function Home() {
       </div>
 
       {/* ==========================================
-          2. UPDATE MESSAGE / 2026 ANNOUNCEMENT
+          2. UPDATE MESSAGE / ANNOUNCEMENT
       ========================================== */}
       <div className="bg-amber-50 border-l-4 border-amber-500 p-5 rounded-2xl shadow-sm flex items-start gap-4">
         <div className="text-amber-600 text-2xl mt-0.5">
