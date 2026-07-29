@@ -80,9 +80,9 @@ const getMemberProfile = async (req, res) => {
 
         if (userRole === 'MEMBER') {
             const tokenMemberId = String(req.user.id || req.user._id || '');
-            const tokenPhone = req.user.phone || req.user.mobile || '';
+            let tokenPhone = String(req.user.phone || req.user.mobile || '').trim();
 
-            if (id) {
+            if (id && id !== 'null' && id !== 'undefined') {
                 if (mongoose.Types.ObjectId.isValid(id)) {
                     member = await Member.findById(id);
                 }
@@ -109,10 +109,27 @@ const getMemberProfile = async (req, res) => {
                     ] 
                 });
             }
+            
+            // ফোন নম্বর দিয়ে খোঁজা (যাতে memberId null থাকলেও টোকেনের নম্বর দিয়ে প্রোফাইল পাওয়া যায়)
             if (!member && tokenPhone) {
                 member = await Member.findOne({ 
-                    $or: [{ phone: tokenPhone }, { mobile: tokenPhone }] 
+                    $or: [
+                        { phone: tokenPhone }, 
+                        { mobile: tokenPhone },
+                        { phone: { $regex: new RegExp(tokenPhone.slice(-10), 'i') } },
+                        { mobile: { $regex: new RegExp(tokenPhone.slice(-10), 'i') } }
+                    ] 
                 });
+            }
+
+            // যদি উপরের সবকিছুর পরও না পাওয়া যায়, তবে ডাটাবেজ থেকে আংশিক বা ফুল ম্যাচ করে দেখা
+            if (!member && tokenPhone) {
+                const allMembersList = await Member.find({});
+                const matched = allMembersList.find(m => {
+                    const mPhone = String(m.phone || m.mobile || '').trim();
+                    return mPhone && (mPhone.includes(tokenPhone) || tokenPhone.includes(mPhone) || mPhone.slice(-10) === tokenPhone.slice(-10));
+                });
+                if (matched) member = matched;
             }
 
             if (!member) {
@@ -200,7 +217,7 @@ const getMemberProfile = async (req, res) => {
                                 String(item.memberId || '') === String(customMemberId) ||
                                 String(item.member || '') === String(customMemberId) ||
                                 (memberName && itemStr.includes(memberName.toLowerCase())) ||
-                                itemStr.includes(String(customMemberId).toLowerCase());
+                                (customMemberId && itemStr.includes(String(customMemberId).toLowerCase()));
                             
                             const categoryStr = String(item.category || item.type || item.description || item.note || item.title || item.reason || '').toLowerCase();
                             const matchCategory = categoryStr.includes('penalty') || categoryStr.includes('fine') || col.name.toLowerCase().includes('penalty') || col.name.toLowerCase().includes('fine');
