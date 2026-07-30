@@ -113,69 +113,112 @@ function Reports(){
   const tableSumCurrentBalance = filteredReport.reduce((sum, item) => sum + Number(item.currentBalance || 0), 0);
 
   // ============================
-  // PDF Export
+  // PDF Export (Fixed & Centered Header with Logo)
   // ============================
-  const exportPDF = ()=>{
-    const doc = new jsPDF('l', 'mm', 'a4'); // Landscape mode for wider table
+  const exportPDF = () => {
+    const doc = new jsPDF('l', 'mm', 'a4'); // Landscape mode
 
-    doc.setFontSize(16);
-    doc.text("Skylark Cooperative Society", 14, 15);
+    const getImageDataUrl = (url, callback) => {
+      const img = new Image();
+      img.crossOrigin = 'Anonymous';
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        callback(canvas.toDataURL('image/png'));
+      };
+      img.onerror = () => {
+        callback(null);
+      };
+      img.src = url;
+    };
 
-    doc.setFontSize(12);
-    doc.text(`Member Financial Report (${filterType.toUpperCase()})`, 14, 23);
+    const logoUrl = "https://skylark-cooperative-system.onrender.com/uploads/logo.jpeg";
 
-    doc.text(`Date: ${new Date().toLocaleDateString()}`, 14, 30);
+    getImageDataUrl(logoUrl, (logoBase64) => {
+      let startY = 15;
+      if (logoBase64) {
+        doc.addImage(logoBase64, 'JPEG', 138, 10, 18, 18);
+        startY = 31;
+      }
 
-    autoTable(doc,{
-      startY: 38,
-      head: [
-        [
-          "SL",
-          "Member ID",
-          "Name",
-          "Member Status",
-          "Phone",
-          "Fixed Deposit",
-          "Deposit",
-          "Withdrawal",
-          "Loan",
-          "Penalty",
-          "Advance",
-          "Due",
-          "Current Balance"
-        ]
-      ],
-      body: filteredReport.map((item, index)=>[
-        index + 1,
-        item.memberId,
-        item.name,
-        item.status || "Active",
-        item.phone,
-        `৳ ${item.fixedDeposit || 0}`,
-        `৳ ${item.totalDeposit || 0}`,
-        `৳ ${item.totalWithdrawal || 0}`,
-        `৳ ${item.totalLoan || 0}`,
-        `৳ ${item.totalPenalty || 0}`,
-        `৳ ${item.advance || 0}`,
-        `৳ ${item.totalDue || 0}`,
-        `৳ ${item.currentBalance || 0}`
-      ]),
-      foot: [[
-        "Total", "", "", "", "",
-        `৳ ${tableSumFixedDeposit.toLocaleString()}`,
-        `৳ ${tableSumDeposit.toLocaleString()}`,
-        `৳ ${tableSumWithdrawal.toLocaleString()}`,
-        `৳ ${tableSumLoan.toLocaleString()}`,
-        `৳ ${tableSumPenalty.toLocaleString()}`,
-        `৳ ${tableSumAdvance.toLocaleString()}`,
-        `৳ ${tableSumDue.toLocaleString()}`,
-        `৳ ${tableSumCurrentBalance.toLocaleString()}`
-      ]],
-      styles: { fontSize: 8 },
-      footStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'bold' }
+      // Header Texts (Centered)
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(16);
+      doc.setTextColor(15, 23, 42);
+      doc.text("Skylark Cooperative Society", 148.5, startY, { align: "center" });
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
+      doc.setTextColor(71, 85, 105);
+      doc.text(`Member Financial Report (${filterType.toUpperCase()})`, 148.5, startY + 6, { align: "center" });
+
+      doc.setFontSize(9);
+      doc.setTextColor(100, 116, 139);
+      doc.text(`Date: ${new Date().toLocaleDateString()}`, 148.5, startY + 12, { align: "center" });
+
+      // AutoTable
+      autoTable(doc, {
+        startY: startY + 16,
+        head: [
+          [
+            "SL",
+            "Member ID",
+            "Name",
+            "Member Status",
+            "Phone",
+            "Fixed Deposit",
+            "Deposit",
+            "Withdrawal",
+            "Loan",
+            "Penalty",
+            "Advance",
+            "Due",
+            "Current Balance"
+          ]
+        ],
+        body: filteredReport.map((item, index) => [
+          index + 1,
+          item.memberId || "",
+          item.name || "",
+          item.status || "Active",
+          item.phone || "",
+          `Tk ${Number(item.fixedDeposit || 0).toLocaleString()}`,
+          `Tk ${Number(item.totalDeposit || 0).toLocaleString()}`,
+          `Tk ${Number(item.totalWithdrawal || 0).toLocaleString()}`,
+          `Tk ${Number(item.totalLoan || 0).toLocaleString()}`,
+          `Tk ${Number(item.totalPenalty || 0).toLocaleString()}`,
+          `Tk ${Number(item.advance || 0).toLocaleString()}`,
+          `Tk ${Number(item.totalDue || 0).toLocaleString()}`,
+          `Tk ${Number(item.currentBalance || 0).toLocaleString()}`
+        ]),
+        foot: [[
+          "Total", "", "", "", "",
+          `Tk ${tableSumFixedDeposit.toLocaleString()}`,
+          `Tk ${tableSumDeposit.toLocaleString()}`,
+          `Tk ${tableSumWithdrawal.toLocaleString()}`,
+          `Tk ${tableSumLoan.toLocaleString()}`,
+          `Tk ${tableSumPenalty.toLocaleString()}`,
+          `Tk ${tableSumAdvance.toLocaleString()}`,
+          `Tk ${tableSumDue.toLocaleString()}`,
+          `Tk ${tableSumCurrentBalance.toLocaleString()}`
+        ]],
+        styles: { fontSize: 8, cellPadding: 2.5, halign: 'center' },
+        headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'bold', halign: 'center' },
+        footStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'bold', halign: 'center' },
+        columnStyles: {
+          0: { halign: 'center' },
+          1: { halign: 'center' },
+          2: { halign: 'left' },
+          3: { halign: 'center' },
+          4: { halign: 'center' }
+        }
+      });
+
+      doc.save(`Skylark-${filterType}-Member-Report.pdf`);
     });
-
-    doc.save(`Skylark-${filterType}-Member-Report.pdf`);
   };
 
   // ============================
