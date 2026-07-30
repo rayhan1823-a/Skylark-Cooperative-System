@@ -23,6 +23,10 @@ function InvestmentManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // SUPER_ADMIN রোল চেক করার লজিক
+  const userRole = localStorage.getItem("role") || "";
+  const isSuperAdmin = userRole.toUpperCase() === "SUPER_ADMIN";
+
   // Backend Model এর সাথে সামঞ্জস্য রেখে Form State
   const [formData, setFormData] = useState({
     investmentType: "FDR",
@@ -63,9 +67,22 @@ function InvestmentManagement() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // Add Button Click Handler (SUPER_ADMIN না হলে ব্লক করবে)
+  const handleAddClick = () => {
+    if (!isSuperAdmin) {
+      toast.error("Access Denied! Only SUPER_ADMIN can add new investments.");
+      return;
+    }
+    setIsModalOpen(true);
+  };
+
   // Handle Submit to Backend
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!isSuperAdmin) {
+      toast.error("Access Denied! Only SUPER_ADMIN can perform this action.");
+      return;
+    }
     try {
       await axios.post(`${API_BASE_URL}/investments`, formData, {
         headers: { Authorization: `Bearer ${token}` }
@@ -118,8 +135,13 @@ function InvestmentManagement() {
           </p>
         </div>
         <button
-          onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-bold text-sm shadow-lg shadow-blue-600/20 transition-all duration-300"
+          onClick={handleAddClick}
+          title={!isSuperAdmin ? "Only SUPER_ADMIN can perform this action" : ""}
+          className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-sm transition-all duration-300 ${
+            isSuperAdmin 
+              ? "bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/20 cursor-pointer" 
+              : "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none"
+          }`}
         >
           <FaPlus /> Add New Investment
         </button>
@@ -227,7 +249,7 @@ function InvestmentManagement() {
       </div>
 
       {/* Add Investment Modal */}
-      {isModalOpen && (
+      {isModalOpen && isSuperAdmin && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-black text-slate-800 mb-4">Add New Investment</h2>
