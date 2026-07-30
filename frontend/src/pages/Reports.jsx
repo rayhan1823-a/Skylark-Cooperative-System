@@ -376,15 +376,15 @@ function SummaryCard({
   borderColor
 }){
   return(
-    <div className={`relative bg-white bg-gradient-to-br ${gradient} shadow-sm hover:shadow-md transition-all duration-300 border ${borderColor} rounded-2xl p-5 overflow-hidden group`}>
-      <div className="flex justify-between items-center">
-        <div>
-          <p className="text-gray-500 text-[11px] font-bold uppercase tracking-wider">{title}</p>
-          <h2 className={`text-2xl font-black mt-1.5 ${color} tracking-tight`}>
+    <div className={`relative bg-white bg-gradient-to-br ${gradient} shadow-sm hover:shadow-md transition-all duration-300 border ${borderColor} rounded-2xl p-4 overflow-hidden group`}>
+      <div className="flex justify-between items-center gap-2">
+        <div className="min-w-0">
+          <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider truncate">{title}</p>
+          <h2 className={`text-xl sm:text-2xl font-black mt-1 ${color} tracking-tight truncate`}>
             {value}
           </h2>
         </div>
-        <div className={`p-3 rounded-xl ${bgIcon} ${color} shadow-sm group-hover:scale-105 transition-transform duration-300`}>
+        <div className={`p-2.5 rounded-xl ${bgIcon} ${color} shadow-sm group-hover:scale-105 transition-transform duration-300 shrink-0`}>
           {icon}
         </div>
       </div>
