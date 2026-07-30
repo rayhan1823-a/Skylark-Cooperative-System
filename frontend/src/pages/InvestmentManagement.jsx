@@ -12,10 +12,10 @@ import {
   FaTimesCircle 
 } from "react-icons/fa";
 
-// পরিবেশ অনুযায়ী স্বয়ংক্রিয়ভাবে API URL নির্ধারণ করা (লোকালহোস্ট অথবা লাইভ সার্ভার)
+// পরিবেশ অনুযায়ী স্বয়ংক্রিয়ভাবে API URL নির্ধারণ করা (লোকালহোস্ট অথবা লাইভ সার্ভার)
 const API_BASE_URL = window.location.hostname === "localhost" 
   ? "http://localhost:5000/api" 
-  : "https://your-backend-live-url.com/api"; // আপনার রিয়েল ব্যাকএন্ড লাইভ ইউআরএল এখানে বসবে (অথবা আপনার প্রজেক্টের অন্য ফাইলে যেভাবে আছে)
+  : "https://skylark-cooperative-system.onrender.com/api";
 
 function InvestmentManagement() {
   const [investments, setInvestments] = useState([]);
