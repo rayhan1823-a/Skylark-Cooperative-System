@@ -60,19 +60,20 @@ function Reports(){
   };
 
   // ============================
-  // Summary
+  // Filtered Report for Table & Summary
+  // ============================
+  const filteredReport = report.filter(item => {
+    const status = String(item.status || "active").toLowerCase();
+    if(filterType === "active") return status === "active";
+    if(filterType === "inactive") return status === "inactive";
+    if(filterType === "exited") return ["exited", "exit", "left", "closed"].includes(status);
+    return true; // "all" এর জন্য সব দেখাবে
+  });
+
+  // ============================
+  // Summary Counts (Card Counts)
   // ============================
   const totalMembers = report.length;
-
-  const totalDeposit = report.reduce(
-    (sum,item)=> sum + Number(item.totalDeposit || 0),
-    0
-  );
-
-  const totalDue = report.reduce(
-    (sum,item)=> sum + Number(item.totalDue || 0),
-    0
-  );
 
   const activeMembers = report.filter(
     item => String(item.status || "").toLowerCase() === "active"
@@ -87,15 +88,17 @@ function Reports(){
   ).length;
 
   // ============================
-  // Filtered Report for Table
+  // Dynamic Summary Totals (Based on Filtered Data)
   // ============================
-  const filteredReport = report.filter(item => {
-    const status = String(item.status || "active").toLowerCase();
-    if(filterType === "active") return status === "active";
-    if(filterType === "inactive") return status === "inactive";
-    if(filterType === "exited") return ["exited", "exit", "left", "closed"].includes(status);
-    return true; // "all" এর জন্য সব দেখাবে
-  });
+  const totalDeposit = filteredReport.reduce(
+    (sum,item)=> sum + Number(item.totalDeposit || 0),
+    0
+  );
+
+  const totalDue = filteredReport.reduce(
+    (sum,item)=> sum + Number(item.totalDue || 0),
+    0
+  );
 
   // ============================
   // Table Footers Calculation (Based on Filtered Data)
