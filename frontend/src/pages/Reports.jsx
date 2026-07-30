@@ -205,46 +205,56 @@ function Reports(){
         </div>
       </div>
 
-      {/* Professional Summary Cards */}
+      {/* Professional & Premium Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         <SummaryCard
           title="Total Members"
           value={totalMembers}
           icon={<Users className="w-6 h-6"/>}
-          color="text-blue-600"
-          bgIcon="bg-blue-50"
+          color="text-blue-700"
+          bgIcon="bg-blue-50 border border-blue-100"
+          gradient="from-blue-500/10 via-blue-500/5 to-transparent"
+          borderColor="border-blue-100"
         />
 
         <SummaryCard
           title="Active Members"
           value={activeMembers}
           icon={<UserCheck className="w-6 h-6"/>}
-          color="text-green-600"
-          bgIcon="bg-green-50"
+          color="text-emerald-700"
+          bgIcon="bg-emerald-50 border border-emerald-100"
+          gradient="from-emerald-500/10 via-emerald-500/5 to-transparent"
+          borderColor="border-emerald-100"
         />
 
         <SummaryCard
           title="Inactive Members"
           value={inactiveMembers}
           icon={<UserX className="w-6 h-6"/>}
-          color="text-amber-600"
-          bgIcon="bg-amber-50"
+          color="text-amber-700"
+          bgIcon="bg-amber-50 border border-amber-100"
+          gradient="from-amber-500/10 via-amber-500/5 to-transparent"
+          borderColor="border-amber-100"
         />
 
         <SummaryCard
           title="Exits Member"
           value={exitedMembers}
           icon={<UserMinus className="w-6 h-6"/>}
-          color="text-rose-600"
-          bgIcon="bg-rose-50"
+          color="text-rose-700"
+          bgIcon="bg-rose-50 border border-rose-100"
+          gradient="from-rose-500/10 via-rose-500/5 to-transparent"
+          borderColor="border-rose-100"
         />
 
         <SummaryCard
           title="Total Deposit"
           value={`৳ ${totalDeposit.toLocaleString()}`}
           icon={<Wallet className="w-6 h-6"/>}
-          color="text-purple-600"
-          bgIcon="bg-purple-50"
+          color="text-purple-700"
+          bgIcon="bg-purple-50 border border-purple-100"
+          gradient="from-purple-500/10 via-purple-500/5 to-transparent"
+          borderColor="border-purple-100"
         />
 
         <SummaryCard
@@ -252,7 +262,9 @@ function Reports(){
           value={`৳ ${totalDue.toLocaleString()}`}
           icon={<TrendingDown className="w-6 h-6"/>}
           color="text-red-600"
-          bgIcon="bg-red-50"
+          bgIcon="bg-red-50 border border-red-100"
+          gradient="from-red-500/10 via-red-500/5 to-transparent"
+          borderColor="border-red-100"
         />
       </div>
 
@@ -359,18 +371,20 @@ function SummaryCard({
   value,
   icon,
   color,
-  bgIcon
+  bgIcon,
+  gradient,
+  borderColor
 }){
   return(
-    <div className="bg-white shadow-sm border border-gray-200/80 rounded-2xl p-5 hover:shadow-md transition-shadow">
+    <div className={`relative bg-white bg-gradient-to-br ${gradient} shadow-sm hover:shadow-md transition-all duration-300 border ${borderColor} rounded-2xl p-5 overflow-hidden group`}>
       <div className="flex justify-between items-center">
         <div>
-          <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider">{title}</p>
-          <h2 className={`text-2xl font-extrabold mt-1.5 ${color}`}>
+          <p className="text-gray-500 text-[11px] font-bold uppercase tracking-wider">{title}</p>
+          <h2 className={`text-2xl font-black mt-1.5 ${color} tracking-tight`}>
             {value}
           </h2>
         </div>
-        <div className={`p-3 rounded-xl ${bgIcon} ${color} shadow-sm`}>
+        <div className={`p-3 rounded-xl ${bgIcon} ${color} shadow-sm group-hover:scale-105 transition-transform duration-300`}>
           {icon}
         </div>
       </div>
