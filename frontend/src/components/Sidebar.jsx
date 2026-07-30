@@ -14,6 +14,7 @@ import {
   FaUserShield,
   FaHome,
   FaBell,
+  FaPiggyBank, // ✅ Added for Investment
 } from "react-icons/fa";
 
 function Sidebar() {
@@ -78,6 +79,12 @@ function Sidebar() {
       title: "Loans",
       path: "/loans",
       icon: <FaUniversity />,
+      roles: ["SUPER_ADMIN", "ADMIN", "STAFF"],
+    },
+    {
+      title: "Investment Management", // ✅ New Menu Added
+      path: "/investments",
+      icon: <FaPiggyBank />,
       roles: ["SUPER_ADMIN", "ADMIN", "STAFF"],
     },
     {

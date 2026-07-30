@@ -42,6 +42,9 @@ import Loans from "./pages/Loans";
 import Funds from "./pages/Funds"; 
 import Penalties from "./pages/Penalties";
 
+// ✅ Investment Management (New)
+import InvestmentManagement from "./pages/InvestmentManagement";
+
 // Reports
 import Reports from "./pages/Reports";
 
@@ -134,7 +137,7 @@ function App() {
           {/* মূল রুট তথা লগইন করার পর সরাসরি হোম পেজ আসবে */}
           <Route path="/" element={<Home />} />
           
-          {/* আলাদা করে /home রুটও যুক্ত করে দেওয়া হলো যাতে কোনো 404 এরর না আসে */}
+          {/* আলাদা করে /home রুটও যুক্ত করে দেওয়া হলো যাতে কোনো 404 এরর না আসে */}
           <Route path="/home" element={<Home />} />
 
           {/* ড্যাশবোর্ড থাকবে শুধুমাত্র /dashboard পাতে */}
@@ -153,11 +156,18 @@ function App() {
           <Route path="/change-password" element={<ChangePassword />} />
           <Route path="/print-receipt/:id" element={<PrintReceipt />} />
           <Route path="/loans/receipt/:id" element={<LoanReceipt />} />
+          
+          {/* ✅ Fixed typo here (= instead of :) */}
           <Route path="/penalties/receipt/:id" element={<PenaltyReceipt />} />
+          
           <Route path="/deposits" element={<Deposits />} />
           <Route path="/deposit-withdrawal" element={<DepositWithdrawal />} />
           <Route path="/payments" element={<Payments />} />
           <Route path="/loans" element={<Loans />} />
+          
+          {/* ✅ Investment Management Route (New) */}
+          <Route path="/investments" element={<InvestmentManagement />} />
+
           <Route path="/funds" element={<Funds />} />
           <Route path="/penalties" element={<Penalties />} />
           <Route path="/reports" element={<Reports />} />
