@@ -9,7 +9,10 @@ import {
   FaMoneyBillWave, 
   FaBuilding, 
   FaCheckCircle, 
-  FaTimesCircle 
+  FaTimesCircle,
+  FaEdit,
+  FaTrash,
+  FaEye
 } from "react-icons/fa";
 
 // পরিবেশ অনুযায়ী স্বয়ংক্রিয়ভাবে API URL নির্ধারণ করা (লোকালহোস্ট অথবা লাইভ সার্ভার)
@@ -22,6 +25,8 @@ function InvestmentManagement() {
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [selectedInvestmentId, setSelectedInvestmentId] = useState(null);
 
   // SUPER_ADMIN রোল চেক করার লজিক
   const userRole = localStorage.getItem("role") || "";
@@ -73,10 +78,66 @@ function InvestmentManagement() {
       toast.error("Access Denied! Only SUPER_ADMIN can add new investments.");
       return;
     }
+    setIsEditMode(false);
+    setSelectedInvestmentId(null);
+    setFormData({
+      investmentType: "FDR",
+      institutionName: "",
+      accountOrCertNo: "",
+      principalAmount: "",
+      interestRate: "",
+      startDate: new Date().toISOString().split("T")[0],
+      maturityDate: "",
+      maturityAmount: "",
+      status: "Active",
+      notes: ""
+    });
     setIsModalOpen(true);
   };
 
-  // Handle Submit to Backend
+  // Edit Button Click Handler
+  const handleEditClick = (item) => {
+    if (!isSuperAdmin) {
+      toast.error("Access Denied! Only SUPER_ADMIN can edit investments.");
+      return;
+    }
+    setIsEditMode(true);
+    setSelectedInvestmentId(item._id);
+    setFormData({
+      investmentType: item.investmentType || "FDR",
+      institutionName: item.institutionName || "",
+      accountOrCertNo: item.accountOrCertNo || "",
+      principalAmount: item.principalAmount || "",
+      interestRate: item.interestRate || "",
+      startDate: item.startDate ? item.startDate.split("T")[0] : new Date().toISOString().split("T")[0],
+      maturityDate: item.maturityDate ? item.maturityDate.split("T")[0] : "",
+      maturityAmount: item.maturityAmount || "",
+      status: item.status || "Active",
+      notes: item.notes || ""
+    });
+    setIsModalOpen(true);
+  };
+
+  // Delete Handler
+  const handleDeleteClick = async (id) => {
+    if (!isSuperAdmin) {
+      toast.error("Access Denied! Only SUPER_ADMIN can delete investments.");
+      return;
+    }
+    if (window.confirm("Are you sure you want to delete this investment?")) {
+      try {
+        await axios.delete(`${API_BASE_URL}/investments/${id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        toast.success("Investment deleted successfully!");
+        fetchInvestments();
+      } catch (error) {
+        toast.error(error.response?.data?.message || "Failed to delete investment");
+      }
+    }
+  };
+
+  // Handle Submit to Backend (Add or Update)
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!isSuperAdmin) {
@@ -84,11 +145,18 @@ function InvestmentManagement() {
       return;
     }
     try {
-      await axios.post(`${API_BASE_URL}/investments`, formData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      if (isEditMode) {
+        await axios.put(`${API_BASE_URL}/investments/${selectedInvestmentId}`, formData, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        toast.success("Investment updated successfully!");
+      } else {
+        await axios.post(`${API_BASE_URL}/investments`, formData, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        toast.success("Investment added successfully!");
+      }
       
-      toast.success("Investment added successfully!");
       setIsModalOpen(false);
       setFormData({
         investmentType: "FDR",
@@ -134,17 +202,14 @@ function InvestmentManagement() {
             Manage and track all cooperative investments, FDR, DPS, and returns.
           </p>
         </div>
-        <button
-          onClick={handleAddClick}
-          title={!isSuperAdmin ? "Only SUPER_ADMIN can perform this action" : ""}
-          className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-sm transition-all duration-300 ${
-            isSuperAdmin 
-              ? "bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/20 cursor-pointer" 
-              : "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none"
-          }`}
-        >
-          <FaPlus /> Add New Investment
-        </button>
+        {isSuperAdmin && (
+          <button
+            onClick={handleAddClick}
+            className="flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-sm bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/20 cursor-pointer transition-all duration-300"
+          >
+            <FaPlus /> Add New Investment
+          </button>
+        )}
       </div>
 
       {/* Summary Cards */}
@@ -230,9 +295,32 @@ function InvestmentManagement() {
                       </span>
                     </td>
                     <td className="p-4 text-center">
-                      <button className="text-blue-600 hover:text-blue-800 font-semibold text-xs bg-blue-50 px-3 py-1.5 rounded-lg transition-colors">
-                        Details
-                      </button>
+                      <div className="flex items-center justify-center gap-2">
+                        <button 
+                          title="Details"
+                          className="text-blue-600 hover:text-blue-800 bg-blue-50 p-2 rounded-lg transition-colors"
+                        >
+                          <FaEye size={14} />
+                        </button>
+                        {isSuperAdmin && (
+                          <>
+                            <button 
+                              onClick={() => handleEditClick(item)}
+                              title="Edit"
+                              className="text-amber-600 hover:text-amber-800 bg-amber-50 p-2 rounded-lg transition-colors"
+                            >
+                              <FaEdit size={14} />
+                            </button>
+                            <button 
+                              onClick={() => handleDeleteClick(item._id)}
+                              title="Delete"
+                              className="text-rose-600 hover:text-rose-800 bg-rose-50 p-2 rounded-lg transition-colors"
+                            >
+                              <FaTrash size={14} />
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -248,11 +336,13 @@ function InvestmentManagement() {
         </div>
       </div>
 
-      {/* Add Investment Modal */}
+      {/* Add / Edit Investment Modal */}
       {isModalOpen && isSuperAdmin && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-black text-slate-800 mb-4">Add New Investment</h2>
+            <h2 className="text-xl font-black text-slate-800 mb-4">
+              {isEditMode ? "Edit Investment" : "Add New Investment"}
+            </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -386,7 +476,7 @@ function InvestmentManagement() {
                   type="submit"
                   className="px-5 py-3 rounded-xl font-bold text-sm bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-600/20 transition-all"
                 >
-                  Save Investment
+                  {isEditMode ? "Update Investment" : "Save Investment"}
                 </button>
               </div>
             </form>
