@@ -199,7 +199,7 @@ function InvestmentManagement() {
             Investment Management (FDR / DPS)
           </h1>
           <p className="text-slate-500 text-sm mt-1">
-            Manage and track all cooperative investments, FDR, DPS, and returns.
+            Manage and track all cooperative investments, FDR, DPS, Property, and returns.
           </p>
         </div>
         {isSuperAdmin && (
@@ -248,7 +248,7 @@ function InvestmentManagement() {
         <FaSearch className="text-slate-400 ml-2" />
         <input
           type="text"
-          placeholder="Search by institution name or type (FDR/DPS)..."
+          placeholder="Search by institution name or type (FDR/DPS/Property)..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full bg-transparent border-none outline-none text-slate-700 placeholder-slate-400 text-sm font-medium"
@@ -282,7 +282,7 @@ function InvestmentManagement() {
                     <td className="p-4 font-bold text-slate-800">{item.institutionName}</td>
                     <td className="p-4 text-slate-500">{new Date(item.startDate).toLocaleDateString()}</td>
                     <td className="p-4 font-bold text-slate-800">৳ {Number(item.principalAmount).toLocaleString()}</td>
-                    <td className="p-4 font-semibold text-blue-600">{item.interestRate}%</td>
+                    <td className="p-4 font-semibold text-blue-600">{item.interestRate ? `${item.interestRate}%` : 'N/A'}</td>
                     <td className="p-4 font-bold text-emerald-600">৳ {Number(item.maturityAmount || 0).toLocaleString()}</td>
                     <td className="p-4">
                       <span className={`px-3 py-1 rounded-full text-xs font-bold inline-flex items-center gap-1.5 ${
@@ -357,17 +357,21 @@ function InvestmentManagement() {
                     <option value="DPS">DPS</option>
                     <option value="Sanchaypatra">Sanchaypatra</option>
                     <option value="Mutual Fund">Mutual Fund</option>
+                    <option value="Land / Property">Land / Property</option>
+                    <option value="Business Venture">Business Venture</option>
+                    <option value="Shares">Shares</option>
+                    <option value="Other">Other</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Institution Name</label>
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Institution / Property Name</label>
                   <input
                     type="text"
                     name="institutionName"
                     required
                     value={formData.institutionName}
                     onChange={handleChange}
-                    placeholder="Bank or Financial Institution"
+                    placeholder="Bank, Property or Business Name"
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-600 font-medium"
                   />
                 </div>
@@ -375,24 +379,22 @@ function InvestmentManagement() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Account / Cert No</label>
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Account / Cert / Deed No</label>
                   <input
                     type="text"
                     name="accountOrCertNo"
-                    required
                     value={formData.accountOrCertNo}
                     onChange={handleChange}
-                    placeholder="A/C or Certificate No"
+                    placeholder="A/C, Certificate or Deed No"
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-600 font-medium"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Interest Rate (%)</label>
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Interest Rate (%) (Optional)</label>
                   <input
                     type="number"
                     step="0.01"
                     name="interestRate"
-                    required
                     value={formData.interestRate}
                     onChange={handleChange}
                     placeholder="e.g. 9.5"
@@ -415,7 +417,7 @@ function InvestmentManagement() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Maturity Amount (৳)</label>
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Maturity / Current Value (৳)</label>
                   <input
                     type="number"
                     name="maturityAmount"
@@ -440,11 +442,10 @@ function InvestmentManagement() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Maturity Date</label>
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Maturity Date (Optional)</label>
                   <input
                     type="date"
                     name="maturityDate"
-                    required
                     value={formData.maturityDate}
                     onChange={handleChange}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-600 font-medium"
