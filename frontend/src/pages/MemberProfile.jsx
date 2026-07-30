@@ -221,7 +221,7 @@ function MemberProfile() {
           ))}
         </div>
 
-        {/* 1. Deposit History */}
+        {/* 1. Deposit History (Updated with Note Column) */}
         <div className="bg-white/95 backdrop-blur-xl border border-slate-100 rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl shadow-slate-200/50">
             <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 p-4 sm:p-5 px-5 sm:px-7">
               <h2 className="text-base sm:text-lg font-black text-white tracking-wide">Deposit History</h2>
@@ -229,7 +229,13 @@ function MemberProfile() {
             <div className="overflow-x-auto">
               <table className="w-full text-xs sm:text-sm min-w-[500px]">
                 <thead className="bg-slate-50/80 text-slate-700 font-extrabold border-b border-slate-100 uppercase tracking-wider">
-                  <tr><th className="p-3 sm:p-4 text-center">Month</th><th className="text-center">Year</th><th className="text-center">Amount</th><th className="text-center">Receipt</th></tr>
+                  <tr>
+                    <th className="p-3 sm:p-4 text-center">Month</th>
+                    <th className="text-center">Year</th>
+                    <th className="text-center">Amount</th>
+                    <th className="text-center">Note</th>
+                    <th className="text-center">Receipt</th>
+                  </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {deposits.length > 0 ? deposits.map((d, index) => (
@@ -237,6 +243,7 @@ function MemberProfile() {
                         <td className="p-3 sm:p-4 font-bold text-slate-800">{d.month}</td>
                         <td className="text-slate-600 font-medium">{d.year}</td>
                         <td className="font-black text-emerald-600 text-sm sm:text-base">৳ {d.amount || d.paidAmount || 0}</td>
+                        <td className="italic text-slate-500 font-medium">{d.note || "---"}</td>
                         <td className="p-2 sm:p-3">
                           <a href={`${API}/deposit-receipt/${d._id}`} 
                              target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 bg-indigo-50 text-indigo-600 font-extrabold px-3 py-1 rounded-xl hover:bg-indigo-600 hover:text-white transition-all shadow-sm text-xs">
@@ -245,7 +252,7 @@ function MemberProfile() {
                         </td>
                     </tr>
                   )) : (
-                    <tr><td colSpan="4" className="py-6 sm:py-8 text-center text-slate-400 font-medium text-xs sm:text-sm">No deposit history found.</td></tr>
+                    <tr><td colSpan="5" className="py-6 sm:py-8 text-center text-slate-400 font-medium text-xs sm:text-sm">No deposit history found.</td></tr>
                   )}
                 </tbody>
               </table>
