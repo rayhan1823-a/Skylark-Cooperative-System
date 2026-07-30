@@ -14,11 +14,31 @@ body {
 }
 
 /* =====================================================
+   ANDROID & MOBILE SIDEBAR CUSTOM SCROLLBAR
+===================================================== */
+.custom-sidebar-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+
+.custom-sidebar-scroll::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.6);
+}
+
+.custom-sidebar-scroll::-webkit-scrollbar-thumb {
+  background: rgba(51, 65, 85, 0.8);
+  border-radius: 10px;
+}
+
+.custom-sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(96, 165, 250, 0.8);
+}
+
+/* =====================================================
    PRINT STYLE (A4 Format)
 ===================================================== */
 @page {
   size: A4 portrait;
-  margin: 10mm; /* মার্জিন সামান্য কমানো হলো যাতে সিগনেচার বা টেবিল নিচে কেটে না যায় */
+  margin: 10mm; /* মার্জিন সামান্য কমানো হলো যাতে সিগনেচার বা টেবিল নিচে কেটে না যায় */
 }
 
 @media print {
@@ -57,7 +77,7 @@ body {
     display: table !important;
     width: 100% !important;
     border-collapse: collapse !important;
-    font-size: 9pt !important; /* ফন্ট সাইজ সামান্য এডজাস্ট করা হলো যাতে পেজে জায়গা বেশি পায় */
+    font-size: 9pt !important; /* ফন্ট সাইজ সামান্য এডজাস্ট করা হলো যাতে পেজে জায়গা বেশি পায় */
     margin-bottom: 10px !important;
   }
 
@@ -88,7 +108,7 @@ body {
     page-break-inside: avoid !important;
   }
 
-  /* সিগনেচার সেকশন স্মার্টলি সাজানো এবং কেটে যাওয়া রোধ করা */
+  /* সিগনেচার সেকশন স্মার্টলি সাজানো এবং কেটে যাওয়া রোধ করা */
   .signature-section {
     display: flex !important;
     justify-content: space-between !important;
