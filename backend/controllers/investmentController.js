@@ -20,3 +20,22 @@ exports.getInvestments = async (req, res, next) => {
     next(err);
   }
 };
+
+// ইনভেস্টমেন্ট বা FDR আপডেট করার লজিক (নতুন যুক্ত করা হয়েছে)
+exports.updateInvestment = async (req, res, next) => {
+  try {
+    const updatedInvestment = await Investment.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedInvestment) {
+      return res.status(404).json({ success: false, message: "Investment not found" });
+    }
+
+    res.status(200).json({ success: true, data: updatedInvestment });
+  } catch (err) {
+    next(err);
+  }
+};
