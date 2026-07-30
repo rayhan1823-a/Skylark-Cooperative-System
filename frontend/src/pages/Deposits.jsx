@@ -29,7 +29,7 @@ function Deposits() {
     year: new Date().getFullYear(),
     depositDate: getTodayDate(),
     paymentMethod: "Cash",
-    note: "Monthly Deposit",
+    note: "", // নোট ফিল্ড যোগ করা হলো
   });
 
   const months = [
@@ -124,7 +124,8 @@ function Deposits() {
     return (
       deposit.memberId?.memberId?.toLowerCase().includes(keyword) ||
       deposit.memberId?.name?.toLowerCase().includes(keyword) ||
-      deposit.receiptNo?.toLowerCase().includes(keyword)
+      deposit.receiptNo?.toLowerCase().includes(keyword) ||
+      deposit.note?.toLowerCase().includes(keyword)
     );
   });
 
@@ -180,7 +181,7 @@ function Deposits() {
         year: new Date().getFullYear(),
         depositDate: getTodayDate(),
         paymentMethod: "Cash",
-        note: "Monthly Deposit",
+        note: "",
       });
 
       fetchDeposits();
@@ -308,6 +309,19 @@ function Deposits() {
           </div>
         </div>
 
+        {/* 3rd Row: Note Input Field */}
+        <div className="mt-4">
+          <label className="font-semibold">Note / Remark (Optional)</label>
+          <input
+            type="text"
+            name="note"
+            placeholder="Write a note about this deposit..."
+            value={formData.note}
+            onChange={handleChange}
+            className="border rounded-lg p-3 w-full"
+          />
+        </div>
+
         <button
           onClick={saveDeposit}
           disabled={loading || !isSuperAdmin}
@@ -330,7 +344,7 @@ function Deposits() {
           <h2 className="text-xl font-bold">Deposit History</h2>
           <input
             type="text"
-            placeholder="Search Member / Receipt"
+            placeholder="Search Member / Receipt / Note"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="border rounded-lg p-2 w-72"
@@ -347,13 +361,14 @@ function Deposits() {
                 <th>Month</th>
                 <th>Year</th>
                 <th>Receipt</th>
+                <th>Note</th>
                 <th>Action</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="7" className="text-center p-6">
+                  <td colSpan="8" className="text-center p-6">
                     Loading...
                   </td>
                 </tr>
@@ -378,6 +393,11 @@ function Deposits() {
                       </span>
                     </td>
                     <td>
+                      <span className="text-sm text-gray-600">
+                        {deposit.note || "---"}
+                      </span>
+                    </td>
+                    <td>
                       <button
                         onClick={() => deleteDeposit(deposit._id)}
                         className={`px-3 py-1 rounded text-white ${
@@ -394,7 +414,7 @@ function Deposits() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="7" className="text-center p-8 text-gray-500">
+                  <td colSpan="8" className="text-center p-8 text-gray-500">
                     No Deposit Found
                   </td>
                 </tr>

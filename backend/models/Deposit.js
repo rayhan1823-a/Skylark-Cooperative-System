@@ -153,7 +153,7 @@ const depositSchema = new mongoose.Schema(
     },
 
     // ======================================
-    // Note
+    // Note (Optional Deposit Note)
     // ======================================
 
     note: {
