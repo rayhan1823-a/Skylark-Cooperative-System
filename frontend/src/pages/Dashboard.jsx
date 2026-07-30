@@ -25,6 +25,7 @@ function Dashboard() {
   const [totalDepositBalance, setTotalDepositBalance] = useState(0);
   const [totalWithdrawal, setTotalWithdrawal] = useState(0);
   const [totalPenaltyAmount, setTotalPenaltyAmount] = useState(0);
+  const [totalInvested, setTotalInvested] = useState(0);
   
   const [depositChartData, setDepositChartData] = useState([]);
   const [dueChartData, setDueChartData] = useState([]);
@@ -165,6 +166,18 @@ function Dashboard() {
           console.error("Error fetching penalties API:", err);
         }
 
+        // ৬. ইনভেস্টমেন্ট ডাটা ফেচ (Total Invested এর জন্য)
+        try {
+          const investRes = await axios.get(`${API}/investments`, config);
+          const investData = investRes.data?.investments || investRes.data?.data || investRes.data || [];
+          if (Array.isArray(investData)) {
+            const calculatedInvest = investData.reduce((sum, item) => sum + Number(item.amount || item.investAmount || 0), 0);
+            setTotalInvested(calculatedInvest);
+          }
+        } catch (err) {
+          console.error("Error fetching investments API:", err);
+        }
+
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
       }
@@ -195,7 +208,7 @@ function Dashboard() {
   const totalTargetDeposit = memberCountForTarget * targetPerMember;
   const calculatedTotalDue = Math.max(0, (totalTargetDeposit - Number(totalDepositBalance)) + Number(totalWithdrawal));
 
-  const currentMainCashBalance = (Number(totalDepositBalance) + Number(totalFundIncome) + Number(totalPenaltyAmount) + Number(stats.bankProfit || 0)) - Number(totalLoanGiven) - Number(totalExpense) - Number(totalWithdrawal);
+  const currentMainCashBalance = (Number(totalDepositBalance) + Number(totalFundIncome) + Number(totalPenaltyAmount) + Number(stats.bankProfit || 0)) - Number(totalLoanGiven) - Number(totalExpense) - Number(totalWithdrawal) - Number(totalInvested);
   const totalProfit = Number(stats.bankProfit || 0) + Number(totalFundIncome || 0) + Number(totalPenaltyAmount || 0) - Number(totalExpense);
 
   return (
@@ -419,6 +432,17 @@ function Dashboard() {
           </div>
           <div className="p-4 bg-gradient-to-tr from-indigo-600 to-violet-600 text-white rounded-2xl group-hover:scale-110 transition duration-300 shadow-lg shadow-indigo-600/40">
             <AlertTriangle size={24} />
+          </div>
+        </div>
+
+        {/* Total Invested Card */}
+        <div className="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 border border-blue-500/40 text-white p-6 rounded-3xl shadow-[0_10px_35px_rgba(37,99,235,0.4)] hover:shadow-2xl transition-all duration-300 flex justify-between items-center group transform hover:-translate-y-1">
+          <div>
+            <p className="text-[11px] font-black text-blue-300 tracking-wider uppercase">Total Invested</p>
+            <h3 className="text-2xl font-black mt-2 text-white">৳ {totalInvested.toLocaleString()}</h3>
+          </div>
+          <div className="p-4 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-2xl backdrop-blur-xl group-hover:scale-110 transition duration-300 shadow-inner">
+            <PiggyBank size={24} />
           </div>
         </div>
 
