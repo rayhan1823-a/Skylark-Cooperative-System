@@ -242,12 +242,15 @@ function Reports(){
 
       {/* Header with Logo */}
       <div className="text-center flex flex-col items-center justify-center space-y-3 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-        <div className="w-16 h-16 rounded-full bg-blue-50 border border-blue-200 flex items-center justify-center shadow-inner overflow-hidden p-1">
+        <div className="w-20 h-20 rounded-full bg-blue-50 border border-blue-200 flex items-center justify-center shadow-inner overflow-hidden p-1">
           <img 
-            src="https://skylark-cooperative-system.onrender.com/logo.png" 
-            onError={(e)=>{e.target.src = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"}} 
+            src="https://skylark-cooperative-system.onrender.com/uploads/logo.jpeg" 
+            onError={(e)=>{
+              e.target.onerror = null; 
+              e.target.src = "https://skylark-cooperative-system.onrender.com/logo.png";
+            }} 
             alt="Logo" 
-            className="w-full h-full object-contain"
+            className="w-full h-full object-contain rounded-full"
           />
         </div>
         <div>
