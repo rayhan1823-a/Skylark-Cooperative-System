@@ -166,12 +166,15 @@ function Dashboard() {
           console.error("Error fetching penalties API:", err);
         }
 
-        // ৬. ইনভেস্টমেন্ট ডাটা ফেচ (Total Invested এর জন্য অটোমেটিক আপডেট নিশ্চিত করা)
+        // ৬. ইনভেস্টমেন্ট ডাটা ফেচ (Total Invested এর সঠিক হিসাবের জন্য আপডেট করা হয়েছে)
         try {
           const investRes = await axios.get(`${API}/investments`, config);
           const investData = investRes.data?.investments || investRes.data?.data || investRes.data || [];
           if (Array.isArray(investData)) {
-            const calculatedInvest = investData.reduce((sum, item) => sum + Number(item.amount || item.investAmount || item.totalAmount || 0), 0);
+            const calculatedInvest = investData.reduce((sum, item) => {
+              const amount = Number(item.principalAmount || item.amount || item.investAmount || item.totalAmount || 0);
+              return sum + amount;
+            }, 0);
             setTotalInvested(calculatedInvest);
           }
         } catch (err) {
