@@ -6,6 +6,8 @@ import {
   Wallet,
   TrendingDown,
   UserCheck,
+  UserX,
+  UserMinus,
   FileText,
   FileSpreadsheet,
   Printer
@@ -70,7 +72,15 @@ function Reports(){
   );
 
   const activeMembers = report.filter(
-    item=>item.status==="Active"
+    item => String(item.status || "").toLowerCase() === "active"
+  ).length;
+
+  const inactiveMembers = report.filter(
+    item => String(item.status || "").toLowerCase() === "inactive"
+  ).length;
+
+  const exitedMembers = report.filter(
+    item => ["exited", "exit", "left", "closed"].includes(String(item.status || "").toLowerCase())
   ).length;
 
   // ============================
@@ -94,6 +104,7 @@ function Reports(){
           "SL",
           "Member ID",
           "Name",
+          "Member Status",
           "Phone",
           "Fixed Deposit",
           "Deposit",
@@ -109,6 +120,7 @@ function Reports(){
         index + 1,
         item.memberId,
         item.name,
+        item.status || "Active",
         item.phone,
         `৳ ${item.fixedDeposit || 0}`,
         `৳ ${item.totalDeposit || 0}`,
@@ -133,8 +145,8 @@ function Reports(){
       "SL": index + 1,
       "Member ID": item.memberId,
       "Name": item.name,
+      "Member Status": item.status || "Active",
       "Phone": item.phone,
-      "Status": item.status,
       "Fixed Deposit": item.fixedDeposit || 0,
       "Total Deposit": item.totalDeposit || 0,
       "Total Withdrawal": item.totalWithdrawal || 0,
@@ -194,7 +206,7 @@ function Reports(){
       </div>
 
       {/* Professional Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         <SummaryCard
           title="Total Members"
           value={totalMembers}
@@ -209,6 +221,22 @@ function Reports(){
           icon={<UserCheck className="w-6 h-6"/>}
           color="text-green-600"
           bgIcon="bg-green-50"
+        />
+
+        <SummaryCard
+          title="Inactive Members"
+          value={inactiveMembers}
+          icon={<UserX className="w-6 h-6"/>}
+          color="text-amber-600"
+          bgIcon="bg-amber-50"
+        />
+
+        <SummaryCard
+          title="Exits Member"
+          value={exitedMembers}
+          icon={<UserMinus className="w-6 h-6"/>}
+          color="text-rose-600"
+          bgIcon="bg-rose-50"
         />
 
         <SummaryCard
@@ -264,6 +292,7 @@ function Reports(){
                 <th className="border border-slate-800 p-3 text-center">SL</th>
                 <th className="border border-slate-800 p-3 whitespace-nowrap">Member ID</th>
                 <th className="border border-slate-800 p-3 whitespace-nowrap">Name</th>
+                <th className="border border-slate-800 p-3 whitespace-nowrap text-center">Member Status</th>
                 <th className="border border-slate-800 p-3 whitespace-nowrap">Phone</th>
                 <th className="border border-slate-800 p-3 text-center whitespace-nowrap">Fixed Deposit</th>
                 <th className="border border-slate-800 p-3 text-center whitespace-nowrap">Deposit</th>
@@ -282,6 +311,17 @@ function Reports(){
                     <td className="border border-gray-200 p-3 text-center text-gray-600 font-medium">{index + 1}</td>
                     <td className="border border-gray-200 p-3 whitespace-nowrap font-semibold text-gray-800">{item.memberId}</td>
                     <td className="border border-gray-200 p-3 whitespace-nowrap font-semibold text-gray-900">{item.name}</td>
+                    <td className="border border-gray-200 p-3 text-center whitespace-nowrap">
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
+                        String(item.status || "").toLowerCase() === "active" 
+                          ? "bg-green-50 text-green-700" 
+                          : String(item.status || "").toLowerCase() === "inactive"
+                          ? "bg-amber-50 text-amber-700"
+                          : "bg-rose-50 text-rose-700"
+                      }`}>
+                        {item.status || "Active"}
+                      </span>
+                    </td>
                     <td className="border border-gray-200 p-3 whitespace-nowrap text-gray-600">{item.phone}</td>
                     <td className="border border-gray-200 p-3 text-center text-indigo-700 font-semibold whitespace-nowrap">৳ {Number(item.fixedDeposit || 0).toLocaleString()}</td>
                     <td className="border border-gray-200 p-3 text-center text-emerald-700 font-semibold whitespace-nowrap">৳ {Number(item.totalDeposit || 0).toLocaleString()}</td>
