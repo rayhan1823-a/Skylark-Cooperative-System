@@ -98,6 +98,18 @@ function Reports(){
   });
 
   // ============================
+  // Table Footers Calculation (Based on Filtered Data)
+  // ============================
+  const tableSumFixedDeposit = filteredReport.reduce((sum, item) => sum + Number(item.fixedDeposit || 0), 0);
+  const tableSumDeposit = filteredReport.reduce((sum, item) => sum + Number(item.totalDeposit || 0), 0);
+  const tableSumWithdrawal = filteredReport.reduce((sum, item) => sum + Number(item.totalWithdrawal || 0), 0);
+  const tableSumLoan = filteredReport.reduce((sum, item) => sum + Number(item.totalLoan || 0), 0);
+  const tableSumPenalty = filteredReport.reduce((sum, item) => sum + Number(item.totalPenalty || 0), 0);
+  const tableSumAdvance = filteredReport.reduce((sum, item) => sum + Number(item.advance || 0), 0);
+  const tableSumDue = filteredReport.reduce((sum, item) => sum + Number(item.totalDue || 0), 0);
+  const tableSumCurrentBalance = filteredReport.reduce((sum, item) => sum + Number(item.currentBalance || 0), 0);
+
+  // ============================
   // PDF Export
   // ============================
   const exportPDF = ()=>{
@@ -145,7 +157,19 @@ function Reports(){
         `৳ ${item.totalDue || 0}`,
         `৳ ${item.currentBalance || 0}`
       ]),
-      styles: { fontSize: 8 }
+      foot: [[
+        "Total", "", "", "", "",
+        `৳ ${tableSumFixedDeposit.toLocaleString()}`,
+        `৳ ${tableSumDeposit.toLocaleString()}`,
+        `৳ ${tableSumWithdrawal.toLocaleString()}`,
+        `৳ ${tableSumLoan.toLocaleString()}`,
+        `৳ ${tableSumPenalty.toLocaleString()}`,
+        `৳ ${tableSumAdvance.toLocaleString()}`,
+        `৳ ${tableSumDue.toLocaleString()}`,
+        `৳ ${tableSumCurrentBalance.toLocaleString()}`
+      ]],
+      styles: { fontSize: 8 },
+      footStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'bold' }
     });
 
     doc.save(`Skylark-${filterType}-Member-Report.pdf`);
@@ -170,6 +194,23 @@ function Reports(){
       "Total Due": item.totalDue || 0,
       "Current Balance": item.currentBalance || 0
     }));
+
+    // এক্সেলেও টোটাল রো যোগ করা হলো
+    data.push({
+      "SL": "Total",
+      "Member ID": "",
+      "Name": "",
+      "Member Status": "",
+      "Phone": "",
+      "Fixed Deposit": tableSumFixedDeposit,
+      "Total Deposit": tableSumDeposit,
+      "Total Withdrawal": tableSumWithdrawal,
+      "Total Loan": tableSumLoan,
+      "Total Penalty": tableSumPenalty,
+      "Advance": tableSumAdvance,
+      "Total Due": tableSumDue,
+      "Current Balance": tableSumCurrentBalance
+    });
 
     const sheet = XLSX.utils.json_to_sheet(data);
     const book = XLSX.utils.book_new();
@@ -388,6 +429,22 @@ function Reports(){
                 )
               }
             </tbody>
+            {/* Table Footer with Total Sums */}
+            {filteredReport.length > 0 && (
+              <tfoot className="bg-slate-900 text-white font-bold">
+                <tr>
+                  <td colSpan="5" className="border border-slate-800 p-3 text-right">Total:</td>
+                  <td className="border border-slate-800 p-3 text-center whitespace-nowrap">৳ {tableSumFixedDeposit.toLocaleString()}</td>
+                  <td className="border border-slate-800 p-3 text-center whitespace-nowrap">৳ {tableSumDeposit.toLocaleString()}</td>
+                  <td className="border border-slate-800 p-3 text-center whitespace-nowrap">৳ {tableSumWithdrawal.toLocaleString()}</td>
+                  <td className="border border-slate-800 p-3 text-center whitespace-nowrap">৳ {tableSumLoan.toLocaleString()}</td>
+                  <td className="border border-slate-800 p-3 text-center whitespace-nowrap">৳ {tableSumPenalty.toLocaleString()}</td>
+                  <td className="border border-slate-800 p-3 text-center whitespace-nowrap">৳ {tableSumAdvance.toLocaleString()}</td>
+                  <td className="border border-slate-800 p-3 text-center whitespace-nowrap">৳ {tableSumDue.toLocaleString()}</td>
+                  <td className="border border-slate-800 p-3 text-center whitespace-nowrap">৳ {tableSumCurrentBalance.toLocaleString()}</td>
+                </tr>
+              </tfoot>
+            )}
           </table>
         </div>
       </div>
