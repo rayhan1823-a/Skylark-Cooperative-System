@@ -12,15 +12,20 @@ import {
   FaTimesCircle 
 } from "react-icons/fa";
 
+// পরিবেশ অনুযায়ী স্বয়ংক্রিয়ভাবে API URL নির্ধারণ করা (লোকালহোস্ট অথবা লাইভ সার্ভার)
+const API_BASE_URL = window.location.hostname === "localhost" 
+  ? "http://localhost:5000/api" 
+  : "https://your-backend-live-url.com/api"; // আপনার রিয়েল ব্যাকএন্ড লাইভ ইউআরএল এখানে বসবে (অথবা আপনার প্রজেক্টের অন্য ফাইলে যেভাবে আছে)
+
 function InvestmentManagement() {
   const [investments, setInvestments] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Backend Model এর সাথে সামঞ্জস্য রেখে Form State আপডেট করা হলো
+  // Backend Model এর সাথে সামঞ্জস্য রেখে Form State
   const [formData, setFormData] = useState({
-    investmentType: "FDR", // FDR, DPS, Sanchaypatra, Mutual Fund
+    investmentType: "FDR",
     institutionName: "",
     accountOrCertNo: "",
     principalAmount: "",
@@ -28,7 +33,7 @@ function InvestmentManagement() {
     startDate: new Date().toISOString().split("T")[0],
     maturityDate: "",
     maturityAmount: "",
-    status: "Active", // Active, Closed
+    status: "Active",
     notes: ""
   });
 
@@ -38,10 +43,9 @@ function InvestmentManagement() {
   const fetchInvestments = async () => {
     setLoading(true);
     try {
-      const response = await axios.get("http://localhost:5000/api/investments", {
+      const response = await axios.get(`${API_BASE_URL}/investments`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      // ব্যাকএন্ড থেকে আসা ডেটা structure ({ success: true, data: [...] }) অনুযায়ী সেট করা হলো
       setInvestments(response.data.data || response.data);
     } catch (error) {
       toast.error("Failed to fetch investments");
@@ -63,7 +67,7 @@ function InvestmentManagement() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:5000/api/investments", formData, {
+      await axios.post(`${API_BASE_URL}/investments`, formData, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -213,7 +217,7 @@ function InvestmentManagement() {
               ) : (
                 <tr>
                   <td colSpan="8" className="p-8 text-center text-slate-400 font-medium">
-                    No investments found.
+                    {loading ? "Loading investments..." : "No investments found."}
                   </td>
                 </tr>
               )}
