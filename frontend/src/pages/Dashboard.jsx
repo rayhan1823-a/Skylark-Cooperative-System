@@ -182,19 +182,31 @@ function Dashboard() {
           console.error("Error fetching investments API:", err);
         }
 
-        // ৭. এক্সিটেড মেম্বারস / রিফান্ড ডাটা ফেচ (Total Refund Amount)
+        // ৭. এক্সিটেড মেম্বারস / রিফান্ড ডাটা ফেচ
         try {
-          const refundRes = await axios.get(`${API}/members/exited`, config).catch(() => axios.get(`${API}/exited-members`, config)).catch(() => axios.get(`${API}/refunds`, config));
-          const refundData = refundRes.data?.exitedMembers || refundRes.data?.refunds || refundRes.data?.data || refundRes.data || [];
-          if (Array.isArray(refundData)) {
-            const calculatedRefund = refundData.reduce((sum, item) => {
+          let refundList = [];
+          try {
+            const res1 = await axios.get(`${API}/exited-members`, config);
+            refundList = res1.data?.exitedMembers || res1.data?.data || res1.data || [];
+          } catch {
+            try {
+              const res2 = await axios.get(`${API}/members/exited`, config);
+              refundList = res2.data?.exitedMembers || res2.data?.data || res2.data || [];
+            } catch {
+              const res3 = await axios.get(`${API}/refunds`, config);
+              refundList = res3.data?.refunds || res3.data?.data || res3.data || [];
+            }
+          }
+
+          if (Array.isArray(refundList)) {
+            const calculatedRefund = refundList.reduce((sum, item) => {
               const amount = Number(item.refundAmount || item.amount || item.totalRefund || 0);
               return sum + amount;
             }, 0);
             setTotalRefundAmount(calculatedRefund);
           }
         } catch (err) {
-          console.error("Error fetching refund/exited members data:", err);
+          console.error("Error fetching exited members refund data:", err);
         }
 
       } catch (error) {
@@ -227,7 +239,7 @@ function Dashboard() {
   const totalTargetDeposit = memberCountForTarget * targetPerMember;
   const calculatedTotalDue = Math.max(0, (totalTargetDeposit - Number(totalDepositBalance)) + Number(totalWithdrawal));
 
-  // Main Cash Balance থেকে Total Refund Amount মাইনাস করা হলো
+  // Main Cash Balance হিসাব (Total Refund Amount বাদ দেওয়া হলো)
   const currentMainCashBalance = (Number(totalDepositBalance) + Number(totalFundIncome) + Number(totalPenaltyAmount) + Number(stats.bankProfit || 0)) - Number(totalLoanGiven) - Number(totalExpense) - Number(totalWithdrawal) - Number(totalInvested) - Number(totalRefundAmount);
   const totalProfit = Number(stats.bankProfit || 0) + Number(totalFundIncome || 0) + Number(totalPenaltyAmount || 0) - Number(totalExpense);
 
@@ -465,7 +477,7 @@ function Dashboard() {
           </div>
         </div>
 
-        {/* Total Refund Amount Card (নতুন যুক্ত করা হলো) */}
+        {/* Total Refund Amount Card */}
         <div className="bg-gradient-to-br from-slate-900 via-rose-950 to-slate-900 border border-rose-500/40 text-white p-6 rounded-3xl shadow-[0_10px_35px_rgba(225,29,72,0.4)] hover:shadow-2xl transition-all duration-300 flex justify-between items-center group transform hover:-translate-y-1">
           <div>
             <p className="text-[11px] font-black text-rose-300 tracking-wider uppercase">Total Refund Amount</p>
