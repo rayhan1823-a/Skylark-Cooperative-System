@@ -56,7 +56,7 @@ function EditMember() {
       const token = localStorage.getItem("token") || localStorage.getItem("authToken");
       const data = new FormData();
       
-      // ফিক্সড: টাইপ অবজেক্ট চেক সরিয়ে সাধারণ ভ্যালিডেশন দেওয়া হয়েছে যাতে আইডি বা টেক্সট ফিল্ডগুলো মিসিং না হয়
+      // ফিক্সড: টাইপ অবজেক্ট চেক সরিয়ে সাধারণ ভ্যালিডেশন দেওয়া হয়েছে যাতে আইডি বা টেক্সট ফিল্ডগুলো মিসিং না হয়
       Object.keys(formData).forEach((key) => {
         if (
           key !== '_id' && 
@@ -126,6 +126,7 @@ function EditMember() {
               >
                 <option value="Active">Active</option>
                 <option value="Inactive">Inactive</option>
+                {/* ✅ এক্সিট মেম্বার ম্যানেজমেন্টের জন্য এই অপশনটি যোগ করা হয়েছে */}
                 <option value="Exited">Exited</option>
               </select>
             </div>

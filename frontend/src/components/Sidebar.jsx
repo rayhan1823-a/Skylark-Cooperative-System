@@ -16,6 +16,7 @@ import {
   FaHome,
   FaBell,
   FaPiggyBank,
+  FaUserSlash,
 } from "react-icons/fa";
 
 function Sidebar() {
@@ -45,6 +46,12 @@ function Sidebar() {
       title: "Members",
       path: "/members",
       icon: <FaUsers />,
+    },
+    {
+      title: "Exited Members",
+      path: "/exited-members",
+      icon: <FaUserSlash />,
+      roles: ["SUPER_ADMIN", "ADMIN"],
     },
     {
       title: "Users List",

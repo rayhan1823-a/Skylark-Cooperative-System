@@ -23,6 +23,7 @@ import Dashboard from "./pages/Dashboard";
 
 // Members & Users List
 import Members from "./pages/Members";
+import ExitedMembers from "./pages/ExitedMembers"; // ✅ Exited Members পেজ ইমপোর্ট করা হলো
 import AddMember from "./pages/AddMember";
 import EditMember from "./pages/EditMember";
 import MemberProfile from "./pages/MemberProfile";
@@ -145,6 +146,19 @@ function App() {
           
           <Route path="/notice" element={<Notice />} />
           <Route path="/members" element={<Members />} />
+          
+          {/* ✅ Exited Members Route (New) */}
+          <Route
+            path="/exited-members"
+            element={
+              userRole === "SUPER_ADMIN" || userRole === "ADMIN" ? (
+                <ExitedMembers />
+              ) : (
+                <Navigate to="/" replace />
+              )
+            }
+          />
+
           <Route
             path="/users-list"
             element={userRole === "SUPER_ADMIN" ? <UsersList /> : <Navigate to="/" replace />}
