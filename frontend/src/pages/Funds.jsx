@@ -20,7 +20,7 @@ function Funds() {
   const [page, setPage] = useState(1);
   const limit = 10;
 
-  // Form State
+  // Form State (Added date field with default today's date)
   const initialForm = {
     type: "INCOME",
     category: "",
@@ -28,6 +28,7 @@ function Funds() {
     amount: "",
     paymentMethod: "Cash",
     description: "",
+    date: new Date().toISOString().split("T")[0],
   };
   const [form, setForm] = useState(initialForm);
 
@@ -162,7 +163,10 @@ function Funds() {
       return;
     }
     setEditingId(null);
-    setForm(initialForm);
+    setForm({
+      ...initialForm,
+      date: new Date().toISOString().split("T")[0]
+    });
     setShowModal(true);
   };
 
@@ -226,6 +230,14 @@ function Funds() {
         resolvedMemberId = item.member._id;
       }
 
+      // Format existing date properly for date input (YYYY-MM-DD)
+      let formattedDate = new Date().toISOString().split("T")[0];
+      if (item.date) {
+        formattedDate = new Date(item.date).toISOString().split("T")[0];
+      } else if (item.createdAt) {
+        formattedDate = new Date(item.createdAt).toISOString().split("T")[0];
+      }
+
       setForm({
         type: item.type || "INCOME",
         category: item.category || "",
@@ -233,6 +245,7 @@ function Funds() {
         amount: item.amount || "",
         paymentMethod: item.paymentMethod || "Cash",
         description: item.description || "",
+        date: formattedDate,
       });
       setShowModal(true);
     }
@@ -424,6 +437,7 @@ function Funds() {
               ) : (
                 currentData.map((item, index) => {
                   const rowMemberName = item?.memberName || item?.member?.name || item?.member?.fullName || "-";
+                  const itemDate = item?.date || item?.createdAt;
                   return (
                     <tr key={item ? item._id : index} className="hover:bg-gray-50 transition">
                       <td className="px-4 py-3 text-center font-medium">{(page - 1) * limit + index + 1}</td>
@@ -437,7 +451,7 @@ function Funds() {
                       <td className="px-4 py-3 text-right font-bold">৳ {Number(item ? item.amount : 0).toLocaleString()}</td>
                       <td className="px-4 py-3">{item ? item.paymentMethod : ""}</td>
                       <td className="px-4 py-3">{item && item.description ? item.description : "-"}</td>
-                      <td className="px-4 py-3">{item && item.createdAt ? new Date(item.createdAt).toLocaleDateString() : "-"}</td>
+                      <td className="px-4 py-3">{itemDate ? new Date(itemDate).toLocaleDateString() : "-"}</td>
                       <td className="px-4 py-3">
                         <div className="flex justify-center gap-2">
                           <button 
@@ -575,6 +589,19 @@ function Funds() {
                     <option value="Bkash">Bkash</option>
                     <option value="Nagad">Nagad</option>
                   </select>
+                </div>
+
+                {/* Added Date Input Field */}
+                <div className="md:col-span-2">
+                  <label className="block mb-2 font-medium text-gray-700">Date</label>
+                  <input 
+                    type="date" 
+                    name="date" 
+                    value={form.date} 
+                    onChange={handleChange} 
+                    className="w-full border rounded-lg px-4 py-3 bg-gray-50 outline-none" 
+                    required 
+                  />
                 </div>
 
                 <div className="md:col-span-2">
