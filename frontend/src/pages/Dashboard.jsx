@@ -182,14 +182,15 @@ function Dashboard() {
           console.error("Error fetching investments API:", err);
         }
 
-        // ৭. এক্সিটেড মেম্বারস / রিফান্ড ডাটা ফেচ (সঠিক রাউট: /member-exit)
+        // ৭. এক্সিটেড মেম্বারস / রিফান্ড ডাটা ফেচ (/api/member-exit)
         try {
           const res = await axios.get(`${API}/member-exit`, config);
-          const refundList = res.data?.exitedMembers || res.data?.data || res.data || [];
+          // ব্যাকএন্ডের যেকোনো ফরম্যাট (exits, memberExits, data বা সরাসরি অ্যারে) নিখুঁতভাবে হ্যান্ডেল করার জন্য
+          const refundList = res.data?.exits || res.data?.memberExits || res.data?.data || (Array.isArray(res.data) ? res.data : []);
 
           if (Array.isArray(refundList)) {
             const calculatedRefund = refundList.reduce((sum, item) => {
-              const amount = Number(item.refundAmount || item.amount || item.totalRefund || 0);
+              const amount = Number(item.refundAmount || item.amount || item.totalRefund || item.netRefund || 0);
               return sum + amount;
             }, 0);
             setTotalRefundAmount(calculatedRefund);
