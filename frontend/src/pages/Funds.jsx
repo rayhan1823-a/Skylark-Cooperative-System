@@ -65,7 +65,11 @@ function Funds() {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch("https://skylark-cooperative-system.onrender.com/api/funds", {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          "Cache-Control": "no-cache"
+        },
+        cache: "no-store"
       });
       const data = await response.json();
       if (data && data.success && Array.isArray(data.transactions)) {
@@ -228,7 +232,6 @@ function Funds() {
     if (item) {
       setEditingId(id);
       
-      // Safely resolve member ID whether populated or raw string/ID
       let resolvedMemberId = "";
       if (typeof item.memberId === "string") {
         resolvedMemberId = item.memberId;
@@ -238,13 +241,11 @@ function Funds() {
         resolvedMemberId = item.member._id;
       }
 
-      // Format existing date properly for date input (YYYY-MM-DD) avoiding timezone shift
       let formattedDate = getLocalDateString();
       const targetDateValue = item.date || item.createdAt;
       
       if (targetDateValue) {
         if (typeof targetDateValue === "string" && targetDateValue.length >= 10) {
-          // সরাসরি স্ট্রিংয়ের প্রথম ১০ অক্ষর (YYYY-MM-DD) নিয়ে নেওয়া হচ্ছে যাতে কোনো টাইমজোন শিফট না হয়
           formattedDate = targetDateValue.substring(0, 10);
         } else {
           const d = new Date(targetDateValue);
