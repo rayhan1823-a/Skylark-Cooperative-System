@@ -115,7 +115,7 @@ function Funds() {
 
   const netBalance = totalIncome - totalExpense;
 
-  // Category-wise Calculations (Fine / Penalty removed)
+  // Category-wise Calculations
   const incomeCategories = [
     "Admission Fee",
     "Share Capital",
@@ -217,7 +217,7 @@ function Funds() {
     }
   };
 
-  // Edit Trigger
+  // Edit Trigger (Fixed Date Parsing for local timezone display)
   const editTransaction = (id) => {
     if (!isSuperAdmin) {
       toast.error("Access Denied: Only Super Admin can edit transactions.");
@@ -238,12 +238,18 @@ function Funds() {
         resolvedMemberId = item.member._id;
       }
 
-      // Format existing date properly for date input (YYYY-MM-DD)
+      // Format existing date properly for date input (YYYY-MM-DD) avoiding timezone shift
       let formattedDate = getLocalDateString();
-      if (item.date) {
-        formattedDate = getLocalDateString(new Date(item.date));
-      } else if (item.createdAt) {
-        formattedDate = getLocalDateString(new Date(item.createdAt));
+      const targetDateValue = item.date || item.createdAt;
+      if (targetDateValue) {
+        const d = new Date(targetDateValue);
+        if (!isNaN(d.getTime())) {
+          // সঠিক লোকাল ডেট স্ট্রিং ফরম্যাট বের করার জন্য
+          const year = d.getFullYear();
+          const month = String(d.getMonth() + 1).padStart(2, '0');
+          const day = String(d.getDate()).padStart(2, '0');
+          formattedDate = `${year}-${month}-${day}`;
+        }
       }
 
       setForm({
@@ -293,7 +299,6 @@ function Funds() {
     const categoryStr = item.category ? String(item.category).toLowerCase() : "";
     const descStr = item.description ? String(item.description).toLowerCase() : "";
     
-    // Safely retrieve member name for search filtration
     const memberNameStr = item.memberName || item.member?.name || item.member?.fullName || "";
     const matchMemberName = String(memberNameStr).toLowerCase();
     
@@ -351,7 +356,6 @@ function Funds() {
 
       {/* Category Breakdown Sections */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Income Breakdown Card */}
         <div className="bg-white p-5 rounded-xl shadow-sm border">
           <div className="flex items-center gap-2 mb-4 pb-2 border-b">
             <TrendingUp className="text-green-600" size={22} />
@@ -367,7 +371,6 @@ function Funds() {
           </div>
         </div>
 
-        {/* Expense Breakdown Card */}
         <div className="bg-white p-5 rounded-xl shadow-sm border">
           <div className="flex items-center gap-2 mb-4 pb-2 border-b">
             <TrendingDown className="text-red-600" size={22} />
@@ -446,6 +449,16 @@ function Funds() {
                 currentData.map((item, index) => {
                   const rowMemberName = item?.memberName || item?.member?.name || item?.member?.fullName || "-";
                   const itemDate = item?.date || item?.createdAt;
+                  
+                  // টেবিল লিস্টে সঠিক ডেট দেখানোর জন্য ফরম্যাটিং
+                  let displayDateFormatted = "-";
+                  if (itemDate) {
+                    const dObj = new Date(itemDate);
+                    if (!isNaN(dObj.getTime())) {
+                      displayDateFormatted = dObj.toLocaleDateString();
+                    }
+                  }
+
                   return (
                     <tr key={item ? item._id : index} className="hover:bg-gray-50 transition">
                       <td className="px-4 py-3 text-center font-medium">{(page - 1) * limit + index + 1}</td>
@@ -459,7 +472,7 @@ function Funds() {
                       <td className="px-4 py-3 text-right font-bold">৳ {Number(item ? item.amount : 0).toLocaleString()}</td>
                       <td className="px-4 py-3">{item ? item.paymentMethod : ""}</td>
                       <td className="px-4 py-3">{item && item.description ? item.description : "-"}</td>
-                      <td className="px-4 py-3">{itemDate ? new Date(itemDate).toLocaleDateString() : "-"}</td>
+                      <td className="px-4 py-3">{displayDateFormatted}</td>
                       <td className="px-4 py-3">
                         <div className="flex justify-center gap-2">
                           <button 
@@ -599,7 +612,7 @@ function Funds() {
                   </select>
                 </div>
 
-                {/* Added Date Input Field */}
+                {/* Date Input Field */}
                 <div className="md:col-span-2">
                   <label className="block mb-2 font-medium text-gray-700">Date</label>
                   <input 
