@@ -9,7 +9,6 @@ const addTransaction = async (req, res) => {
 
     try {
 
-
         const {
             type,
             category,
@@ -20,8 +19,6 @@ const addTransaction = async (req, res) => {
             date,
             createdBy
         } = req.body;
-
-
 
         if(
             !type ||
@@ -40,8 +37,6 @@ const addTransaction = async (req, res) => {
 
         }
 
-
-
         const transaction = await Transaction.create({
 
             type,
@@ -57,13 +52,11 @@ const addTransaction = async (req, res) => {
 
             description,
 
-            date,
+            date: date || Date.now(), // ডে트 না থাকলে বর্তমান ডেট নিবে
 
             createdBy
 
         });
-
-
 
         res.status(201).json({
 
@@ -76,17 +69,13 @@ const addTransaction = async (req, res) => {
 
         });
 
-
-
     }
     catch(error){
-
 
         console.log(
             "Add Transaction Error:",
             error
         );
-
 
         res.status(500).json({
 
@@ -97,13 +86,77 @@ const addTransaction = async (req, res) => {
 
         });
 
-
     }
 
 };
 
 
+// ======================================
+// Update / Edit Transaction (নতুন যোগ করা হলো)
+// ======================================
 
+const updateTransaction = async (req, res) => {
+
+    try {
+
+        const { id } = req.params;
+
+        const {
+            type,
+            category,
+            memberId,
+            amount,
+            paymentMethod,
+            description,
+            date
+        } = req.body;
+
+        let transaction = await Transaction.findById(id);
+
+        if (!transaction) {
+            return res.status(404).json({
+                success: false,
+                message: "Transaction not found"
+            });
+        }
+
+        const updateData = {
+            type: type || transaction.type,
+            category: category || transaction.category,
+            memberId: memberId !== undefined ? (memberId || null) : transaction.memberId,
+            amount: amount !== undefined ? amount : transaction.amount,
+            paymentMethod: paymentMethod || transaction.paymentMethod,
+            description: description !== undefined ? description : transaction.description,
+            date: date || transaction.date // নতুন ডেট ইনপুট পেলে তা আপডেট করবে
+        };
+
+        transaction = await Transaction.findByIdAndUpdate(id, updateData, {
+            new: true,
+            runValidators: true
+        });
+
+        res.status(200).json({
+            success: true,
+            message: "Transaction updated successfully",
+            transaction
+        });
+
+    }
+    catch (error) {
+
+        console.log(
+            "Update Transaction Error:",
+            error
+        );
+
+        res.status(500).json({
+            success: false,
+            message: "Server Error"
+        });
+
+    }
+
+};
 
 
 // ======================================
@@ -112,9 +165,7 @@ const addTransaction = async (req, res) => {
 
 const getTransactions = async(req,res)=>{
 
-
     try{
-
 
         const transactions =
         await Transaction.find()
@@ -128,8 +179,6 @@ const getTransactions = async(req,res)=>{
             createdAt:-1
         });
 
-
-
         res.status(200).json({
 
             success:true,
@@ -141,17 +190,13 @@ const getTransactions = async(req,res)=>{
 
         });
 
-
-
     }
     catch(error){
-
 
         console.log(
             "Get Transaction Error:",
             error
         );
-
 
         res.status(500).json({
 
@@ -162,15 +207,9 @@ const getTransactions = async(req,res)=>{
 
         });
 
-
     }
 
-
 };
-
-
-
-
 
 
 // ======================================
@@ -179,9 +218,7 @@ const getTransactions = async(req,res)=>{
 
 const getTransactionSummary = async(req,res)=>{
 
-
     try{
-
 
         const income =
         await Transaction.aggregate([
@@ -206,9 +243,6 @@ const getTransactionSummary = async(req,res)=>{
 
         ]);
 
-
-
-
         const expense =
         await Transaction.aggregate([
 
@@ -231,10 +265,6 @@ const getTransactionSummary = async(req,res)=>{
             }
 
         ]);
-
-
-
-
 
         const refund =
         await Transaction.aggregate([
@@ -259,30 +289,19 @@ const getTransactionSummary = async(req,res)=>{
 
         ]);
 
-
-
-
-
         const totalIncome =
         income[0]?.total || 0;
-
 
         const totalExpense =
         expense[0]?.total || 0;
 
-
         const totalRefund =
         refund[0]?.total || 0;
-
-
 
         const balance =
         totalIncome -
         totalExpense -
         totalRefund;
-
-
-
 
         res.status(200).json({
 
@@ -302,17 +321,13 @@ const getTransactionSummary = async(req,res)=>{
 
         });
 
-
-
     }
     catch(error){
-
 
         console.log(
             "Summary Error:",
             error
         );
-
 
         res.status(500).json({
 
@@ -323,15 +338,9 @@ const getTransactionSummary = async(req,res)=>{
 
         });
 
-
     }
 
-
 };
-
-
-
-
 
 
 // ======================================
@@ -340,18 +349,12 @@ const getTransactionSummary = async(req,res)=>{
 
 const deleteTransaction = async(req,res)=>{
 
-
     try{
-
 
         const {id}=req.params;
 
-
-
         const transaction =
         await Transaction.findById(id);
-
-
 
         if(!transaction){
 
@@ -366,11 +369,7 @@ const deleteTransaction = async(req,res)=>{
 
         }
 
-
-
         await Transaction.findByIdAndDelete(id);
-
-
 
         res.status(200).json({
 
@@ -381,11 +380,8 @@ const deleteTransaction = async(req,res)=>{
 
         });
 
-
-
     }
     catch(error){
-
 
         res.status(500).json({
 
@@ -396,25 +392,17 @@ const deleteTransaction = async(req,res)=>{
 
         });
 
-
     }
 
-
 };
-
-
-
-
 
 
 module.exports = {
 
     addTransaction,
-
+    updateTransaction, // এখানে আপডেট কন্ট্রোলার যুক্ত করা হলো
     getTransactions,
-
     getTransactionSummary,
-
     deleteTransaction
 
 };
