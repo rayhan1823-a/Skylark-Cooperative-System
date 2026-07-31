@@ -14,7 +14,8 @@ const addFundTransaction = async (req, res) => {
             paymentMethod,
             createdBy,
             memberId,
-            date // নতুন: ফ্রন্টএন্ড থেকে পাঠানো ডেট রিসিভ করা হলো
+            date,
+            transactionDate // ফ্রন্টএন্ডে অন্য নামে ডেট পাঠানো হলে যেন মিস না হয়
         } = req.body;
 
         // Validation
@@ -53,6 +54,16 @@ const addFundTransaction = async (req, res) => {
             }
         }
 
+        // ইউজার যে তারিখ দিয়েছে তা নিশ্চিত করা (ফাঁկ বা ইনভ্যালিড হলে আজকের ডেট নেবে)
+        let finalDate = Date.now();
+        const rawDate = date || transactionDate;
+        if (rawDate) {
+            const parsedDate = new Date(rawDate);
+            if (!isNaN(parsedDate.getTime())) {
+                finalDate = parsedDate;
+            }
+        }
+
         const transaction = await FundTransaction.create({
             type,
             category: category.trim(),
@@ -63,7 +74,7 @@ const addFundTransaction = async (req, res) => {
             member: resolvedMember,
             memberId: resolvedMemberCustomId,
             memberName: resolvedMemberName,
-            date: date ? new Date(date) : Date.now() // নতুন: ইউজার ডেট দিলে সেটা সেভ হবে, না দিলে কারেন্ট ডেট
+            date: finalDate // সঠিক ডেট এখানে সেভ হবে
         });
 
         return res.status(201).json({
@@ -215,7 +226,8 @@ const updateFundTransaction = async (req, res) => {
             paymentMethod,
             createdBy,
             memberId,
-            date // নতুন: আপডেট করার সময় ডেਟ রিসিভ করা হলো
+            date,
+            transactionDate
         } = req.body;
 
         if (!type || !category || amount === undefined) {
@@ -254,8 +266,13 @@ const updateFundTransaction = async (req, res) => {
         transaction.memberName = resolvedMemberName;
         transaction.memberId = resolvedMemberCustomId;
         
-        if (date) {
-            transaction.date = new Date(date); // নতুন: ডেট পরিবর্তন করা হলে তা আপডেট হবে
+        // আপডেট করার সময় সঠিক ডেট হ্যান্ডেল করা
+        const rawUpdateDate = date || transactionDate;
+        if (rawUpdateDate) {
+            const parsedUpdateDate = new Date(rawUpdateDate);
+            if (!isNaN(parsedUpdateDate.getTime())) {
+                transaction.date = parsedUpdateDate;
+            }
         }
 
         await transaction.save();
