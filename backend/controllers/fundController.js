@@ -15,7 +15,7 @@ const addFundTransaction = async (req, res) => {
             createdBy,
             memberId,
             date,
-            transactionDate // ফ্রন্টএন্ডে অন্য নামে ডেট পাঠানো হলে যেন মিস না হয়
+            transactionDate // ফ্রন্টএন্ডে অন্য নামে ডেট পাঠানো হলে যেন মিস না হয়
         } = req.body;
 
         // Validation
@@ -54,13 +54,14 @@ const addFundTransaction = async (req, res) => {
             }
         }
 
-        // ইউজার যে তারিখ দিয়েছে তা নিশ্চিত করা (ফাঁկ বা ইনভ্যালিড হলে আজকের ডেট নেবে)
-        let finalDate = Date.now();
+        // সঠিক ডেট হ্যান্ডেলিং (টাইমজোন বাগ এড়ানোর জন্য লোকাল ডেট পার্সিং)
+        let finalDate = new Date();
         const rawDate = date || transactionDate;
         if (rawDate) {
             const parsedDate = new Date(rawDate);
             if (!isNaN(parsedDate.getTime())) {
-                finalDate = parsedDate;
+                // ইউজার যে ডেট দিয়েছে তার সময় ঠিক রেখে সঠিক ডেট অবজেক্ট তৈরি
+                finalDate = new Date(parsedDate.getTime() + parsedDate.getTimezoneOffset() * 60000);
             }
         }
 
@@ -266,12 +267,12 @@ const updateFundTransaction = async (req, res) => {
         transaction.memberName = resolvedMemberName;
         transaction.memberId = resolvedMemberCustomId;
         
-        // আপডেট করার সময় সঠিক ডেট হ্যান্ডেল করা
+        // আপডেট করার সময় সঠিক ডেট হ্যান্ডেল করা (টাইমজোন সেফ)
         const rawUpdateDate = date || transactionDate;
         if (rawUpdateDate) {
             const parsedUpdateDate = new Date(rawUpdateDate);
             if (!isNaN(parsedUpdateDate.getTime())) {
-                transaction.date = parsedUpdateDate;
+                transaction.date = new Date(parsedUpdateDate.getTime() + parsedUpdateDate.getTimezoneOffset() * 60000);
             }
         }
 
@@ -385,7 +386,7 @@ const filterFundTransactionsByDate = async (req, res) => {
             .sort({ date: -1, createdAt: -1 });
 
         return res.status(200).json({
-            success: true,
+            success: `true`,
             count: transactions.length,
             transactions
         });
