@@ -15,7 +15,7 @@ const addFundTransaction = async (req, res) => {
             createdBy,
             memberId,
             date,
-            transactionDate // ফ্রন্টএন্ডে অন্য নামে ডেট পাঠানো হলে যেন মিস না হয়
+            transactionDate
         } = req.body;
 
         // Validation
@@ -54,14 +54,14 @@ const addFundTransaction = async (req, res) => {
             }
         }
 
-        // সঠিক ডেট হ্যান্ডেলিং (টাইমজোন বাগ এড়ানোর জন্য লোকাল ডেট পার্সিং)
+        // সঠিক ডেট হ্যান্ডেলিং (টাইমজোন বাগ সমাধান করা হয়েছে)
         let finalDate = new Date();
         const rawDate = date || transactionDate;
         if (rawDate) {
             const parsedDate = new Date(rawDate);
             if (!isNaN(parsedDate.getTime())) {
-                // ইউজার যে ডেট দিয়েছে তার সময় ঠিক রেখে সঠিক ডেট অবজেক্ট তৈরি
-                finalDate = new Date(parsedDate.getTime() + parsedDate.getTimezoneOffset() * 60000);
+                // লোকাল ডেটকে সঠিকভাবে UTC-তে কনভার்ட் করে সেভ করার জন্য
+                finalDate = new Date(Date.UTC(parsedDate.getFullYear(), parsedDate.getMonth(), parsedDate.getDate(), 0, 0, 0));
             }
         }
 
@@ -75,7 +75,7 @@ const addFundTransaction = async (req, res) => {
             member: resolvedMember,
             memberId: resolvedMemberCustomId,
             memberName: resolvedMemberName,
-            date: finalDate // সঠিক ডেট এখানে সেভ হবে
+            date: finalDate
         });
 
         return res.status(201).json({
@@ -113,7 +113,6 @@ const getFundTransactions = async (req, res) => {
 
         const total = await FundTransaction.countDocuments(filter);
 
-        // মেম্বার মডেলের নাম ও আইডি পপুলেট করা হলো
         const transactions = await FundTransaction.find(filter)
             .populate("member", "name memberId phone")
             .sort({ date: -1, createdAt: -1 })
@@ -267,12 +266,12 @@ const updateFundTransaction = async (req, res) => {
         transaction.memberName = resolvedMemberName;
         transaction.memberId = resolvedMemberCustomId;
         
-        // আপডেট করার সময় সঠিক ডেট হ্যান্ডেল করা (টাইমজোন সেফ)
+        // আপডেট করার সময় সঠিক ডেট হ্যান্ডেল করা (টাইমজোন বাগ সমাধান)
         const rawUpdateDate = date || transactionDate;
         if (rawUpdateDate) {
             const parsedUpdateDate = new Date(rawUpdateDate);
             if (!isNaN(parsedUpdateDate.getTime())) {
-                transaction.date = new Date(parsedUpdateDate.getTime() + parsedUpdateDate.getTimezoneOffset() * 60000);
+                transaction.date = new Date(Date.UTC(parsedUpdateDate.getFullYear(), parsedUpdateDate.getMonth(), parsedUpdateDate.getDate(), 0, 0, 0));
             }
         }
 
@@ -386,7 +385,7 @@ const filterFundTransactionsByDate = async (req, res) => {
             .sort({ date: -1, createdAt: -1 });
 
         return res.status(200).json({
-            success: `true`,
+            success: true,
             count: transactions.length,
             transactions
         });

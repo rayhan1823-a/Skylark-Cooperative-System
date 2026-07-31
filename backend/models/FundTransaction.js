@@ -88,6 +88,20 @@ const fundTransactionSchema = new mongoose.Schema(
 
 
     // ======================================
+    // Transaction Date (Added to fix date issue)
+    // ======================================
+
+    date:{
+
+        type:Date,
+
+        default:Date.now
+
+    },
+
+
+
+    // ======================================
     // Created By
     // ======================================
 
@@ -194,6 +208,12 @@ const fundTransactionSchema = new mongoose.Schema(
 fundTransactionSchema.index({
 
     createdAt:-1
+
+});
+
+fundTransactionSchema.index({
+
+    date:-1
 
 });
 
