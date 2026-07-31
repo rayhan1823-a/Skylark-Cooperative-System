@@ -3,24 +3,34 @@ import axios from "axios";
 
 function ExitedMembers() {
   const [exitedMembers, setExitedMembers] = useState([]);
+  const [allMembers, setAllMembers] = useState([]); // ড্রপডাউনের জন্য সব মেম্বার
   const [loading, setLoading] = useState(true);
-  const [selectedMember, setSelectedMember] = useState(null); // মোডাল বা ড্রয়ার ওপেন করার জন্য
-  const [editFormData, setEditFormData] = useState({});
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false); // নতুন এক্সিট এন্ট্রি মোডাল
+  const [selectedMember, setSelectedMember] = useState(null); // এডিট মোডাল বা ড্রয়ার ওপেন করার জন্য
+  const [editFormData, setEditFormData] = useState({
+    memberId: "",
+    exitDate: "",
+    refundAmount: "",
+    exitReason: ""
+  });
 
-  // সব মেম্বার ফেচ করে শুধু যাদের স্ট্যাটাস "Exited" তাদের ফিল্টার করব
+  const token = localStorage.getItem("token") || localStorage.getItem("authToken");
+
+  // সব মেম্বার ফেচ করে শুধু যাদের স্ট্যাটাস "Exited" তাদের ফিল্টার করব এবং বাকিদের ড্রপডাউনের জন্য রাখব
   const loadExitedMembers = async () => {
     try {
-      const token = localStorage.getItem("token") || localStorage.getItem("authToken");
       const res = await axios.get(
         `https://skylark-cooperative-system.onrender.com/api/members`,
         {
           headers: { Authorization: `Bearer ${token}` }
         }
       );
-      const allMembers = res.data.members || res.data.data || res.data || [];
+      const allMembersData = res.data.members || res.data.data || res.data || [];
+      
+      setAllMembers(allMembersData);
       
       // শুধুমাত্র Exited মেম্বারদের ফিল্টার করা
-      const exited = allMembers.filter(
+      const exited = allMembersData.filter(
         (m) => m.status && m.status.toLowerCase() === "exited"
       );
       setExitedMembers(exited);
@@ -39,6 +49,7 @@ function ExitedMembers() {
   const handleOpenEdit = (member) => {
     setSelectedMember(member);
     setEditFormData({
+      memberId: member._id,
       exitDate: member.exitDate ? member.exitDate.substring(0, 10) : "",
       refundAmount: member.refundAmount || "",
       exitReason: member.exitReason || ""
@@ -52,20 +63,44 @@ function ExitedMembers() {
     });
   };
 
+  // ড্রপডাউন থেকে মেম্বার সিলেক্ট করলে তার ID সেট করা
+  const handleMemberSelect = (e) => {
+    setEditFormData({
+      ...editFormData,
+      memberId: e.target.value
+    });
+  };
+
   // এক্সিট ডাটা সেভ বা আপডেট করা
   const handleSaveExitInfo = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem("token") || localStorage.getItem("authToken");
+      const memberIdToUpdate = selectedMember ? selectedMember._id : editFormData.memberId;
+
+      if (!memberIdToUpdate) {
+        alert("❌ Please select a member");
+        return;
+      }
+
+      const updatePayload = {
+        status: "Exited",
+        exitDate: editFormData.exitDate,
+        refundAmount: editFormData.refundAmount,
+        exitReason: editFormData.exitReason
+      };
+
       await axios.put(
-        `https://skylark-cooperative-system.onrender.com/api/members/${selectedMember._id}`,
-        editFormData,
+        `https://skylark-cooperative-system.onrender.com/api/members/${memberIdToUpdate}`,
+        updatePayload,
         {
           headers: { Authorization: `Bearer ${token}` }
         }
       );
-      alert("✅ Exit details updated successfully!");
+
+      alert("✅ Exit details saved successfully!");
       setSelectedMember(null);
+      setIsAddModalOpen(false);
+      setEditFormData({ memberId: "", exitDate: "", refundAmount: "", exitReason: "" });
       loadExitedMembers(); // লিস্ট রিফ্রেশ করা
     } catch (error) {
       console.log(error);
@@ -91,7 +126,21 @@ function ExitedMembers() {
   return (
     <div className="p-6 bg-slate-50 min-h-screen w-full">
       <div className="max-w-7xl mx-auto space-y-6">
-        <h1 className="text-3xl font-bold text-blue-900">Exited Members Management</h1>
+        
+        {/* Header & Add Button */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <h1 className="text-3xl font-bold text-blue-900">Exited Members Management</h1>
+          <button
+            onClick={() => {
+              setSelectedMember(null);
+              setEditFormData({ memberId: "", exitDate: "", refundAmount: "", exitReason: "" });
+              setIsAddModalOpen(true);
+            }}
+            className="bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-xl font-bold shadow transition flex items-center gap-2"
+          >
+            <span>+</span> Add Exited Member
+          </button>
+        </div>
 
         {/* 📊 ওপরের সামারি রিপোর্ট সেクション */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -121,7 +170,7 @@ function ExitedMembers() {
           <h2 className="text-xl font-bold text-gray-800 mb-4">Exited Members List</h2>
 
           {exitedMembers.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">No exited members found.</p>
+            <p className="text-gray-500 text-center py-8">No exited members found. Click "+ Add Exited Member" to add one.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
@@ -162,15 +211,15 @@ function ExitedMembers() {
         </div>
 
         {/* 🛠️ এক্সিট ইনফো এন্ট্রি/এডিট করার মোডাল (Popup) */}
-        {selectedMember && (
+        {(selectedMember || isAddModalOpen) && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-xl max-w-lg w-full p-6 shadow-xl space-y-4">
               <div className="flex justify-between items-center border-b pb-3">
                 <h3 className="text-lg font-bold text-gray-800">
-                  Manage Exit: <span className="text-blue-600">{selectedMember.name}</span>
+                  {selectedMember ? `Manage Exit: ${selectedMember.name}` : "Add New Exited Member"}
                 </h3>
                 <button
-                  onClick={() => setSelectedMember(null)}
+                  onClick={() => { setSelectedMember(null); setIsAddModalOpen(false); }}
                   className="text-gray-400 hover:text-gray-600 font-bold text-lg"
                 >
                   ✕
@@ -178,6 +227,29 @@ function ExitedMembers() {
               </div>
 
               <form onSubmit={handleSaveExitInfo} className="space-y-4">
+                {/* যদি নতুন এন্ট্রি হয়, তবে ড্রপডাউন থেকে মেম্বার সিলেক্ট করতে হবে */}
+                {!selectedMember && (
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Select Member</label>
+                    <select
+                      name="memberId"
+                      value={editFormData.memberId}
+                      onChange={handleMemberSelect}
+                      className="border p-2.5 rounded-lg w-full bg-white"
+                      required
+                    >
+                      <option value="">-- Choose Member --</option>
+                      {allMembers
+                        .filter(m => !m.status || m.status.toLowerCase() !== "exited")
+                        .map(m => (
+                          <option key={m._id} value={m._id}>
+                            {m.name} ({m.memberId || "No ID"}) - {m.phone}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+                )}
+
                 <div>
                   <label className="block text-sm font-semibold mb-1">Exit Date</label>
                   <input
@@ -218,7 +290,7 @@ function ExitedMembers() {
                 <div className="flex justify-end gap-3 pt-3 border-t">
                   <button
                     type="button"
-                    onClick={() => setSelectedMember(null)}
+                    onClick={() => { setSelectedMember(null); setIsAddModalOpen(false); }}
                     className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-400"
                   >
                     Cancel
