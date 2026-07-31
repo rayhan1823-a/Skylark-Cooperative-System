@@ -182,21 +182,10 @@ function Dashboard() {
           console.error("Error fetching investments API:", err);
         }
 
-        // ৭. এক্সিটেড মেম্বারস / রিফান্ড ডাটা ফেচ
+        // ৭. এক্সিটেড মেম্বারস / রিফান্ড ডাটা ফেচ (সঠিক রাউট: /member-exit)
         try {
-          let refundList = [];
-          try {
-            const res1 = await axios.get(`${API}/exited-members`, config);
-            refundList = res1.data?.exitedMembers || res1.data?.data || res1.data || [];
-          } catch {
-            try {
-              const res2 = await axios.get(`${API}/members/exited`, config);
-              refundList = res2.data?.exitedMembers || res2.data?.data || res2.data || [];
-            } catch {
-              const res3 = await axios.get(`${API}/refunds`, config);
-              refundList = res3.data?.refunds || res3.data?.data || res3.data || [];
-            }
-          }
+          const res = await axios.get(`${API}/member-exit`, config);
+          const refundList = res.data?.exitedMembers || res.data?.data || res.data || [];
 
           if (Array.isArray(refundList)) {
             const calculatedRefund = refundList.reduce((sum, item) => {
@@ -206,7 +195,7 @@ function Dashboard() {
             setTotalRefundAmount(calculatedRefund);
           }
         } catch (err) {
-          console.error("Error fetching exited members refund data:", err);
+          console.error("Error fetching member-exit refund data:", err);
         }
 
       } catch (error) {
