@@ -241,15 +241,17 @@ function Funds() {
       // Format existing date properly for date input (YYYY-MM-DD) avoiding timezone shift
       let formattedDate = getLocalDateString();
       const targetDateValue = item.date || item.createdAt;
+      
       if (targetDateValue) {
         if (typeof targetDateValue === "string" && targetDateValue.length >= 10) {
+          // সরাসরি স্ট্রিংয়ের প্রথম ১০ অক্ষর (YYYY-MM-DD) নিয়ে নেওয়া হচ্ছে যাতে কোনো টাইমজোন শিফট না হয়
           formattedDate = targetDateValue.substring(0, 10);
         } else {
           const d = new Date(targetDateValue);
           if (!isNaN(d.getTime())) {
-            const year = d.getUTCFullYear();
-            const month = String(d.getUTCMonth() + 1).padStart(2, '0');
-            const day = String(d.getUTCDate()).padStart(2, '0');
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
             formattedDate = `${year}-${month}-${day}`;
           }
         }
