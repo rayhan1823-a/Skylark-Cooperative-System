@@ -54,7 +54,7 @@ const addFundTransaction = async (req, res) => {
             }
         }
 
-        // সঠিক ডেট হ্যান্ডেলিং (টাইমজোন বাগ সমাধান করা হয়েছে)
+        // সঠিক ডেট হ্যান্ডেলিং (টাইমজোন বাগ সমাধান করা হয়েছে)
         let finalDate = new Date();
         const rawDate = date || transactionDate;
         if (rawDate) {
@@ -95,13 +95,14 @@ const addFundTransaction = async (req, res) => {
 };
 
 // ======================================
-// Get All Fund Transactions
+// Get All Fund Transactions (Updated for Unlimited)
 // ======================================
 const getFundTransactions = async (req, res) => {
     try {
         const page = Number(req.query.page) || 1;
-        const limit = Number(req.query.limit) || 20;
-        const skip = (page - 1) * limit;
+        // এখানে পরিবর্তন করা হয়েছে: যদি query-তে limit না থাকে তবে 0 (অর্থাৎ unlimited/সব ডাটা) আসবে
+        const limit = req.query.limit !== undefined ? Number(req.query.limit) : 0; 
+        const skip = limit > 0 ? (page - 1) * limit : 0;
 
         const filter = {};
         if (req.query.type) {
@@ -113,16 +114,21 @@ const getFundTransactions = async (req, res) => {
 
         const total = await FundTransaction.countDocuments(filter);
 
-        const transactions = await FundTransaction.find(filter)
+        let query = FundTransaction.find(filter)
             .populate("member", "name memberId phone")
-            .sort({ date: -1, createdAt: -1 })
-            .skip(skip)
-            .limit(limit);
+            .sort({ date: -1, createdAt: -1 });
+
+        // যদি limit জিরো বা তার বেশি থাকে, তবেই পেজিনেশন বা লিমি트 অ্যাপ্লাই হবে
+        if (limit > 0) {
+            query = query.skip(skip).limit(limit);
+        }
+
+        const transactions = await query;
 
         return res.status(200).json({
             success: true,
             page,
-            totalPages: Math.ceil(total / limit),
+            totalPages: limit > 0 ? Math.ceil(total / limit) : 1,
             totalRecords: total,
             count: transactions.length,
             transactions

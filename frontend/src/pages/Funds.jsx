@@ -60,22 +60,21 @@ function Funds() {
     }
   }, []);
 
-  // ================= Fetch Data =================
+  // ================= Fetch Data (Clean URL without limit=10000) =================
   const fetchTransactions = async () => {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-  "https://skylark-cooperative-system.onrender.com/api/funds?limit=10000",
-  {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Cache-Control": "no-cache",
-    },
-    cache: "no-store",
-  }
-);
+        "https://skylark-cooperative-system.onrender.com/api/funds",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Cache-Control": "no-cache",
+          },
+          cache: "no-store",
+        }
+      );
       const data = await response.json();
-console.log(data);
       if (data && data.success && Array.isArray(data.transactions)) {
         setTransactions(data.transactions);
       } else {
@@ -201,20 +200,18 @@ console.log(data);
         : "https://skylark-cooperative-system.onrender.com/api/funds";
       
       const method = editingId ? "PUT" : "POST";
-console.log(form);
+      
       const response = await fetch(url, {
-  method,
-  headers: {
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify(form),
-});
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(form),
+      });
 
-console.log("Sending Form:", form);
+      const data = await response.json();
 
-const data = await response.json();
-
-console.log("Response:", data);
       if (data && data.success) {
         toast.success(editingId ? "Updated successfully!" : "Saved successfully!");
         fetchTransactions();
@@ -228,7 +225,7 @@ console.log("Response:", data);
     }
   };
 
-  // Edit Trigger (Fixed Date Parsing for local timezone display)
+  // Edit Trigger
   const editTransaction = (id) => {
     if (!isSuperAdmin) {
       toast.error("Access Denied: Only Super Admin can edit transactions.");
