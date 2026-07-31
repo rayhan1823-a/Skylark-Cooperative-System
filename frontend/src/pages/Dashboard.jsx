@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Users, UserCheck, UserX, DollarSign, Wallet, TrendingDown, Building, ArrowUpRight, PiggyBank, ArrowDownRight, LogOut, ShieldCheck, AlertTriangle } from "lucide-react";
+import { Users, UserCheck, UserX, DollarSign, Wallet, TrendingDown, Building, ArrowUpRight, PiggyBank, ArrowDownRight, LogOut, ShieldCheck, AlertTriangle, RefreshCw } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from "recharts";
 import axios from "axios";
 
@@ -26,6 +26,7 @@ function Dashboard() {
   const [totalWithdrawal, setTotalWithdrawal] = useState(0);
   const [totalPenaltyAmount, setTotalPenaltyAmount] = useState(0);
   const [totalInvested, setTotalInvested] = useState(0);
+  const [totalRefundAmount, setTotalRefundAmount] = useState(0);
   
   const [depositChartData, setDepositChartData] = useState([]);
   const [dueChartData, setDueChartData] = useState([]);
@@ -166,7 +167,7 @@ function Dashboard() {
           console.error("Error fetching penalties API:", err);
         }
 
-        // ৬. ইনভেস্টমেন্ট ডাটা ফেচ (Total Invested এর সঠিক হিসাবের জন্য আপডেট করা হয়েছে)
+        // ৬. ইনভেস্টমেন্ট ডাটা ফেচ
         try {
           const investRes = await axios.get(`${API}/investments`, config);
           const investData = investRes.data?.investments || investRes.data?.data || investRes.data || [];
@@ -179,6 +180,21 @@ function Dashboard() {
           }
         } catch (err) {
           console.error("Error fetching investments API:", err);
+        }
+
+        // ৭. এক্সিটেড মেম্বারস / রিফান্ড ডাটা ফেচ (Total Refund Amount)
+        try {
+          const refundRes = await axios.get(`${API}/members/exited`, config).catch(() => axios.get(`${API}/exited-members`, config)).catch(() => axios.get(`${API}/refunds`, config));
+          const refundData = refundRes.data?.exitedMembers || refundRes.data?.refunds || refundRes.data?.data || refundRes.data || [];
+          if (Array.isArray(refundData)) {
+            const calculatedRefund = refundData.reduce((sum, item) => {
+              const amount = Number(item.refundAmount || item.amount || item.totalRefund || 0);
+              return sum + amount;
+            }, 0);
+            setTotalRefundAmount(calculatedRefund);
+          }
+        } catch (err) {
+          console.error("Error fetching refund/exited members data:", err);
         }
 
       } catch (error) {
@@ -211,7 +227,8 @@ function Dashboard() {
   const totalTargetDeposit = memberCountForTarget * targetPerMember;
   const calculatedTotalDue = Math.max(0, (totalTargetDeposit - Number(totalDepositBalance)) + Number(totalWithdrawal));
 
-  const currentMainCashBalance = (Number(totalDepositBalance) + Number(totalFundIncome) + Number(totalPenaltyAmount) + Number(stats.bankProfit || 0)) - Number(totalLoanGiven) - Number(totalExpense) - Number(totalWithdrawal) - Number(totalInvested);
+  // Main Cash Balance থেকে Total Refund Amount মাইনাস করা হলো
+  const currentMainCashBalance = (Number(totalDepositBalance) + Number(totalFundIncome) + Number(totalPenaltyAmount) + Number(stats.bankProfit || 0)) - Number(totalLoanGiven) - Number(totalExpense) - Number(totalWithdrawal) - Number(totalInvested) - Number(totalRefundAmount);
   const totalProfit = Number(stats.bankProfit || 0) + Number(totalFundIncome || 0) + Number(totalPenaltyAmount || 0) - Number(totalExpense);
 
   return (
@@ -438,7 +455,6 @@ function Dashboard() {
           </div>
         </div>
 
-        {/* Total Invested Card */}
         <div className="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 border border-blue-500/40 text-white p-6 rounded-3xl shadow-[0_10px_35px_rgba(37,99,235,0.4)] hover:shadow-2xl transition-all duration-300 flex justify-between items-center group transform hover:-translate-y-1">
           <div>
             <p className="text-[11px] font-black text-blue-300 tracking-wider uppercase">Total Invested</p>
@@ -446,6 +462,17 @@ function Dashboard() {
           </div>
           <div className="p-4 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-2xl backdrop-blur-xl group-hover:scale-110 transition duration-300 shadow-inner">
             <PiggyBank size={24} />
+          </div>
+        </div>
+
+        {/* Total Refund Amount Card (নতুন যুক্ত করা হলো) */}
+        <div className="bg-gradient-to-br from-slate-900 via-rose-950 to-slate-900 border border-rose-500/40 text-white p-6 rounded-3xl shadow-[0_10px_35px_rgba(225,29,72,0.4)] hover:shadow-2xl transition-all duration-300 flex justify-between items-center group transform hover:-translate-y-1">
+          <div>
+            <p className="text-[11px] font-black text-rose-300 tracking-wider uppercase">Total Refund Amount</p>
+            <h3 className="text-2xl font-black mt-2 text-white">৳ {totalRefundAmount.toLocaleString()}</h3>
+          </div>
+          <div className="p-4 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-2xl backdrop-blur-xl group-hover:scale-110 transition duration-300 shadow-inner">
+            <RefreshCw size={24} />
           </div>
         </div>
 
