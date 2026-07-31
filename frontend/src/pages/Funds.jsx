@@ -20,6 +20,14 @@ function Funds() {
   const [page, setPage] = useState(1);
   const limit = 10;
 
+  // Helper function for local YYYY-MM-DD date (Timezone safe)
+  const getLocalDateString = (dateObj = new Date()) => {
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   // Form State (Added date field with default today's date)
   const initialForm = {
     type: "INCOME",
@@ -28,7 +36,7 @@ function Funds() {
     amount: "",
     paymentMethod: "Cash",
     description: "",
-    date: new Date().toISOString().split("T")[0],
+    date: getLocalDateString(),
   };
   const [form, setForm] = useState(initialForm);
 
@@ -165,7 +173,7 @@ function Funds() {
     setEditingId(null);
     setForm({
       ...initialForm,
-      date: new Date().toISOString().split("T")[0]
+      date: getLocalDateString()
     });
     setShowModal(true);
   };
@@ -231,11 +239,11 @@ function Funds() {
       }
 
       // Format existing date properly for date input (YYYY-MM-DD)
-      let formattedDate = new Date().toISOString().split("T")[0];
+      let formattedDate = getLocalDateString();
       if (item.date) {
-        formattedDate = new Date(item.date).toISOString().split("T")[0];
+        formattedDate = getLocalDateString(new Date(item.date));
       } else if (item.createdAt) {
-        formattedDate = new Date(item.createdAt).toISOString().split("T")[0];
+        formattedDate = getLocalDateString(new Date(item.createdAt));
       }
 
       setForm({
