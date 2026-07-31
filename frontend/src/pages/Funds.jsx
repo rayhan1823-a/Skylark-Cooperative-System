@@ -72,6 +72,7 @@ function Funds() {
         cache: "no-store"
       });
       const data = await response.json();
+console.log(data);
       if (data && data.success && Array.isArray(data.transactions)) {
         setTransactions(data.transactions);
       } else {
