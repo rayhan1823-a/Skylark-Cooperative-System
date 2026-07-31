@@ -41,102 +41,105 @@ function Dashboard() {
           }
         };
 
-        // সব API একসাথে (প্যারালালি) কল করা হচ্ছে যাতে সময় অনেক কম লাগে এবং পেজ দ্রুত লোড হয়
-        const [dashRes, reportRes, loanRes, fundRes, penaltyRes, investRes, membersRes] = await Promise.all([
-          axios.get(`${API}/dashboard`, config).catch(() => null),
-          axios.get(`${API}/reports/members`, config).catch(() => null),
-          axios.get(`${API}/loans`, config).catch(() => null),
-          axios.get(`${API}/funds`, config).catch(() => null),
-          axios.get(`${API}/penalties`, config).catch(() => null),
-          axios.get(`${API}/investments`, config).catch(() => null),
-          axios.get(`${API}/members`, config).catch(() => null),
-        ]);
-
         let calculatedTotalMembers = 5;
 
-        // ১. মেইন ড্যাশবোর্ড ডাটা প্রসেস
-        if (dashRes && dashRes.data && dashRes.data.success) {
-          const data = dashRes.data.data;
-          calculatedTotalMembers = data.totalMembers || 5;
-          
-          setStats(prev => ({
-            ...prev,
-            totalMembers: calculatedTotalMembers,
-            activeMembers: data.activeMembers || calculatedTotalMembers,
-            inactiveMembers: data.inactiveMembers || 0,
-            bankProfit: data.totalProfit || 0,
-          }));
+        // ১. মেইন ড্যাশবোর্ড ডাটা ফেচ
+        try {
+          const dashRes = await axios.get(`${API}/dashboard`, config);
+          if (dashRes.data && dashRes.data.success) {
+            const data = dashRes.data.data;
+            
+            calculatedTotalMembers = data.totalMembers || 5;
+            setStats(prev => ({
+              ...prev,
+              totalMembers: calculatedTotalMembers,
+              activeMembers: data.activeMembers || calculatedTotalMembers,
+              inactiveMembers: data.inactiveMembers || 0,
+              bankProfit: data.totalProfit || 0,
+            }));
 
-          setTotalDepositBalance(data.totalDeposit || 0);
-          setTotalWithdrawal(data.totalWithdrawal || 0);
-          setTotalLoanGiven(data.totalLoan || 0);
+            setTotalDepositBalance(data.totalDeposit || 0);
+            setTotalWithdrawal(data.totalWithdrawal || 0);
+            setTotalLoanGiven(data.totalLoan || 0);
 
-          if (Array.isArray(data.recentTransactions)) {
-            setFundTransactions(data.recentTransactions);
+            if (Array.isArray(data.recentTransactions)) {
+              setFundTransactions(data.recentTransactions);
+            }
+
+            if (Array.isArray(data.monthlyDeposit)) {
+              const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+              const formattedDeposit = data.monthlyDeposit.map(item => {
+                const mName = monthNames[(item._id?.month || item.month || 1) - 1];
+                const yStr = String(item._id?.year || item.year || "").slice(-2);
+                return {
+                  month: `${mName} ${yStr}`,
+                  amount: item.total || item.amount || 0
+                };
+              });
+              setDepositChartData(formattedDeposit);
+            }
+
+            if (Array.isArray(data.monthlyDue)) {
+              const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+              const formattedDue = data.monthlyDue.map(item => {
+                const mName = monthNames[(item.month || item._id?.month || 1) - 1];
+                const yStr = String(item.year || item._id?.year || "").slice(-2);
+                return {
+                  month: `${mName} ${yStr}`,
+                  amount: item.total || item.amount || 0
+                };
+              });
+              setDueChartData(formattedDue);
+            }
           }
-
-          if (Array.isArray(data.monthlyDeposit)) {
-            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-            const formattedDeposit = data.monthlyDeposit.map(item => {
-              const mName = monthNames[(item._id?.month || item.month || 1) - 1];
-              const yStr = String(item._id?.year || item.year || "").slice(-2);
-              return {
-                month: `${mName} ${yStr}`,
-                amount: item.total || item.amount || 0
-              };
-            });
-            setDepositChartData(formattedDeposit);
-          }
-
-          if (Array.isArray(data.monthlyDue)) {
-            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-            const formattedDue = data.monthlyDue.map(item => {
-              const mName = monthNames[(item.month || item._id?.month || 1) - 1];
-              const yStr = String(item.year || item._id?.year || "").slice(-2);
-              return {
-                month: `${mName} ${yStr}`,
-                amount: item.total || item.amount || 0
-              };
-            });
-            setDueChartData(formattedDue);
-          }
+        } catch (dashErr) {
+          console.error("Error fetching main dashboard API:", dashErr);
         }
 
-        // ২. মেম্বার রিপোর্ট ডাটা প্রসেস
-        if (reportRes && reportRes.data && reportRes.data.success) {
-          const reportList = reportRes.data.report || [];
-          if (reportList.length > 0) {
-            calculatedTotalMembers = reportList.length;
-          }
+        // ২. মেম্বার রিপোর্ট ডাটা ফেচ
+        try {
+          const reportRes = await axios.get(`${API}/reports/members`, config);
+          if (reportRes.data && reportRes.data.success) {
+            const reportList = reportRes.data.report || [];
+            if (reportList.length > 0) {
+              calculatedTotalMembers = reportList.length;
+            }
 
-          const calculatedTotalDep = reportList.reduce((sum, item) => sum + Number(item.totalDeposit || 0), 0);
-          if (calculatedTotalDep > 0) {
-            setTotalDepositBalance(calculatedTotalDep);
-          }
+            const calculatedTotalDep = reportList.reduce((sum, item) => sum + Number(item.totalDeposit || 0), 0);
+            if (calculatedTotalDep > 0) {
+              setTotalDepositBalance(calculatedTotalDep);
+            }
 
-          const calculatedTotalWithdrawal = reportList.reduce((sum, item) => sum + Number(item.totalWithdrawal || item.withdrawn || 0), 0);
-          if (calculatedTotalWithdrawal > 0) {
-            setTotalWithdrawal(calculatedTotalWithdrawal);
-          }
+            const calculatedTotalWithdrawal = reportList.reduce((sum, item) => sum + Number(item.totalWithdrawal || item.withdrawn || 0), 0);
+            if (calculatedTotalWithdrawal > 0) {
+              setTotalWithdrawal(calculatedTotalWithdrawal);
+            }
 
-          const activeCount = reportList.filter(item => item.status === "Active" || item.isActive).length;
-          setStats(prev => ({
-            ...prev,
-            totalMembers: calculatedTotalMembers,
-            activeMembers: activeCount > 0 ? activeCount : calculatedTotalMembers,
-            inactiveMembers: calculatedTotalMembers - (activeCount > 0 ? activeCount : calculatedTotalMembers),
-          }));
+            const activeCount = reportList.filter(item => item.status === "Active" || item.isActive).length;
+            setStats(prev => ({
+              ...prev,
+              totalMembers: calculatedTotalMembers,
+              activeMembers: activeCount > 0 ? activeCount : calculatedTotalMembers,
+              inactiveMembers: calculatedTotalMembers - (activeCount > 0 ? activeCount : calculatedTotalMembers),
+            }));
+          }
+        } catch (reportErr) {
+          console.error("Error fetching reports API in dashboard:", reportErr);
         }
 
-        // ৩. লোন ডাটা প্রসেস
-        if (loanRes) {
+        // ৩. লোন ডাটা ফেচ
+        try {
+          const loanRes = await axios.get(`${API}/loans`, config);
           const loans = loanRes.data?.loans || loanRes.data?.data || loanRes.data || [];
           const totalLoan = loans.reduce((sum, l) => sum + Number(l.amount || l.loanAmount || 0), 0);
           if (totalLoan > 0) setTotalLoanGiven(totalLoan);
+        } catch (err) {
+          console.error("Error fetching loans API:", err);
         }
 
-        // ৪. ফান্ড ও ট্রানজেকশন প্রসেস
-        if (fundRes) {
+        // ৪. ফান্ড ও ট্রানজেকশন ফেচ
+        try {
+          const fundRes = await axios.get(`${API}/funds`, config);
           const fundData = fundRes.data;
           const transactions = fundData?.success && Array.isArray(fundData.transactions) ? fundData.transactions : (Array.isArray(fundData) ? fundData : []);
           setFundTransactions(transactions);
@@ -148,19 +151,25 @@ function Dashboard() {
           if (fundWithdrawal > 0) {
             setTotalWithdrawal(fundWithdrawal);
           }
+        } catch (err) {
+          console.error("Error fetching funds:", err);
         }
 
-        // ৫. পেনাল্টি ডাটা প্রসেস
-        if (penaltyRes) {
+        // ৫. পেনাল্টি ডাটা ফেচ
+        try {
+          const penaltyRes = await axios.get(`${API}/penalties`, config);
           const penaltyData = penaltyRes.data?.penalties || penaltyRes.data?.data || penaltyRes.data || [];
           if (Array.isArray(penaltyData)) {
             const calculatedPenalty = penaltyData.reduce((sum, item) => sum + Number(item.amount || 0), 0);
             setTotalPenaltyAmount(calculatedPenalty);
           }
+        } catch (err) {
+          console.error("Error fetching penalties API:", err);
         }
 
-        // ৬. ইনভেস্টমেন্ট ডাটা প্রসেস
-        if (investRes) {
+        // ৬. ইনভেস্টমেন্ট ডাটা ফেচ
+        try {
+          const investRes = await axios.get(`${API}/investments`, config);
           const investData = investRes.data?.investments || investRes.data?.data || investRes.data || [];
           if (Array.isArray(investData)) {
             const calculatedInvest = investData.reduce((sum, item) => {
@@ -169,11 +178,15 @@ function Dashboard() {
             }, 0);
             setTotalInvested(calculatedInvest);
           }
+        } catch (err) {
+          console.error("Error fetching investments API:", err);
         }
 
-        // ৭. এক্সিটেড মেম্বারস / রিফান্ড ডাটা প্রসেস
-        if (membersRes) {
-          const allMembersData = membersRes.data.members || membersRes.data.data || membersRes.data || [];
+        // ৭. এক্সিটেড মেম্বারস / রিফান্ড ডাটা ফেচ (সরাসরি /api/members থেকে Exited মেম্বার ফিল্টার করা হলো যেমনটা ExitedMembers পেজে করা হয়েছে)
+        try {
+          const res = await axios.get(`${API}/members`, config);
+          const allMembersData = res.data.members || res.data.data || res.data || [];
+          
           if (Array.isArray(allMembersData)) {
             const exited = allMembersData.filter(
               (m) => m.status && m.status.toLowerCase() === "exited"
@@ -184,6 +197,8 @@ function Dashboard() {
             );
             setTotalRefundAmount(calculatedRefund);
           }
+        } catch (err) {
+          console.error("Error fetching members refund data:", err);
         }
 
       } catch (error) {
@@ -216,6 +231,7 @@ function Dashboard() {
   const totalTargetDeposit = memberCountForTarget * targetPerMember;
   const calculatedTotalDue = Math.max(0, (totalTargetDeposit - Number(totalDepositBalance)) + Number(totalWithdrawal));
 
+  // Main Cash Balance হিসাব (Total Refund Amount বাদ দেওয়া হলো)
   const currentMainCashBalance = (Number(totalDepositBalance) + Number(totalFundIncome) + Number(totalPenaltyAmount) + Number(stats.bankProfit || 0)) - Number(totalLoanGiven) - Number(totalExpense) - Number(totalWithdrawal) - Number(totalInvested) - Number(totalRefundAmount);
   const totalProfit = Number(stats.bankProfit || 0) + Number(totalFundIncome || 0) + Number(totalPenaltyAmount || 0) - Number(totalExpense);
 
