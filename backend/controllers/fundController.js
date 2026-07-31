@@ -13,7 +13,8 @@ const addFundTransaction = async (req, res) => {
             description,
             paymentMethod,
             createdBy,
-            memberId
+            memberId,
+            date // নতুন: ফ্রন্টএন্ড থেকে পাঠানো ডেট রিসিভ করা হলো
         } = req.body;
 
         // Validation
@@ -42,7 +43,7 @@ const addFundTransaction = async (req, res) => {
         let resolvedMemberName = "";
         let resolvedMemberCustomId = "";
 
-        // মেম্বার আইডি দেওয়া থাকলে মেম্বারের তথ্য ডাটাবেজ থেকে নিয়ে আসা
+        // মেম্বার আইডি দেওয়া থাকলে মেম্বারের তথ্য ডাটাবেজ থেকে নিয়ে আসা
         if (memberId) {
             const memberDoc = await Member.findById(memberId);
             if (memberDoc) {
@@ -61,7 +62,8 @@ const addFundTransaction = async (req, res) => {
             createdBy: createdBy || "Admin",
             member: resolvedMember,
             memberId: resolvedMemberCustomId,
-            memberName: resolvedMemberName
+            memberName: resolvedMemberName,
+            date: date ? new Date(date) : Date.now() // নতুন: ইউজার ডেট দিলে সেটা সেভ হবে, না দিলে কারেন্ট ডেট
         });
 
         return res.status(201).json({
@@ -102,7 +104,7 @@ const getFundTransactions = async (req, res) => {
         // মেম্বার মডেলের নাম ও আইডি পপুলেট করা হলো
         const transactions = await FundTransaction.find(filter)
             .populate("member", "name memberId phone")
-            .sort({ createdAt: -1 })
+            .sort({ date: -1, createdAt: -1 })
             .skip(skip)
             .limit(limit);
 
@@ -172,7 +174,7 @@ const searchFundTransactions = async (req, res) => {
 
         const transactions = await FundTransaction.find(filter)
             .populate("member", "name memberId phone")
-            .sort({ createdAt: -1 });
+            .sort({ date: -1, createdAt: -1 });
 
         return res.status(200).json({
             success: true,
@@ -212,7 +214,8 @@ const updateFundTransaction = async (req, res) => {
             description,
             paymentMethod,
             createdBy,
-            memberId
+            memberId,
+            date // নতুন: আপডেট করার সময় ডেਟ রিসিভ করা হলো
         } = req.body;
 
         if (!type || !category || amount === undefined) {
@@ -250,6 +253,10 @@ const updateFundTransaction = async (req, res) => {
         transaction.member = resolvedMember;
         transaction.memberName = resolvedMemberName;
         transaction.memberId = resolvedMemberCustomId;
+        
+        if (date) {
+            transaction.date = new Date(date); // নতুন: ডেট পরিবর্তন করা হলে তা আপডেট হবে
+        }
 
         await transaction.save();
 
@@ -350,7 +357,7 @@ const filterFundTransactionsByDate = async (req, res) => {
         const filter = {};
 
         if (from && to) {
-            filter.createdAt = {
+            filter.date = {
                 $gte: new Date(from),
                 $lte: new Date(to)
             };
@@ -358,7 +365,7 @@ const filterFundTransactionsByDate = async (req, res) => {
 
         const transactions = await FundTransaction.find(filter)
             .populate("member", "name memberId phone")
-            .sort({ createdAt: -1 });
+            .sort({ date: -1, createdAt: -1 });
 
         return res.status(200).json({
             success: true,
