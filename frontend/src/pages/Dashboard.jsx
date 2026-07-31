@@ -166,7 +166,7 @@ function Dashboard() {
           console.error("Error fetching penalties API:", err);
         }
 
-        // ৬. ইনভেস্টমেন্ট ডাটা ফেচ (Total Invested এর সঠিক হিসাবের জন্য আপডেট করা হয়েছে)
+        // ৬. ইনভেস্টমেন্ট ডাটা ফেচ (Total Invested এর সঠিক হিসাবের জন্য আপডেট করা হয়েছে)
         try {
           const investRes = await axios.get(`${API}/investments`, config);
           const investData = investRes.data?.investments || investRes.data?.data || investRes.data || [];
