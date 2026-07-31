@@ -64,13 +64,16 @@ function Funds() {
   const fetchTransactions = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("https://skylark-cooperative-system.onrender.com/api/funds", {
-        headers: { 
-          Authorization: `Bearer ${token}`,
-          "Cache-Control": "no-cache"
-        },
-        cache: "no-store"
-      });
+      const response = await fetch(
+  "https://skylark-cooperative-system.onrender.com/api/funds?limit=10000",
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Cache-Control": "no-cache",
+    },
+    cache: "no-store",
+  }
+);
       const data = await response.json();
 console.log(data);
       if (data && data.success && Array.isArray(data.transactions)) {
