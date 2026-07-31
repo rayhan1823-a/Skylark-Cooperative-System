@@ -198,17 +198,20 @@ console.log(data);
         : "https://skylark-cooperative-system.onrender.com/api/funds";
       
       const method = editingId ? "PUT" : "POST";
-
+console.log(form);
       const response = await fetch(url, {
-        method,
-        headers: { 
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify(form),
-      });
+  method,
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify(form),
+});
 
-      const data = await response.json();
+console.log("Sending Form:", form);
+
+const data = await response.json();
+
+console.log("Response:", data);
       if (data && data.success) {
         toast.success(editingId ? "Updated successfully!" : "Saved successfully!");
         fetchTransactions();
