@@ -242,13 +242,16 @@ function Funds() {
       let formattedDate = getLocalDateString();
       const targetDateValue = item.date || item.createdAt;
       if (targetDateValue) {
-        const d = new Date(targetDateValue);
-        if (!isNaN(d.getTime())) {
-          // সঠিক লোকাল ডেট স্ট্রিং ফরম্যাট বের করার জন্য
-          const year = d.getFullYear();
-          const month = String(d.getMonth() + 1).padStart(2, '0');
-          const day = String(d.getDate()).padStart(2, '0');
-          formattedDate = `${year}-${month}-${day}`;
+        if (typeof targetDateValue === "string" && targetDateValue.length >= 10) {
+          formattedDate = targetDateValue.substring(0, 10);
+        } else {
+          const d = new Date(targetDateValue);
+          if (!isNaN(d.getTime())) {
+            const year = d.getUTCFullYear();
+            const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+            const day = String(d.getUTCDate()).padStart(2, '0');
+            formattedDate = `${year}-${month}-${day}`;
+          }
         }
       }
 
@@ -450,7 +453,6 @@ function Funds() {
                   const rowMemberName = item?.memberName || item?.member?.name || item?.member?.fullName || "-";
                   const itemDate = item?.date || item?.createdAt;
                   
-                  // টেবিল লিস্টে সঠিক ডেট দেখানোর জন্য ফরম্যাটিং
                   let displayDateFormatted = "-";
                   if (itemDate) {
                     const dObj = new Date(itemDate);
