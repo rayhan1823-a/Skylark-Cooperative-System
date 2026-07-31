@@ -182,21 +182,23 @@ function Dashboard() {
           console.error("Error fetching investments API:", err);
         }
 
-        // ৭. এক্সিটেড মেম্বারস / রিফান্ড ডাটা ফেচ (/api/member-exit)
+        // ৭. এক্সিটেড মেম্বারস / রিফান্ড ডাটা ফেচ (সরাসরি /api/members থেকে Exited মেম্বার ফিল্টার করা হলো যেমনটা ExitedMembers পেজে করা হয়েছে)
         try {
-          const res = await axios.get(`${API}/member-exit`, config);
-          // ব্যাকএন্ডের যেকোনো ফরম্যাট (exits, memberExits, data বা সরাসরি অ্যারে) নিখুঁতভাবে হ্যান্ডেল করার জন্য
-          const refundList = res.data?.exits || res.data?.memberExits || res.data?.data || (Array.isArray(res.data) ? res.data : []);
-
-          if (Array.isArray(refundList)) {
-            const calculatedRefund = refundList.reduce((sum, item) => {
-              const amount = Number(item.refundAmount || item.amount || item.totalRefund || item.netRefund || 0);
-              return sum + amount;
-            }, 0);
+          const res = await axios.get(`${API}/members`, config);
+          const allMembersData = res.data.members || res.data.data || res.data || [];
+          
+          if (Array.isArray(allMembersData)) {
+            const exited = allMembersData.filter(
+              (m) => m.status && m.status.toLowerCase() === "exited"
+            );
+            const calculatedRefund = exited.reduce(
+              (sum, m) => sum + Number(m.refundAmount || 0),
+              0
+            );
             setTotalRefundAmount(calculatedRefund);
           }
         } catch (err) {
-          console.error("Error fetching member-exit refund data:", err);
+          console.error("Error fetching members refund data:", err);
         }
 
       } catch (error) {
@@ -229,7 +231,7 @@ function Dashboard() {
   const totalTargetDeposit = memberCountForTarget * targetPerMember;
   const calculatedTotalDue = Math.max(0, (totalTargetDeposit - Number(totalDepositBalance)) + Number(totalWithdrawal));
 
-  // Main Cash Balance হিসাব (Total Refund Amount বাদ দেওয়া হলো)
+  // Main Cash Balance হিসাব (Total Refund Amount বাদ দেওয়া হলো)
   const currentMainCashBalance = (Number(totalDepositBalance) + Number(totalFundIncome) + Number(totalPenaltyAmount) + Number(stats.bankProfit || 0)) - Number(totalLoanGiven) - Number(totalExpense) - Number(totalWithdrawal) - Number(totalInvested) - Number(totalRefundAmount);
   const totalProfit = Number(stats.bankProfit || 0) + Number(totalFundIncome || 0) + Number(totalPenaltyAmount || 0) - Number(totalExpense);
 
