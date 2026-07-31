@@ -16,6 +16,17 @@ function ExitedMembers() {
 
   const token = localStorage.getItem("token") || localStorage.getItem("authToken");
 
+  // ইউজারের রোল চেক করা (SUPER_ADMIN কিনা যাচাই করার জন্য)
+  let userRole = "";
+  try {
+    const userObj = JSON.parse(localStorage.getItem("user") || "{}");
+    userRole = userObj.role || localStorage.getItem("role") || "";
+  } catch (e) {
+    userRole = localStorage.getItem("role") || "";
+  }
+  
+  const isSuperAdmin = userRole.toUpperCase() === "SUPER_ADMIN";
+
   // সব মেম্বার ফেচ করে শুধু যাদের স্ট্যাটাস "Exited" তাদের ফিল্টার করব এবং বাকিদের ড্রপডাউনের জন্য রাখব
   const loadExitedMembers = async () => {
     try {
@@ -47,6 +58,10 @@ function ExitedMembers() {
 
   // এক্সিট ইনফো এডিট করার জন্য মোডাল ওপেন করা
   const handleOpenEdit = (member) => {
+    if (!isSuperAdmin) {
+      alert("❌ Access Denied! Only SUPER_ADMIN can edit exit info.");
+      return;
+    }
     setSelectedMember(member);
     setEditFormData({
       memberId: member._id,
@@ -74,6 +89,11 @@ function ExitedMembers() {
   // এক্সিট ডাটা সেভ বা আপডেট করা
   const handleSaveExitInfo = async (e) => {
     e.preventDefault();
+    if (!isSuperAdmin) {
+      alert("❌ Access Denied!");
+      return;
+    }
+
     try {
       const memberIdToUpdate = selectedMember ? selectedMember._id : editFormData.memberId;
 
@@ -108,6 +128,32 @@ function ExitedMembers() {
     }
   };
 
+  // 🗑️ মেম্বার ডিলিট বা এক্সিট স্ট্যাটাস রিমুভ করার ফাংশন (শুধু SUPER_ADMIN এর জন্য)
+  const handleDeleteExit = async (memberId) => {
+    if (!isSuperAdmin) {
+      alert("❌ Access Denied! Only SUPER_ADMIN can delete exit records.");
+      return;
+    }
+
+    if (!window.confirm("Are you sure you want to remove/reset this exit record?")) {
+      return;
+    }
+
+    try {
+      await axios.put(
+        `https://skylark-cooperative-system.onrender.com/api/members/${memberId}`,
+        { status: "Active", exitDate: null, refundAmount: 0, exitReason: "" },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      alert("✅ Exit record deleted successfully!");
+      loadExitedMembers();
+    } catch (error) {
+      console.log(error);
+      alert("❌ Failed to delete exit record.");
+    }
+  };
+
   // 📊 রিপোর্টের জন্য ক্যালকুলেশন
   const totalExitedCount = exitedMembers.length;
   const totalRefundAmount = exitedMembers.reduce(
@@ -130,19 +176,31 @@ function ExitedMembers() {
         {/* Header & Add Button */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <h1 className="text-3xl font-bold text-blue-900">Exited Members Management</h1>
+          
+          {/* যদি SUPER_ADMIN না হয়, তবে বাটনটি disabled এবং gray হয়ে থাকবে */}
           <button
             onClick={() => {
+              if (!isSuperAdmin) {
+                alert("❌ Access Denied! Only SUPER_ADMIN can add exited members.");
+                return;
+              }
               setSelectedMember(null);
               setEditFormData({ memberId: "", exitDate: "", refundAmount: "", exitReason: "" });
               setIsAddModalOpen(true);
             }}
-            className="bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-xl font-bold shadow transition flex items-center gap-2"
+            disabled={!isSuperAdmin}
+            className={`px-5 py-2.5 rounded-xl font-bold shadow transition flex items-center gap-2 ${
+              isSuperAdmin 
+                ? "bg-green-600 hover:bg-green-700 text-white cursor-pointer" 
+                : "bg-gray-300 text-gray-500 cursor-not-allowed opacity-70"
+            }`}
+            title={!isSuperAdmin ? "Only SUPER_ADMIN can add exited members" : ""}
           >
             <span>+</span> Add Exited Member
           </button>
         </div>
 
-        {/* 📊 ওপরের সামারি রিপোর্ট সেクション */}
+        {/* 📊 ওপরের সামারি রিপোর্ট সেকশন */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
             <div>
@@ -195,12 +253,24 @@ function ExitedMembers() {
                       <td className="p-3 font-bold text-green-600">৳ {member.refundAmount || 0}</td>
                       <td className="p-3 truncate max-w-xs">{member.exitReason || "N/A"}</td>
                       <td className="p-3 text-center">
-                        <button
-                          onClick={() => handleOpenEdit(member)}
-                          className="bg-blue-600 text-white px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-blue-700 transition"
-                        >
-                          Manage Exit Info
-                        </button>
+                        {isSuperAdmin ? (
+                          <div className="flex items-center justify-center gap-2">
+                            <button
+                              onClick={() => handleOpenEdit(member)}
+                              className="bg-blue-600 text-white px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-blue-700 transition"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeleteExit(member._id)}
+                              className="bg-red-600 text-white px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-red-700 transition"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-gray-400 font-medium italic">View Only</span>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -211,12 +281,12 @@ function ExitedMembers() {
         </div>
 
         {/* 🛠️ এক্সিট ইনফো এন্ট্রি/এডিট করার মোডাল (Popup) */}
-        {(selectedMember || isAddModalOpen) && (
+        {(selectedMember || isAddModalOpen) && isSuperAdmin && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-xl max-w-lg w-full p-6 shadow-xl space-y-4">
               <div className="flex justify-between items-center border-b pb-3">
                 <h3 className="text-lg font-bold text-gray-800">
-                  {selectedMember ? `Manage Exit: ${selectedMember.name}` : "Add New Exited Member"}
+                  {selectedMember ? `Edit Exit Info: ${selectedMember.name}` : "Add New Exited Member"}
                 </h3>
                 <button
                   onClick={() => { setSelectedMember(null); setIsAddModalOpen(false); }}
@@ -227,7 +297,7 @@ function ExitedMembers() {
               </div>
 
               <form onSubmit={handleSaveExitInfo} className="space-y-4">
-                {/* যদি নতুন এন্ট্রি হয়, তবে ড্রপডাউন থেকে মেম্বার সিলেক্ট করতে হবে */}
+                {/* যদি নতুন এন্ট্রি হয়, তবে ড্রপডাউন থেকে মেম্বার সিলেক্ট করতে হবে */}
                 {!selectedMember && (
                   <div>
                     <label className="block text-sm font-semibold mb-1">Select Member</label>
