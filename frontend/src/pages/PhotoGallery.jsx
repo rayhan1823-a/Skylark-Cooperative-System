@@ -2,10 +2,15 @@ import React, { useState } from "react";
 import { FaPlus, FaTrash, FaEye, FaImages, FaTimes, FaLink, FaUpload } from "react-icons/fa";
 
 function PhotoGallery() {
-  // রোল চেক (স্টাফ বা অ্যাডমিন কিনা দেখার জন্য)
+  // রোল চেক (ইউজার, স্টাফ, অ্যাডমিন বা সুপার অ্যাডমিন কিনা দেখার জন্য)
   const user = JSON.parse(localStorage.getItem("user")) || {};
   const role = user.role || "";
-  const canManage = ["SUPER_ADMIN", "ADMIN", "STAFF"].includes(role);
+  
+  // কে কে আপলোড করতে পারবে (ADMIN, SUPER_ADMIN এবং STAFF)
+  const canUpload = ["SUPER_ADMIN", "ADMIN", "STAFF"].includes(role);
+  
+  // কে কে ডিলিট করতে পারবে (শুধুমাত্র SUPER_ADMIN)
+  const canDelete = role === "SUPER_ADMIN";
 
   // ডেমো প্রাথমিক ছবি (আপনার প্রয়োজনমতো পরিবর্তন বা ব্যাকএন্ড থেকে ফেচ করতে পারেন)
   const [photos, setPhotos] = useState([
@@ -48,6 +53,10 @@ function PhotoGallery() {
   // নতুন ছবি সাবমিট করার ফাংশন
   const handleAddPhoto = (e) => {
     e.preventDefault();
+    if (!canUpload) {
+      alert("আপনার ছবি আপলোড করার অনুমতি নেই!");
+      return;
+    }
     if (!title) return;
 
     let photoUrl = "";
@@ -76,8 +85,13 @@ function PhotoGallery() {
     setIsModalOpen(false);
   };
 
-  // ছবি ডিলিট করার ফাংশন
+  // ছবি ডিলিট করার ফাংশন (শুধুমাত্র SUPER_ADMIN এর জন্য সুরক্ষিত)
   const handleDelete = (id) => {
+    if (!canDelete) {
+      alert("দুঃখিত, শুধুমাত্র সুপার অ্যাডমিন (SUPER_ADMIN) ছবি ডিলিট করতে পারবেন!");
+      return;
+    }
+
     if (window.confirm("আপনি কি নিশ্চিতভাবে এই ছবিটি মুছে ফেলতে চান?")) {
       setPhotos(photos.filter((p) => p.id !== id));
     }
@@ -97,8 +111,8 @@ function PhotoGallery() {
           </div>
         </div>
 
-        {/* Add Photo Button (Admin/Staff Only) */}
-        {canManage && (
+        {/* Add Photo Button (Admin/Staff/Super_Admin Only) */}
+        {canUpload && (
           <button
             onClick={() => setIsModalOpen(true)}
             className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-2.5 rounded-xl shadow-md transition duration-200 text-sm"
@@ -115,7 +129,7 @@ function PhotoGallery() {
           photos.map((photo) => (
             <div
               key={photo.id}
-              className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group hover:shadow-md transition-all duration-300 flex flex-col"
+              className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group hover:shadow-md transition-all duration-300 flex flex-col relative"
             >
               {/* Image Box */}
               <div className="relative h-48 overflow-hidden bg-gray-100">
@@ -124,6 +138,8 @@ function PhotoGallery() {
                   alt={photo.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
+                
+                {/* View Button Overlay on Hover */}
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3">
                   <button
                     onClick={() => setSelectedPhoto(photo)}
@@ -132,19 +148,22 @@ function PhotoGallery() {
                   >
                     <FaEye size={16} />
                   </button>
-                  {canManage && (
-                    <button
-                      onClick={() => handleDelete(photo.id)}
-                      className="bg-rose-500/90 hover:bg-rose-600 text-white p-2.5 rounded-xl transition shadow"
-                      title="ডিলিট করুন"
-                    >
-                      <FaTrash size={16} />
-                    </button>
-                  )}
                 </div>
-                <span className="absolute top-3 left-3 bg-blue-600 text-white text-[11px] font-semibold px-2.5 py-1 rounded-lg shadow">
+
+                <span className="absolute top-3 left-3 bg-blue-600 text-white text-[11px] font-semibold px-2.5 py-1 rounded-lg shadow z-10">
                   {photo.category}
                 </span>
+
+                {/* Direct Delete Button (Only visible for SUPER_ADMIN) */}
+                {canDelete && (
+                  <button
+                    onClick={() => handleDelete(photo.id)}
+                    className="absolute top-3 right-3 bg-rose-500 hover:bg-rose-600 text-white p-2 rounded-xl transition shadow z-20"
+                    title="ডিলিট করুন"
+                  >
+                    <FaTrash size={14} />
+                  </button>
+                )}
               </div>
 
               {/* Content info */}
@@ -162,7 +181,7 @@ function PhotoGallery() {
       </div>
 
       {/* Add Photo Modal */}
-      {isModalOpen && (
+      {isModalOpen && canUpload && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
           <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl border border-gray-100 space-y-4">
             <div className="flex items-center justify-between border-b pb-3">

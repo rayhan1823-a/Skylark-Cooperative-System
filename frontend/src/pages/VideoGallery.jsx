@@ -2,10 +2,15 @@ import React, { useState } from "react";
 import { FaPlus, FaTrash, FaPlay, FaVideo, FaTimes, FaLink, FaUpload } from "react-icons/fa";
 
 function VideoGallery() {
-  // রোল চেক (স্টাফ বা অ্যাডমিন কিনা দেখার জন্য)
+  // রোল চেক (ইউজার, স্টাফ, অ্যাডমিন বা সুপার অ্যাডমিন কিনা দেখার জন্য)
   const user = JSON.parse(localStorage.getItem("user")) || {};
   const role = user.role || "";
-  const canManage = ["SUPER_ADMIN", "ADMIN", "STAFF"].includes(role);
+  
+  // কে কে আপলোড বা নতুন ভিডিও যোগ করতে পারবে (ADMIN, SUPER_ADMIN এবং STAFF)
+  const canUpload = ["SUPER_ADMIN", "ADMIN", "STAFF"].includes(role);
+  
+  // কে কে ডিলিট করতে পারবে (শুধুমাত্র SUPER_ADMIN)
+  const canDelete = role === "SUPER_ADMIN";
 
   // ডেমো প্রাথমিক ভিডিও লিস্ট
   const [videos, setVideos] = useState([
@@ -52,6 +57,10 @@ function VideoGallery() {
   // নতুন ভিডিও সাবমিট করার ফাংশন
   const handleAddVideo = (e) => {
     e.preventDefault();
+    if (!canUpload) {
+      alert("আপনার ভিডিও আপলোড করার অনুমতি নেই!");
+      return;
+    }
     if (!title) return;
 
     let newVideoData = {
@@ -84,8 +93,13 @@ function VideoGallery() {
     setIsModalOpen(false);
   };
 
-  // ভিডিও ডিলিট করার ফাংশন
+  // ভিডিও ডিলিট করার ফাংশন (শুধুমাত্র SUPER_ADMIN এর জন্য সুরক্ষিত)
   const handleDelete = (id) => {
+    if (!canDelete) {
+      alert("দুঃখিত, শুধুমাত্র সুপার অ্যাডমিন (SUPER_ADMIN) ভিডিও ডিলিট করতে পারবেন!");
+      return;
+    }
+
     if (window.confirm("আপনি কি নিশ্চিতভাবে এই ভিডিওটি মুছে ফেলতে চান?")) {
       setVideos(videos.filter((v) => v.id !== id));
     }
@@ -105,8 +119,8 @@ function VideoGallery() {
           </div>
         </div>
 
-        {/* Add Video Button (Admin/Staff Only) */}
-        {canManage && (
+        {/* Add Video Button (Admin/Staff/Super_Admin Only) */}
+        {canUpload && (
           <button
             onClick={() => setIsModalOpen(true)}
             className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-2.5 rounded-xl shadow-md transition duration-200 text-sm"
@@ -152,10 +166,11 @@ function VideoGallery() {
                   {video.category}
                 </span>
 
-                {canManage && (
+                {/* Direct Delete Button (Only visible for SUPER_ADMIN) */}
+                {canDelete && (
                   <button
                     onClick={() => handleDelete(video.id)}
-                    className="absolute top-3 right-3 bg-rose-500/90 hover:bg-rose-600 text-white p-2 rounded-xl transition shadow opacity-0 group-hover:opacity-100"
+                    className="absolute top-3 right-3 bg-rose-500 hover:bg-rose-600 text-white p-2 rounded-xl transition shadow z-20"
                     title="ডিলিট করুন"
                   >
                     <FaTrash size={14} />
@@ -178,7 +193,7 @@ function VideoGallery() {
       </div>
 
       {/* Add Video Modal */}
-      {isModalOpen && (
+      {isModalOpen && canUpload && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
           <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl border border-gray-100 space-y-4">
             <div className="flex items-center justify-between border-b pb-3">
