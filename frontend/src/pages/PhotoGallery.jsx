@@ -197,6 +197,10 @@ function PhotoGallery() {
                 >
                   <option value="Meeting">Meeting</option>
                   <option value="Collection">Collection</option>
+                  <option value="Foundation Anniversary">Foundation Anniversary</option>
+                  <option value="Annual Picnic">Annual Picnic</option>
+                  <option value="Cultural Program">Cultural Program</option>
+                  <option value="Prize Giving">Prize Giving</option>
                   <option value="Event">Event</option>
                   <option value="General">General</option>
                 </select>
