@@ -140,6 +140,9 @@ const penaltyRoute = require("./routes/penaltyroute");
 // ✅ Investment & FDR Route (New)
 const investmentRoutes = require("./routes/investmentRoutes");
 
+// ✅ Videos Route (New)
+const videoRoutes = require("./routes/videoRoutes");
+
 // ======================================
 // API Routes
 // ======================================
@@ -205,6 +208,9 @@ app.use("/api/penalties", penaltyRoute);
 // ✅ Investment & FDR API Route (New)
 app.use("/api/investments", investmentRoutes);
 
+// ✅ Video Gallery API Route (New)
+app.use("/api/videos", videoRoutes);
+
 // ======================================
 // Root Route
 // ======================================
@@ -259,6 +265,7 @@ app.listen(PORT, () => {
   console.log("✅ Backup Scheduler Started");
   console.log("✅ Deposit Receipt Route Loaded");
   console.log("✅ Penalty Route Loaded");
-  console.log("✅ Investment & FDR Route Loaded"); // New Log
+  console.log("✅ Investment & FDR Route Loaded");
+  console.log("✅ Video Gallery Route Loaded"); // New Video Route Log
   console.log("✅ Skylark Cooperative Management System Ready");
 });
