@@ -2,9 +2,24 @@ import React, { useState } from "react";
 import { FaPlus, FaTrash, FaPlay, FaVideo, FaTimes, FaLink, FaUpload } from "react-icons/fa";
 
 function VideoGallery() {
-  // রোল চেক (ইউজার, স্টাফ, অ্যাডমিন বা সুপার অ্যাডমিন কিনা দেখার জন্য)
-  const user = JSON.parse(localStorage.getItem("user")) || {};
-  const role = user.role || "";
+  // রোল সঠিকভাবে এবং নিরাপদে চেক করার ফাংশন
+  const getUserRole = () => {
+    try {
+      const storedUser = JSON.parse(localStorage.getItem("user"));
+      if (storedUser) {
+        if (typeof storedUser === "string") return storedUser.trim();
+        return storedUser.role || storedUser.userType || storedUser.type || "";
+      }
+      // যদি সরাসরি লোকাল স্টোরেজে স্ট্রিং আকারে থাকে
+      return localStorage.getItem("role") || localStorage.getItem("userRole") || "";
+    } catch (e) {
+      return localStorage.getItem("user") || "";
+    }
+  };
+
+  // রোলকে বড় হাতের অক্ষরে রূপান্তর করে চেক করা (কেস সেন্সিটিভ সমস্যা এড়াতে)
+  const rawRole = getUserRole();
+  const role = typeof rawRole === "string" ? rawRole.toUpperCase() : "";
   
   // কে কে আপলোড বা নতুন ভিডিও যোগ করতে পারবে (ADMIN, SUPER_ADMIN এবং STAFF)
   const canUpload = ["SUPER_ADMIN", "ADMIN", "STAFF"].includes(role);
@@ -82,7 +97,6 @@ function VideoGallery() {
       newVideoData.embedId = embedId;
     } else {
       if (!selectedVideoFile) return;
-      // ব্রাউজারে লোকাল ভিডিও প্রিভিউ বা প্লে করার জন্য অবজেক্ট ইউআরএল তৈরি
       newVideoData.videoUrl = URL.createObjectURL(selectedVideoFile);
     }
 

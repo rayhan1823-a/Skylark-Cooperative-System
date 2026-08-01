@@ -2,9 +2,24 @@ import React, { useState } from "react";
 import { FaPlus, FaTrash, FaEye, FaImages, FaTimes, FaLink, FaUpload } from "react-icons/fa";
 
 function PhotoGallery() {
-  // রোল চেক (ইউজার, স্টাফ, অ্যাডমিন বা সুপার অ্যাডমিন কিনা দেখার জন্য)
-  const user = JSON.parse(localStorage.getItem("user")) || {};
-  const role = user.role || "";
+  // রোল সঠিকভাবে এবং নিরাপদে চেক করার ফাংশন
+  const getUserRole = () => {
+    try {
+      const storedUser = JSON.parse(localStorage.getItem("user"));
+      if (storedUser) {
+        if (typeof storedUser === "string") return storedUser.trim();
+        return storedUser.role || storedUser.userType || storedUser.type || "";
+      }
+      // যদি সরাসরি লোকাল স্টোরেজে স্টริง আকারে থাকে
+      return localStorage.getItem("role") || localStorage.getItem("userRole") || "";
+    } catch (e) {
+      return localStorage.getItem("user") || "";
+    }
+  };
+
+  // রোলকে বড় হাতের অক্ষরে রূপান্তর করে চেক করা (যাতে কেস সেন্সিটিভ সমস্যা না হয়)
+  const rawRole = getUserRole();
+  const role = typeof rawRole === "string" ? rawRole.toUpperCase() : "";
   
   // কে কে আপলোড করতে পারবে (ADMIN, SUPER_ADMIN এবং STAFF)
   const canUpload = ["SUPER_ADMIN", "ADMIN", "STAFF"].includes(role);
@@ -12,7 +27,7 @@ function PhotoGallery() {
   // কে কে ডিলিট করতে পারবে (শুধুমাত্র SUPER_ADMIN)
   const canDelete = role === "SUPER_ADMIN";
 
-  // ডেমো প্রাথমিক ছবি (আপনার প্রয়োজনমতো পরিবর্তন বা ব্যাকএন্ড থেকে ফেচ করতে পারেন)
+  // ডেমো প্রাথমিক ছবি
   const [photos, setPhotos] = useState([
     {
       id: 1,
@@ -66,7 +81,6 @@ function PhotoGallery() {
       photoUrl = url;
     } else {
       if (!selectedFile) return;
-      // ব্রাউজারে লোকাল প্রিভিউ বা ব্যবহারের জন্য অবজেক্ট ইউআরএল তৈরি করা
       photoUrl = URL.createObjectURL(selectedFile);
     }
 
