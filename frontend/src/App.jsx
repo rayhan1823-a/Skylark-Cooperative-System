@@ -52,6 +52,9 @@ import Reports from "./pages/Reports";
 // Settings
 import Settings from "./pages/Settings";
 
+// ✅ Popup Modal Component (New)
+import PopupModal from "./components/PopupModal"; // পাথ আপনার ফোল্ডার স্ট্রাকচার অনুযায়ী অ্যাডজাস্ট করে নিতে পারেন (যদি components ফোল্ডারে থাকে)
+
 // ======================================
 // 404 Page
 // ======================================
@@ -102,6 +105,9 @@ function App() {
           },
         }}
       />
+
+      {/* ✅ গ্লোবাল পপ-আপ মোডাল যা সব পেজেই কাজ করবে */}
+      <PopupModal />
 
       <Routes>
         {/* ==========================
@@ -171,7 +177,6 @@ function App() {
           <Route path="/print-receipt/:id" element={<PrintReceipt />} />
           <Route path="/loans/receipt/:id" element={<LoanReceipt />} />
           
-          {/* ✅ Fixed typo here (= instead of :) */}
           <Route path="/penalties/receipt/:id" element={<PenaltyReceipt />} />
           
           <Route path="/deposits" element={<Deposits />} />
