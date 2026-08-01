@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FaPlus, FaTrash, FaEye, FaImages, FaTimes } from "react-icons/fa";
+import { FaPlus, FaTrash, FaEye, FaImages, FaTimes, FaLink, FaUpload } from "react-icons/fa";
 
 function PhotoGallery() {
   // রোল চেক (স্টাফ বা অ্যাডমিন কিনা দেখার জন্য)
@@ -7,7 +7,7 @@ function PhotoGallery() {
   const role = user.role || "";
   const canManage = ["SUPER_ADMIN", "ADMIN", "STAFF"].includes(role);
 
-  // ডেমো প্রাথমিক ছবি (আপনার প্রয়োজনমতো পরিবর্তন বা ব্যাকএন্ড থেকে ফেচ করতে পারেন)
+  // ডেমো প্রাথমিক ছবি (আপনার প্রয়োজনমতো পরিবর্তন বা ব্যাকএন্ড থেকে ফেচ করতে পারেন)
   const [photos, setPhotos] = useState([
     {
       id: 1,
@@ -18,7 +18,7 @@ function PhotoGallery() {
     },
     {
       id: 2,
-      title: "মাসিক কিস্তি ও সঞ্চয় সংগ্রহ",
+      title: "মাসিক কিস্তি ও সঞ্চয় সংগ্রহ",
       category: "Collection",
       url: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?q=80&w=1000&auto=format&fit=crop",
       date: "2026-02-10",
@@ -36,27 +36,43 @@ function PhotoGallery() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("Meeting");
+  
+  // নতুন আপলোড ফিচার সম্পর্কিত স্টেট
+  const [inputType, setInputType] = useState("link"); // 'link' অথবা 'upload'
   const [url, setUrl] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
 
-  // ছবি বড় করে দেখার (Lightbox) স্টেট
+  // ছবি বড় করে দেখার (Lightbox) স্টেট
   const [selectedPhoto, setSelectedPhoto] = useState(null);
 
   // নতুন ছবি সাবমিট করার ফাংশন
   const handleAddPhoto = (e) => {
     e.preventDefault();
-    if (!title || !url) return;
+    if (!title) return;
+
+    let photoUrl = "";
+
+    if (inputType === "link") {
+      if (!url) return;
+      photoUrl = url;
+    } else {
+      if (!selectedFile) return;
+      // ব্রাউজারে লোকাল প্রিভিউ বা ব্যবহারের জন্য অবজেক্ট ইউআরএল তৈরি করা
+      photoUrl = URL.createObjectURL(selectedFile);
+    }
 
     const newPhoto = {
       id: Date.now(),
       title,
       category,
-      url,
+      url: photoUrl,
       date: new Date().toISOString().split("T")[0],
     };
 
     setPhotos([newPhoto, ...photos]);
     setTitle("");
     setUrl("");
+    setSelectedFile(null);
     setIsModalOpen(false);
   };
 
@@ -112,7 +128,7 @@ function PhotoGallery() {
                   <button
                     onClick={() => setSelectedPhoto(photo)}
                     className="bg-white/90 hover:bg-white text-gray-800 p-2.5 rounded-xl transition shadow"
-                    title="বড় করে দেখুন"
+                    title="বড় করে দেখুন"
                   >
                     <FaEye size={16} />
                   </button>
@@ -140,7 +156,7 @@ function PhotoGallery() {
           ))
         ) : (
           <div className="col-span-full text-center py-12 bg-white rounded-2xl border border-gray-100">
-            <p className="text-gray-500 text-sm">কোনো ছবি পাওয়া যায়নি।</p>
+            <p className="text-gray-500 text-sm">কোনো ছবি পাওয়া যায়নি।</p>
           </div>
         )}
       </div>
@@ -186,17 +202,57 @@ function PhotoGallery() {
                 </select>
               </div>
 
+              {/* ছবি যোগ করার মাধ্যম নির্বাচন (Link অথবা Upload) */}
               <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1">ছবির লিংক (Image URL)</label>
-                <input
-                  type="url"
-                  required
-                  value={url}
-                  onChange={(e) => setUrl(e.target.value)}
-                  placeholder="https://example.com/image.jpg"
-                  className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-600"
-                />
+                <label className="block text-xs font-semibold text-gray-600 mb-1.5">যোগ করার মাধ্যম</label>
+                <div className="grid grid-cols-2 gap-2 bg-gray-100 p-1 rounded-xl">
+                  <button
+                    type="button"
+                    onClick={() => setInputType("link")}
+                    className={`flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition ${
+                      inputType === "link" ? "bg-white text-blue-600 shadow-sm" : "text-gray-500 hover:text-gray-800"
+                    }`}
+                  >
+                    <FaLink size={12} />
+                    <span>ছবির লিংক (URL)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setInputType("upload")}
+                    className={`flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition ${
+                      inputType === "upload" ? "bg-white text-blue-600 shadow-sm" : "text-gray-500 hover:text-gray-800"
+                    }`}
+                  >
+                    <FaUpload size={12} />
+                    <span>ফাইল আপলোড</span>
+                  </button>
+                </div>
               </div>
+
+              {inputType === "link" ? (
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1">ছবির লিংক (Image URL)</label>
+                  <input
+                    type="url"
+                    required
+                    value={url}
+                    onChange={(e) => setUrl(e.target.value)}
+                    placeholder="https://example.com/image.jpg"
+                    className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-600"
+                  />
+                </div>
+              ) : (
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1">ডিভাইস থেকে ছবি সিলেক্ট করুন</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    required
+                    onChange={(e) => setSelectedFile(e.target.files[0])}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-xl text-xs text-gray-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  />
+                </div>
+              )}
 
               <div className="flex justify-end gap-3 pt-3">
                 <button
