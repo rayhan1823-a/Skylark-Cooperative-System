@@ -18,6 +18,10 @@ import MainLayout from "./layouts/MainLayout";
 import Home from "./pages/Home";
 import Notice from "./pages/Notice";
 
+// ✅ Gallery Pages (New)
+import PhotoGallery from "./pages/PhotoGallery";
+import VideoGallery from "./pages/VideoGallery";
+
 // Dashboard
 import Dashboard from "./pages/Dashboard";
 
@@ -53,7 +57,7 @@ import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 
 // ✅ Popup Modal Component (New)
-import PopupModal from "./components/PopupModal"; // পাথ আপনার ফোল্ডার স্ট্রাকচার অনুযায়ী অ্যাডজাস্ট করে নিতে পারেন (যদি components ফোল্ডারে থাকে)
+import PopupModal from "./components/PopupModal"; // পাথ আপনার ফোল্ডার স্ট্রাকচার অনুযায়ী অ্যাডজাস্ট করে নিতে পারেন (যদি components ফোল্ডারে থাকে)
 
 // ======================================
 // 404 Page
@@ -151,6 +155,11 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           
           <Route path="/notice" element={<Notice />} />
+
+          {/* ✅ Gallery Routes (New) */}
+          <Route path="/photo-gallery" element={<PhotoGallery />} />
+          <Route path="/video-gallery" element={<VideoGallery />} />
+
           <Route path="/members" element={<Members />} />
           
           {/* ✅ Exited Members Route (New) */}

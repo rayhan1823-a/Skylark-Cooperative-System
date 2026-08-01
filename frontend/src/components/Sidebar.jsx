@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   FaUsers,
@@ -17,11 +17,20 @@ import {
   FaBell,
   FaPiggyBank,
   FaUserSlash,
+  FaImages,
+  FaVideo,
+  FaChevronDown,
+  FaChevronUp,
 } from "react-icons/fa";
 
 function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
+
+  // ✅ Gallery dropdown toggle state (পেইজ রিলোড বা রাউট বদলালেও সাব-মেনু যেন ঠিক থাকে বা ডিফল্ট বন্ধ থাকে)
+  const [isGalleryOpen, setIsGalleryOpen] = useState(
+    location.pathname.startsWith("/photo-gallery") || location.pathname.startsWith("/video-gallery")
+  );
 
   const user = JSON.parse(localStorage.getItem("user")) || {};
   const role = user.role || "";
@@ -142,27 +151,85 @@ function Sidebar() {
 
       {/* ================= Menu (Scrollable for Android/Mobile views) ================= */}
       <nav className="flex-1 mt-2 px-3 space-y-1.5 overflow-y-auto custom-sidebar-scroll">
-        {menu.map((item) => {
+        {menu.map((item, index) => {
           if (item.roles && !item.roles.includes(role)) {
             return null;
           }
           const active = location.pathname === item.path;
+
+          // Home এবং Notice এর রেন্ডারিং এর পর Gallery ড্রপডাউন ইনজেক্ট করা হচ্ছে
+          const isNoticeItem = item.title === "Notice";
+
           return (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`flex items-center gap-3.5 px-4 py-3 rounded-2xl transition-all duration-300 font-semibold text-sm group
-                ${
-                  active
-                    ? "bg-gradient-to-r from-blue-600 via-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-600/30 scale-[1.01]"
-                    : "text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 border border-transparent hover:border-slate-700/40"
-                }`}
-            >
-              <span className={`text-lg transition-colors duration-300 ${active ? "text-white" : "text-slate-400 group-hover:text-blue-400"}`}>
-                {item.icon}
-              </span>
-              <span className="tracking-wide">{item.title}</span>
-            </Link>
+            <React.Fragment key={item.path}>
+              <Link
+                to={item.path}
+                className={`flex items-center gap-3.5 px-4 py-3 rounded-2xl transition-all duration-300 font-semibold text-sm group
+                  ${
+                    active
+                      ? "bg-gradient-to-r from-blue-600 via-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-600/30 scale-[1.01]"
+                      : "text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 border border-transparent hover:border-slate-700/40"
+                  }`}
+              >
+                <span className={`text-lg transition-colors duration-300 ${active ? "text-white" : "text-slate-400 group-hover:text-blue-400"}`}>
+                  {item.icon}
+                </span>
+                <span className="tracking-wide">{item.title}</span>
+              </Link>
+
+              {/* ✅ Notice মেনুর ঠিক পরেই Gallery ড্রপডাউন মেনু যুক্ত করা হলো */}
+              {isNoticeItem && (
+                <div className="space-y-1">
+                  <button
+                    onClick={() => setIsGalleryOpen(!isGalleryOpen)}
+                    className="w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-all duration-300 font-semibold text-sm text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 border border-transparent hover:border-slate-700/40"
+                  >
+                    <div className="flex items-center gap-3.5">
+                      <span className="text-lg text-slate-400 group-hover:text-blue-400">
+                        <FaImages />
+                      </span>
+                      <span className="tracking-wide">Gallery</span>
+                    </div>
+                    <span className="text-xs text-slate-400">
+                      {isGalleryOpen ? <FaChevronUp /> : <FaChevronDown />}
+                    </span>
+                  </button>
+
+                  {/* Sub-menus (Photo Gallery & Video Gallery) */}
+                  {isGalleryOpen && (
+                    <div className="pl-6 space-y-1 my-1 border-l-2 border-blue-600/40 ml-4">
+                      {/* Photo Gallery Link */}
+                      <Link
+                        to="/photo-gallery"
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 font-medium text-xs
+                          ${
+                            location.pathname === "/photo-gallery"
+                              ? "bg-blue-600/20 text-blue-400 font-semibold border border-blue-500/30"
+                              : "text-slate-400 hover:bg-slate-800/40 hover:text-slate-200"
+                          }`}
+                      >
+                        <FaImages className="text-sm text-blue-400" />
+                        <span>Photo Gallery</span>
+                      </Link>
+
+                      {/* Video Gallery Link */}
+                      <Link
+                        to="/video-gallery"
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 font-medium text-xs
+                          ${
+                            location.pathname === "/video-gallery"
+                              ? "bg-blue-600/20 text-blue-400 font-semibold border border-blue-500/30"
+                              : "text-slate-400 hover:bg-slate-800/40 hover:text-slate-200"
+                          }`}
+                      >
+                        <FaVideo className="text-sm text-blue-400" />
+                        <span>Video Gallery</span>
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              )}
+            </React.Fragment>
           );
         })}
       </nav>
