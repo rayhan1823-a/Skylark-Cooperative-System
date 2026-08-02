@@ -1,7 +1,10 @@
-import React, { useState } from "react";
-import { FaPlus, FaTrash, FaPlay, FaVideo, FaTimes, FaLink, FaUpload } from "react-icons/fa";
+import React, { useState, useEffect } from "react";
+import { FaPlus, FaTrash, FaPlay, FaVideo, FaTimes, FaLink } from "react-icons/fa";
 
 function VideoGallery() {
+  // API Base URL
+  const API = "https://skylark-cooperative-system.onrender.com/api";
+
   // রোল সঠিকভাবে এবং নিরাপদে চেক করার ফাংশন
   const getUserRole = () => {
     try {
@@ -10,112 +13,127 @@ function VideoGallery() {
         if (typeof storedUser === "string") return storedUser.trim();
         return storedUser.role || storedUser.userType || storedUser.type || "";
       }
-      // যদি সরাসরি লোকাল স্টোরেজে স্ট্রিং আকারে থাকে
       return localStorage.getItem("role") || localStorage.getItem("userRole") || "";
     } catch (e) {
       return localStorage.getItem("user") || "";
     }
   };
 
-  // রোলকে বড় হাতের অক্ষরে রূপান্তর করে চেক করা (কেস সেন্সিটিভ সমস্যা এড়াতে)
   const rawRole = getUserRole();
   const role = typeof rawRole === "string" ? rawRole.toUpperCase() : "";
   
-  // কে কে আপলোড বা নতুন ভিডিও যোগ করতে পারবে (ADMIN, SUPER_ADMIN এবং STAFF)
   const canUpload = ["SUPER_ADMIN", "ADMIN", "STAFF"].includes(role);
-  
-  // কে কে ডিলিট করতে পারবে (শুধুমাত্র SUPER_ADMIN)
   const canDelete = role === "SUPER_ADMIN";
 
-  // ডেমো প্রাথমিক ভিডিও লিস্ট
-  const [videos, setVideos] = useState([
-    {
-      id: 1,
-      title: "সমিতির বার্ষিক সাধারণ সভা ২০২৬ এর সম্পূর্ণ আলোচনা",
-      category: "Meeting",
-      type: "youtube", // 'youtube' অথবা 'upload'
-      youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", 
-      embedId: "dQw4w9WgXcQ", 
-      date: "2026-01-16",
-    },
-    {
-      id: 2,
-      title: "সঞ্চয় ও শেয়ার ডিপোজিট নির্দেশিকা",
-      category: "Tutorial",
-      type: "youtube",
-      youtubeUrl: "https://www.youtube.com/watch?v=3JZ_D3ELwOQ",
-      embedId: "3JZ_D3ELwOQ",
-      date: "2026-02-12",
-    },
-  ]);
-
-  // নতুন ভিডিও যোগ করার স্টেট
+  // স্টেটসমূহ
+  const [videos, setVideos] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("Meeting");
   
-  // নতুন আপলোড ফিচার সম্পর্কিত স্টেট
-  const [videoInputType, setVideoInputType] = useState("youtube"); // 'youtube' অথবা 'upload'
+  // আপাতত শুধু ইউটিউব অপশন চালু রাখা হয়েছে
+  const [videoInputType, setVideoInputType] = useState("youtube");
   const [youtubeUrl, setYoutubeUrl] = useState("");
-  const [selectedVideoFile, setSelectedVideoFile] = useState(null);
 
-  // ভিডিও প্লে করার জন্য মোডাল স্টেট
   const [selectedVideo, setSelectedVideo] = useState(null);
 
-  // ইউটিউব লিংক থেকে ভিডিও আইডি এক্সট্রাক্ট করার ফাংশন
-  const extractYoutubeId = (url) => {
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-    const match = url.match(regExp);
-    return match && match[2].length === 11 ? match[2] : null;
+  // কম্পোনেন্ট লোড হওয়ার সাথে সাথে ব্যাকএন্ড থেকে ভিডিও ফেচ করা
+  useEffect(() => {
+    fetchVideos();
+  }, []);
+
+  const fetchVideos = async () => {
+    try {
+      const res = await fetch(`${API}/videos`);
+      const data = await res.json();
+
+      if (data.success) {
+        setVideos(data.data || []);
+      }
+    } catch (err) {
+      console.log(err);
+    }
   };
 
-  // নতুন ভিডিও সাবমিট করার ফাংশন
-  const handleAddVideo = (e) => {
+  // নতুন ভিডিও সাবমিট করার ফাংশন (POST Request)
+  const handleAddVideo = async (e) => {
     e.preventDefault();
+
+    // ১. Title + URL Validation
+    if (!title || !youtubeUrl) {
+      alert("Title এবং YouTube URL আবশ্যক");
+      return;
+    }
+
     if (!canUpload) {
       alert("আপনার ভিডিও আপলোড করার অনুমতি নেই!");
       return;
     }
-    if (!title) return;
 
-    let newVideoData = {
-      id: Date.now(),
-      title,
-      category,
-      type: videoInputType,
-      date: new Date().toISOString().split("T")[0],
-    };
+    try {
+      const token = localStorage.getItem("token");
+      
+      let payload = {
+        title,
+        category,
+        type: videoInputType,
+        youtubeUrl: youtubeUrl,
+      };
 
-    if (videoInputType === "youtube") {
-      if (!youtubeUrl) return;
-      const embedId = extractYoutubeId(youtubeUrl);
-      if (!embedId) {
-        alert("দয়া করে একটি সঠিক ইউটিউব লিংক (YouTube URL) প্রদান করুন।");
-        return;
+      const res = await fetch(`${API}/videos`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        await fetchVideos();
+        setTitle("");
+        setCategory("Meeting");
+        setYoutubeUrl("");
+        setIsModalOpen(false);
+      } else {
+        alert(data.message || "ভিডিও সংরক্ষণ করতে সমস্যা হয়েছে।");
       }
-      newVideoData.youtubeUrl = youtubeUrl;
-      newVideoData.embedId = embedId;
-    } else {
-      if (!selectedVideoFile) return;
-      newVideoData.videoUrl = URL.createObjectURL(selectedVideoFile);
+    } catch (error) {
+      console.error(error);
+      alert("সার্ভার ত্রুটি। আবার চেষ্টা করুন।");
     }
-
-    setVideos([newVideoData, ...videos]);
-    setTitle("");
-    setYoutubeUrl("");
-    setSelectedVideoFile(null);
-    setIsModalOpen(false);
   };
 
-  // ভিডিও ডিলিট করার ফাংশন (শুধুমাত্র SUPER_ADMIN এর জন্য সুরক্ষিত)
-  const handleDelete = (id) => {
+  // ভিডিও ডিলিট করার ফাংশন (DELETE Request)
+  const handleDelete = async (id) => {
     if (!canDelete) {
       alert("দুঃখিত, শুধুমাত্র সুপার অ্যাডমিন (SUPER_ADMIN) ভিডিও ডিলিট করতে পারবেন!");
       return;
     }
 
     if (window.confirm("আপনি কি নিশ্চিতভাবে এই ভিডিওটি মুছে ফেলতে চান?")) {
-      setVideos(videos.filter((v) => v.id !== id));
+      try {
+        const token = localStorage.getItem("token");
+        const res = await fetch(`${API}/videos/${id}`, {
+          method: "DELETE",
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          await fetchVideos();
+        } else {
+          alert(data.message || "ভিডিও ডিলিট করা যায়নি।");
+        }
+      } catch (error) {
+        console.error(error);
+        alert("সার্ভার ত্রুটি। আবার চেষ্টা করুন।");
+      }
     }
   };
 
@@ -133,7 +151,6 @@ function VideoGallery() {
           </div>
         </div>
 
-        {/* Add Video Button (Admin/Staff/Super_Admin Only) */}
         {canUpload && (
           <button
             onClick={() => setIsModalOpen(true)}
@@ -150,22 +167,16 @@ function VideoGallery() {
         {videos.length > 0 ? (
           videos.map((video) => (
             <div
-              key={video.id}
+              key={video._id}
               className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group hover:shadow-md transition-all duration-300 flex flex-col"
             >
               {/* Video Thumbnail Box */}
               <div className="relative h-48 overflow-hidden bg-gray-900">
-                {video.type === "youtube" ? (
-                  <img
-                    src={`https://img.youtube.com/vi/${video.embedId}/hqdefault.jpg`}
-                    alt={video.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90 group-hover:opacity-100"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-slate-900 text-gray-300 font-medium text-xs">
-                    [আপলোড করা ভিডিও ফাইল]
-                  </div>
-                )}
+                <img
+                  src={`https://img.youtube.com/vi/${video.embedId}/hqdefault.jpg`}
+                  alt={video.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90 group-hover:opacity-100"
+                />
 
                 <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors flex items-center justify-center">
                   <button
@@ -180,10 +191,9 @@ function VideoGallery() {
                   {video.category}
                 </span>
 
-                {/* Direct Delete Button (Only visible for SUPER_ADMIN) */}
                 {canDelete && (
                   <button
-                    onClick={() => handleDelete(video.id)}
+                    onClick={() => handleDelete(video._id)}
                     className="absolute top-3 right-3 bg-rose-500 hover:bg-rose-600 text-white p-2 rounded-xl transition shadow z-20"
                     title="ডিলিট করুন"
                   >
@@ -195,7 +205,11 @@ function VideoGallery() {
               {/* Content info */}
               <div className="p-4 flex flex-col justify-between flex-1">
                 <h3 className="font-semibold text-gray-800 text-sm line-clamp-2">{video.title}</h3>
-                <p className="text-xs text-gray-400 mt-2">তারিখ: {video.date}</p>
+                
+                <div className="mt-3 pt-3 border-t border-gray-50 flex items-center justify-between text-xs text-gray-400">
+                  <span>আপলোডকারী: <strong className="text-gray-600">{video.uploadedBy?.name || "অজ্ঞাত"}</strong></span>
+                  <span>{new Date(video.date).toLocaleDateString()}</span>
+                </div>
               </div>
             </div>
           ))
@@ -212,8 +226,14 @@ function VideoGallery() {
           <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl border border-gray-100 space-y-4">
             <div className="flex items-center justify-between border-b pb-3">
               <h3 className="font-bold text-lg text-gray-800">নতুন ভিডিও যুক্ত করুন</h3>
+              {/* ২. Modal Close করলে Field Reset */}
               <button
-                onClick={() => setIsModalOpen(false)}
+                onClick={() => {
+                  setIsModalOpen(false);
+                  setTitle("");
+                  setCategory("Meeting");
+                  setYoutubeUrl("");
+                }}
                 className="text-gray-400 hover:text-gray-600 p-1 rounded-lg"
               >
                 <FaTimes size={18} />
@@ -251,62 +271,37 @@ function VideoGallery() {
                 </select>
               </div>
 
-              {/* ভিডিও যোগ করার মাধ্যম সিলেকশন (YouTube vs Upload File) */}
               <div>
                 <label className="block text-xs font-semibold text-gray-600 mb-1.5">ভিডিওর উৎস মাধ্যম</label>
-                <div className="grid grid-cols-2 gap-2 bg-gray-100 p-1 rounded-xl">
-                  <button
-                    type="button"
-                    onClick={() => setVideoInputType("youtube")}
-                    className={`flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition ${
-                      videoInputType === "youtube" ? "bg-white text-blue-600 shadow-sm" : "text-gray-500 hover:text-gray-800"
-                    }`}
-                  >
+                <div className="grid grid-cols-1 bg-gray-100 p-1 rounded-xl">
+                  <div className="flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold bg-white text-blue-600 shadow-sm">
                     <FaLink size={12} />
-                    <span>ইউটিউব লিংক</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setVideoInputType("upload")}
-                    className={`flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition ${
-                      videoInputType === "upload" ? "bg-white text-blue-600 shadow-sm" : "text-gray-500 hover:text-gray-800"
-                    }`}
-                  >
-                    <FaUpload size={12} />
-                    <span>ভিডিও ফাইল আপলোড</span>
-                  </button>
+                    <span>ইউটিউব লিংক (শুধুমাত্র সমর্থিত)</span>
+                  </div>
                 </div>
               </div>
 
-              {videoInputType === "youtube" ? (
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1">ইউটিউব লিংক (YouTube URL)</label>
-                  <input
-                    type="url"
-                    required
-                    value={youtubeUrl}
-                    onChange={(e) => setYoutubeUrl(e.target.value)}
-                    placeholder="https://www.youtube.com/watch?v=..."
-                    className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-600"
-                  />
-                </div>
-              ) : (
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1">ডিভাইস থেকে ভিডিও ফাইল সিলেক্ট করুন (MP4)</label>
-                  <input
-                    type="file"
-                    accept="video/*"
-                    required
-                    onChange={(e) => setSelectedVideoFile(e.target.files[0])}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-xl text-xs text-gray-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                  />
-                </div>
-              )}
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">ইউটিউব লিংক (YouTube URL)</label>
+                <input
+                  type="url"
+                  required
+                  value={youtubeUrl}
+                  onChange={(e) => setYoutubeUrl(e.target.value)}
+                  placeholder="https://www.youtube.com/watch?v=..."
+                  className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-600"
+                />
+              </div>
 
               <div className="flex justify-end gap-3 pt-3">
                 <button
                   type="button"
-                  onClick={() => setIsModalOpen(false)}
+                  onClick={() => {
+                    setIsModalOpen(false);
+                    setTitle("");
+                    setCategory("Meeting");
+                    setYoutubeUrl("");
+                  }}
                   className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-xl transition"
                 >
                   বাতিল
@@ -337,22 +332,13 @@ function VideoGallery() {
               </button>
             </div>
             <div className="relative w-full aspect-video bg-black flex items-center justify-center">
-              {selectedVideo.type === "youtube" ? (
-                <iframe
-                  src={`https://www.youtube.com/embed/${selectedVideo.embedId}?autoplay=1`}
-                  title={selectedVideo.title}
-                  className="w-full h-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                ></iframe>
-              ) : (
-                <video
-                  src={selectedVideo.videoUrl}
-                  controls
-                  autoPlay
-                  className="w-full h-full object-contain"
-                ></video>
-              )}
+              <iframe
+                src={`https://www.youtube.com/embed/${selectedVideo.embedId}?autoplay=1`}
+                title={selectedVideo.title}
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              ></iframe>
             </div>
           </div>
         </div>
