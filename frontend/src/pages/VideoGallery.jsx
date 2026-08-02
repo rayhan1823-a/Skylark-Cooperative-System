@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaPlus, FaTrash, FaPlay, FaVideo, FaTimes, FaLink } from "react-icons/fa";
+import { FaPlus, FaTrash, FaPlay, FaVideo, FaTimes, FaLink, FaUpload } from "react-icons/fa";
 
 function VideoGallery() {
   // API Base URL
@@ -31,13 +31,13 @@ function VideoGallery() {
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("Meeting");
   
-  // আপাতত শুধু ইউটিউব অপশন চালু রাখা হয়েছে
   const [videoInputType, setVideoInputType] = useState("youtube");
   const [youtubeUrl, setYoutubeUrl] = useState("");
+  const [selectedVideoFile, setSelectedVideoFile] = useState(null);
 
   const [selectedVideo, setSelectedVideo] = useState(null);
 
-  // কম্পোনেন্ট লোড হওয়ার সাথে সাথে ব্যাকএন্ড থেকে ভিডিও ফেচ করা
+  // কম্পোনেন্ট লোড হওয়ার সাথে সাথে ব্যাকএন্ড থেকে ভিডিও ফেচ করা
   useEffect(() => {
     fetchVideos();
   }, []);
@@ -55,13 +55,23 @@ function VideoGallery() {
     }
   };
 
-  // নতুন ভিডিও সাবমিট করার ফাংশন (POST Request)
+  // নতুন ভিডিও সাবমিট করার ফাংশন (POST Request with FormData)
   const handleAddVideo = async (e) => {
     e.preventDefault();
 
-    // ১. Title + URL Validation
-    if (!title || !youtubeUrl) {
-      alert("Title এবং YouTube URL আবশ্যক");
+    // ১. Title + Validation (YouTube URL অথবা Upload File)
+    if (!title) {
+      alert("Title আবশ্যক");
+      return;
+    }
+
+    if (videoInputType === "youtube" && !youtubeUrl) {
+      alert("YouTube URL আবশ্যক");
+      return;
+    }
+
+    if (videoInputType === "upload" && !selectedVideoFile) {
+      alert("Upload করার জন্য ভিডিও ফাইল আবশ্যক");
       return;
     }
 
@@ -73,20 +83,24 @@ function VideoGallery() {
     try {
       const token = localStorage.getItem("token");
       
-      let payload = {
-        title,
-        category,
-        type: videoInputType,
-        youtubeUrl: youtubeUrl,
-      };
+      // JSON এর বদলে FormData ব্যবহার করা হলো
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("category", category);
+      formData.append("type", videoInputType);
+      
+      if (videoInputType === "youtube") {
+        formData.append("youtubeUrl", youtubeUrl);
+      } else if (videoInputType === "upload" && selectedVideoFile) {
+        formData.append("video", selectedVideoFile);
+      }
 
       const res = await fetch(`${API}/videos`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`
         },
-        body: JSON.stringify(payload)
+        body: formData
       });
 
       const data = await res.json();
@@ -96,9 +110,11 @@ function VideoGallery() {
         setTitle("");
         setCategory("Meeting");
         setYoutubeUrl("");
+        setVideoInputType("youtube");
+        setSelectedVideoFile(null);
         setIsModalOpen(false);
       } else {
-        alert(data.message || "ভিডিও সংরক্ষণ করতে সমস্যা হয়েছে।");
+        alert(data.message || "ভিডিও সংরক্ষণ করতে সমস্যা হয়েছে।");
       }
     } catch (error) {
       console.error(error);
@@ -128,7 +144,7 @@ function VideoGallery() {
         if (data.success) {
           await fetchVideos();
         } else {
-          alert(data.message || "ভিডিও ডিলিট করা যায়নি।");
+          alert(data.message || "ভিডিও ডিলিট করা যায়নি।");
         }
       } catch (error) {
         console.error(error);
@@ -173,7 +189,11 @@ function VideoGallery() {
               {/* Video Thumbnail Box */}
               <div className="relative h-48 overflow-hidden bg-gray-900">
                 <img
-                  src={`https://img.youtube.com/vi/${video.embedId}/hqdefault.jpg`}
+                  src={
+                    video.type === "youtube"
+                      ? `https://img.youtube.com/vi/${video.embedId}/hqdefault.jpg`
+                      : "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=600"
+                  }
                   alt={video.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90 group-hover:opacity-100"
                 />
@@ -226,13 +246,14 @@ function VideoGallery() {
           <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl border border-gray-100 space-y-4">
             <div className="flex items-center justify-between border-b pb-3">
               <h3 className="font-bold text-lg text-gray-800">নতুন ভিডিও যুক্ত করুন</h3>
-              {/* ২. Modal Close করলে Field Reset */}
               <button
                 onClick={() => {
                   setIsModalOpen(false);
                   setTitle("");
                   setCategory("Meeting");
                   setYoutubeUrl("");
+                  setVideoInputType("youtube");
+                  setSelectedVideoFile(null);
                 }}
                 className="text-gray-400 hover:text-gray-600 p-1 rounded-lg"
               >
@@ -272,25 +293,59 @@ function VideoGallery() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1.5">ভিডিওর উৎস মাধ্যম</label>
-                <div className="grid grid-cols-1 bg-gray-100 p-1 rounded-xl">
-                  <div className="flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold bg-white text-blue-600 shadow-sm">
-                    <FaLink size={12} />
-                    <span>ইউটিউব লিংক (শুধুমাত্র সমর্থিত)</span>
-                  </div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1.5">
+                  ভিডিওর উৎস মাধ্যম
+                </label>
+
+                <div className="grid grid-cols-2 gap-2 bg-gray-100 p-1 rounded-xl">
+                  <button
+                    type="button"
+                    onClick={() => setVideoInputType("youtube")}
+                    className={`py-2 rounded-lg text-xs font-semibold transition ${
+                      videoInputType === "youtube"
+                        ? "bg-white text-blue-600 shadow-sm"
+                        : "text-gray-500"
+                    }`}
+                  >
+                    <FaLink className="inline mr-1" />
+                    YouTube
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setVideoInputType("upload")}
+                    className={`py-2 rounded-lg text-xs font-semibold transition ${
+                      videoInputType === "upload"
+                        ? "bg-white text-blue-600 shadow-sm"
+                        : "text-gray-500"
+                    }`}
+                  >
+                    <FaUpload className="inline mr-1" />
+                    Upload
+                  </button>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1">ইউটিউব লিংক (YouTube URL)</label>
-                <input
-                  type="url"
-                  required
-                  value={youtubeUrl}
-                  onChange={(e) => setYoutubeUrl(e.target.value)}
-                  placeholder="https://www.youtube.com/watch?v=..."
-                  className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-600"
-                />
+                <label className="block text-xs font-semibold text-gray-600 mb-1">
+                  {videoInputType === "youtube" ? "ইউটিউব লিংক (YouTube URL)" : "ভিডিও ফাইল নির্বাচন করুন"}
+                </label>
+                {videoInputType === "youtube" ? (
+                  <input
+                    type="url"
+                    value={youtubeUrl}
+                    onChange={(e) => setYoutubeUrl(e.target.value)}
+                    placeholder="https://youtube.com/watch?v=..."
+                    className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-600"
+                  />
+                ) : (
+                  <input
+                    type="file"
+                    accept="video/*"
+                    onChange={(e) => setSelectedVideoFile(e.target.files[0])}
+                    className="w-full px-3.5 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-600 bg-white"
+                  />
+                )}
               </div>
 
               <div className="flex justify-end gap-3 pt-3">
@@ -301,6 +356,8 @@ function VideoGallery() {
                     setTitle("");
                     setCategory("Meeting");
                     setYoutubeUrl("");
+                    setVideoInputType("youtube");
+                    setSelectedVideoFile(null);
                   }}
                   className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-xl transition"
                 >
@@ -332,13 +389,22 @@ function VideoGallery() {
               </button>
             </div>
             <div className="relative w-full aspect-video bg-black flex items-center justify-center">
-              <iframe
-                src={`https://www.youtube.com/embed/${selectedVideo.embedId}?autoplay=1`}
-                title={selectedVideo.title}
-                className="w-full h-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              ></iframe>
+              {selectedVideo.type === "youtube" ? (
+                <iframe
+                  src={`https://www.youtube.com/embed/${selectedVideo.embedId}?autoplay=1`}
+                  title={selectedVideo.title}
+                  className="w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
+              ) : (
+                <video
+                  controls
+                  autoPlay
+                  className="w-full h-full"
+                  src={`https://skylark-cooperative-system.onrender.com/${selectedVideo.videoUrl}`}
+                />
+              )}
             </div>
           </div>
         </div>
