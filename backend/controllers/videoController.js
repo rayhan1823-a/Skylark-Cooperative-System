@@ -22,7 +22,7 @@ const getEmbedId = (url = "") => {
   return match ? match[1] : "";
 };
 
-// ১. সব অ্যাক্টিভ ভিডিও পাওয়ার জন্য (Get All Videos)
+// ১. সব অ্যাক্টিভ ভিডিও পাওয়ার জন্য (Get All Videos)
 const getVideos = async (req, res) => {
   try {
     const videos = await Video.find({ status: "Active" })
@@ -37,13 +37,13 @@ const getVideos = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: "সার্ভার ত্রুটি: ভিডিওগুলো লোড করা যায়নি",
+      message: "সার্ভার ত্রুটি: ভিডিওগুলো লোড করা যায়নি",
       error: error.message,
     });
   }
 };
 
-// ২. নির্দিষ্ট আইডি দিয়ে একটি অ্যাক্টিভ ভিডিও পাওয়ার জন্য (Get Video By ID)
+// ২. নির্দিষ্ট আইডি দিয়ে একটি অ্যাক্টিভ ভিডিও পাওয়ার জন্য (Get Video By ID)
 const getVideoById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -75,7 +75,7 @@ const getVideoById = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: "ভিডিও লোড করতে সমস্যা হয়েছে",
+      message: "ভিডিও লোড করতে সমস্যা হয়েছে",
       error: error.message,
     });
   }
@@ -94,7 +94,11 @@ const addVideo = async (req, res) => {
   }
 
   try {
-    const { title, category, type, youtubeUrl, videoUrl, date } = req.body;
+    const { title, category, type, youtubeUrl, date } = req.body;
+    let uploadedVideoUrl = "";
+    if (req.file) {
+      uploadedVideoUrl = `uploads/videos/${req.file.filename}`;
+    }
 
     if (!title) {
       return res.status(400).json({
@@ -126,10 +130,10 @@ const addVideo = async (req, res) => {
       });
     }
 
-    if (type === "upload" && !videoUrl) {
+    if (type === "upload" && !req.file) {
       return res.status(400).json({
         success: false,
-        message: "Video URL is required.",
+        message: "Video file is required.",
       });
     }
 
@@ -142,7 +146,7 @@ const addVideo = async (req, res) => {
       type: type || "youtube",
       youtubeUrl: youtubeUrl || "",
       embedId: finalEmbedId,
-      videoUrl: videoUrl || "",
+      videoUrl: uploadedVideoUrl,
       uploadedBy: req.user && req.user.id ? req.user.id : null,
       date: date ? new Date(date) : Date.now(),
     });
@@ -152,13 +156,13 @@ const addVideo = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: "ভিডিও সফলভাবে যুক্ত হয়েছে",
+      message: "ভিডিও সফলভাবে যুক্ত হয়েছে",
       data: populatedVideo,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: "ভিডিও সংরক্ষণ করতে সমস্যা হয়েছে",
+      message: "ভিডিও সংরক্ষণ করতে সমস্যা হয়েছে",
       error: error.message,
     });
   }
@@ -187,7 +191,7 @@ const updateVideo = async (req, res) => {
       });
     }
 
-    const { title, category, type, youtubeUrl, videoUrl, date } = req.body;
+    const { title, category, type, youtubeUrl, date } = req.body;
 
     const video = await Video.findOne({
       _id: id,
@@ -223,11 +227,15 @@ const updateVideo = async (req, res) => {
     
     if (youtubeUrl !== undefined) {
       video.youtubeUrl = youtubeUrl;
-      // Auto Generate embedId on update using getEmbedId helper
       video.embedId = getEmbedId(youtubeUrl);
     }
 
-    if (videoUrl !== undefined) video.videoUrl = videoUrl;
+    if (req.file) {
+      video.videoUrl = `uploads/videos/${req.file.filename}`;
+      video.youtubeUrl = "";
+      video.embedId = "";
+    }
+
     if (date !== undefined) video.date = new Date(date);
 
     if (video.type === "youtube" && !video.youtubeUrl) {
@@ -240,7 +248,7 @@ const updateVideo = async (req, res) => {
     if (video.type === "upload" && !video.videoUrl) {
       return res.status(400).json({
         success: false,
-        message: "Video URL is required.",
+        message: "Video file is required.",
       });
     }
 
@@ -249,13 +257,13 @@ const updateVideo = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "ভিডিও সফলভাবে আপডেট হয়েছে",
+      message: "ভিডিও সফলভাবে আপডেট হয়েছে",
       data: populatedUpdatedVideo,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: "ভিডিও আপডেট করতে সমস্যা হয়েছে",
+      message: "ভিডিও আপডেট করতে সমস্যা হয়েছে",
       error: error.message,
     });
   }
@@ -297,19 +305,19 @@ const deleteVideo = async (req, res) => {
     if (!deletedVideo) {
       return res.status(404).json({
         success: false,
-        message: "ডিলিট করার জন্য বা অ্যাক্টিভ অবস্থায় ভিডিওটি খুঁজে পাওয়া যায়নি",
+        message: "ডিলিট করার জন্য বা অ্যাক্টিভ অবস্থায় ভিডিওটি খুঁজে পাওয়া যায়নি",
       });
     }
 
     res.status(200).json({
       success: true,
-      message: "ভিডিও সফলভাবে মুছে ফেলা হয়েছে",
+      message: "ভিডিও সফলভাবে মুছে ফেলা হয়েছে",
       data: deletedVideo,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: "ভিডিও ডিলিট করতে সমস্যা হয়েছে",
+      message: "ভিডিও ডিলিট করতে সমস্যা হয়েছে",
       error: error.message,
     });
   }
