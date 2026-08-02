@@ -1,5 +1,11 @@
 const Video = require("../models/Video");
 const mongoose = require("mongoose");
+const ffmpeg = require("fluent-ffmpeg");
+const ffmpegPath = require("ffmpeg-static");
+const path = require("path");
+const fs = require("fs");
+
+ffmpeg.setFfmpegPath(ffmpegPath);
 
 // ক্যাটাগরি লিস্ট
 const categories = [
@@ -48,7 +54,6 @@ const getVideoById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // ইনভ্যালিড আইডি চেক
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({
         success: false,
@@ -96,8 +101,43 @@ const addVideo = async (req, res) => {
   try {
     const { title, category, type, youtubeUrl, date } = req.body;
     let uploadedVideoUrl = "";
+    let thumbnailUrl = "";
+
     if (req.file) {
       uploadedVideoUrl = `uploads/videos/${req.file.filename}`;
+      
+      const videoPath = path.join(
+        __dirname,
+        "../uploads/videos",
+        req.file.filename
+      );
+
+      const thumbnailsDir = path.join(__dirname, "../uploads/thumbnails");
+      if (!fs.existsSync(thumbnailsDir)) {
+        fs.mkdirSync(thumbnailsDir, { recursive: true });
+      }
+
+      const thumbnailName = path.parse(req.file.filename).name + ".jpg";
+      const thumbnailFullPath = path.join(thumbnailsDir, thumbnailName);
+
+      // নির্ভরযোগ্য ও কাস্টম এফএফএমপিজি প্রসেস ব্যবহার করে থাম্বনেইল জেনারেট করা
+      await new Promise((resolve, reject) => {
+        ffmpeg(videoPath)
+          .outputOptions([
+            "-ss 00:00:02", // ২ সেকেন্ড থেকে ফ্রেম ক্যাপচার করবে
+            "-vframes 1"   // মাত্র ১টি ফ্রেম নিবে
+          ])
+          .output(thumbnailFullPath)
+          .on("end", () => {
+            resolve(true);
+          })
+          .on("error", (err) => {
+            reject(err);
+          })
+          .run();
+      });
+
+      thumbnailUrl = `uploads/thumbnails/${thumbnailName}`;
     }
 
     if (!title) {
@@ -139,6 +179,11 @@ const addVideo = async (req, res) => {
 
     // Universal getEmbedId Function Call
     const finalEmbedId = getEmbedId(youtubeUrl);
+    
+    // যদি ইউটিউব ভিডিও হয়, তবে অটো থাম্বনেইল লিংক সেট হবে
+    if (type === "youtube" && finalEmbedId) {
+      thumbnailUrl = `https://img.youtube.com/vi/${finalEmbedId}/hqdefault.jpg`;
+    }
 
     const newVideo = new Video({
       title,
@@ -147,6 +192,7 @@ const addVideo = async (req, res) => {
       youtubeUrl: youtubeUrl || "",
       embedId: finalEmbedId,
       videoUrl: uploadedVideoUrl,
+      thumbnailUrl: thumbnailUrl,
       uploadedBy: req.user && req.user.id ? req.user.id : null,
       date: date ? new Date(date) : Date.now(),
     });
@@ -183,7 +229,6 @@ const updateVideo = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Invalid ObjectId Check
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({
         success: false,
@@ -205,7 +250,6 @@ const updateVideo = async (req, res) => {
       });
     }
 
-    // Category Validation
     if (category && !categories.includes(category)) {
       return res.status(400).json({
         success: false,
@@ -213,7 +257,6 @@ const updateVideo = async (req, res) => {
       });
     }
 
-    // Type Validation
     if (type && !["youtube", "upload"].includes(type)) {
       return res.status(400).json({
         success: false,
@@ -228,12 +271,43 @@ const updateVideo = async (req, res) => {
     if (youtubeUrl !== undefined) {
       video.youtubeUrl = youtubeUrl;
       video.embedId = getEmbedId(youtubeUrl);
+      if (video.embedId) {
+        video.thumbnailUrl = `https://img.youtube.com/vi/${video.embedId}/hqdefault.jpg`;
+      }
     }
 
     if (req.file) {
       video.videoUrl = `uploads/videos/${req.file.filename}`;
       video.youtubeUrl = "";
       video.embedId = "";
+
+      const videoPath = path.join(
+        __dirname,
+        "../uploads/videos",
+        req.file.filename
+      );
+      
+      const thumbnailsDir = path.join(__dirname, "../uploads/thumbnails");
+      if (!fs.existsSync(thumbnailsDir)) {
+        fs.mkdirSync(thumbnailsDir, { recursive: true });
+      }
+
+      const thumbnailName = path.parse(req.file.filename).name + ".jpg";
+      const thumbnailFullPath = path.join(thumbnailsDir, thumbnailName);
+
+      await new Promise((resolve, reject) => {
+        ffmpeg(videoPath)
+          .outputOptions([
+            "-ss 00:00:02",
+            "-vframes 1"
+          ])
+          .output(thumbnailFullPath)
+          .on("end", () => resolve(true))
+          .on("error", (err) => reject(err))
+          .run();
+      });
+
+      video.thumbnailUrl = `uploads/thumbnails/${thumbnailName}`;
     }
 
     if (date !== undefined) video.date = new Date(date);
@@ -281,7 +355,6 @@ const deleteVideo = async (req, res) => {
 
     const { id } = req.params;
 
-    // Invalid ObjectId Check
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({
         success: false,

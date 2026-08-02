@@ -49,6 +49,12 @@ const videoSchema = new mongoose.Schema(
       trim: true,
     },
 
+    thumbnailUrl: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
     uploadedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
