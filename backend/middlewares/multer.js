@@ -2,26 +2,34 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 
-// ফোল্ডার না থাকলে স্বয়ংক্রিয়ভাবে তৈরি করার ব্যবস্থা
-const uploadDir = "uploads/videos";
-if (!fs.existsSync(uploadDir)) {
+// সুনির্দিষ্ট অ্যাবসোলিউট পাথ ব্যবহার করা যাতে রেন্ডার সার্ভারে কোনো কনফ্লিক্ট না হয়
+const uploadDir = path.join(__dirname, "../uploads/videos");
+
+// ফোল্ডার আছে কিনা বা ভুলবশত ফাইল হিসেবে আছে কিনা তা চেক করা
+if (fs.existsSync(uploadDir)) {
+  const stats = fs.statSync(uploadDir);
+  if (!stats.isDirectory()) {
+    // যদি ভুলবশত ফাইল হয়ে থাকে, তবে সেটি ডিলিট করে ফোল্ডার বানিয়ে দেবে
+    fs.unlinkSync(uploadDir);
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
+} else {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
 // Storage Configuration
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
+    // ফোল্ডার না থাকলে যেন রানটাইমে ক্র্যাশ না করে সুরক্ষার জন্য
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
     cb(null, uploadDir);
   },
 
   filename: (req, file, cb) => {
-    const uniqueName =
-      Date.now() + "-" + Math.round(Math.random() * 1e9);
-
-    cb(
-      null,
-      uniqueName + path.extname(file.originalname)
-    );
+    const uniqueName = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, uniqueName + path.extname(file.originalname));
   },
 });
 
@@ -37,7 +45,7 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 100 * 1024 * 1024 }, // সর্বোচ্চ ১০০ এমবি (প্রয়োজন অনুযায়ী কমাতে বা বাড়াতে পারেন)
+  limits: { fileSize: 500 * 1024 * 1024 }, // সর্বোচ্চ ৫০০ এমবি (500MB Limit)
 });
 
 module.exports = upload;
