@@ -10,7 +10,7 @@ const {
 } = require("../controllers/videoController");
 
 const verifyToken = require("../middlewares/authMiddleware");
-const upload = require("../middleware/multer");
+const upload = require("../middlewares/multer");
 
 // Public Routes (সবার জন্য উন্মুক্ত)
 router.get("/", getVideos);
