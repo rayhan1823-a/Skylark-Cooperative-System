@@ -4,6 +4,7 @@ import { FaPlus, FaTrash, FaPlay, FaVideo, FaTimes, FaLink, FaUpload } from "rea
 function VideoGallery() {
   // API Base URL
   const API = "https://skylark-cooperative-system.onrender.com/api";
+  const BASE_URL = "https://skylark-cooperative-system.onrender.com";
 
   // রোল সঠিকভাবে এবং নিরাপদে চেক করার ফাংশন
   const getUserRole = () => {
@@ -59,7 +60,6 @@ function VideoGallery() {
   const handleAddVideo = async (e) => {
     e.preventDefault();
 
-    // ১. Title + Validation (YouTube URL অথবা Upload File)
     if (!title) {
       alert("Title আবশ্যক");
       return;
@@ -83,7 +83,6 @@ function VideoGallery() {
     try {
       const token = localStorage.getItem("token");
       
-      // JSON এর বদলে FormData ব্যবহার করা হলো
       const formData = new FormData();
       formData.append("title", title);
       formData.append("category", category);
@@ -192,7 +191,9 @@ function VideoGallery() {
                   src={
                     video.type === "youtube"
                       ? `https://img.youtube.com/vi/${video.embedId}/hqdefault.jpg`
-                      : "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=600"
+                      : video.thumbnailUrl 
+                        ? `${BASE_URL}/${video.thumbnailUrl}`
+                        : "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=600"
                   }
                   alt={video.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90 group-hover:opacity-100"
@@ -228,7 +229,7 @@ function VideoGallery() {
                 
                 <div className="mt-3 pt-3 border-t border-gray-50 flex items-center justify-between text-xs text-gray-400">
                   <span>আপলোডকারী: <strong className="text-gray-600">{video.uploadedBy?.name || "অজ্ঞাত"}</strong></span>
-                  <span>{new Date(video.date).toLocaleDateString()}</span>
+                  <span>{new Date(video.createdAt || video.date).toLocaleDateString()}</span>
                 </div>
               </div>
             </div>
@@ -402,7 +403,7 @@ function VideoGallery() {
                   controls
                   autoPlay
                   className="w-full h-full"
-                  src={`https://skylark-cooperative-system.onrender.com/${selectedVideo.videoUrl}`}
+                  src={`${BASE_URL}/${selectedVideo.videoUrl}`}
                 />
               )}
             </div>
