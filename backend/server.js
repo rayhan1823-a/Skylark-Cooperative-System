@@ -20,6 +20,9 @@ dotenv.config();
 
 const app = express();
 
+// ✅ Trust Proxy (Render/Vercel-এর জন্য)
+app.set("trust proxy", 1);
+
 // ======================================
 // Automatic Backup Scheduler
 // ======================================
@@ -34,13 +37,13 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://skylark-cooperative-system.vercel.app"
+      "https://skylark-cooperative-system.vercel.app",
     ],
     credentials: true,
   })
 );
 
-// ✅ ফাইলের সাইজ লিমিট ৫০ এমবি থেকে বাড়িয়ে ৫০০ এমবি করা হলো
+// ✅ ফাইলের সাইজ লিমিট ৫০ এমবি থেকে বাড়িয়ে ৫০০ এমবি করা হলো
 app.use(
   express.json({
     limit: "500mb",
@@ -62,19 +65,6 @@ app.use(
   "/uploads",
   express.static(path.join(__dirname, "uploads"))
 );
-
-// ======================================
-// MongoDB Connection
-// ======================================
-
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => {
-    console.log("✅ MongoDB Connected");
-  })
-  .catch((err) => {
-    console.log("❌ MongoDB Connection Error:", err.message);
-  });
 
 // ======================================
 // Import Routes
@@ -141,8 +131,11 @@ const penaltyRoute = require("./routes/penaltyroute");
 // ✅ Investment & FDR Route (New)
 const investmentRoutes = require("./routes/investmentRoutes");
 
-// ✅ Videos Route (New)
+// ✅ Videos Route
 const videoRoutes = require("./routes/videoRoutes");
+
+// ✅ Photos Route
+const photoRoutes = require("./routes/photoRoutes");
 
 // ======================================
 // API Routes
@@ -209,8 +202,11 @@ app.use("/api/penalties", penaltyRoute);
 // ✅ Investment & FDR API Route (New)
 app.use("/api/investments", investmentRoutes);
 
-// ✅ Video Gallery API Route (New)
+// ✅ Video Gallery API Route
 app.use("/api/videos", videoRoutes);
+
+// ✅ Photo Gallery API Route
+app.use("/api/photos", photoRoutes);
 
 // ======================================
 // Root Route
@@ -222,6 +218,15 @@ app.get("/", (req, res) => {
     app: "Skylark Cooperative Management System",
     version: "1.0.0",
     message: "🚀 API Running Successfully",
+  });
+});
+
+// ✅ Health Check Route (with ISO String)
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "OK",
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
   });
 });
 
@@ -250,23 +255,34 @@ app.use((err, req, res, next) => {
 });
 
 // ======================================
-// Server Start
+// MongoDB Connection & Server Start
 // ======================================
 
-const PORT = process.env.PORT || 5000;
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => {
+    console.log("✅ MongoDB Connected");
 
-app.listen(PORT, () => {
-  console.log("======================================");
-  console.log(`🚀 Server Running : http://localhost:${PORT}`);
-  console.log("======================================");
+    const PORT = process.env.PORT || 5000;
 
-  // Automatic Daily Backup Scheduler
-  startBackupScheduler();
+    app.listen(PORT, () => {
+      console.log("======================================");
+      console.log(`🚀 Server Running : http://localhost:${PORT}`);
+      console.log("======================================");
 
-  console.log("✅ Backup Scheduler Started");
-  console.log("✅ Deposit Receipt Route Loaded");
-  console.log("✅ Penalty Route Loaded");
-  console.log("✅ Investment & FDR Route Loaded");
-  console.log("✅ Video Gallery Route Loaded"); // New Video Route Log
-  console.log("✅ Skylark Cooperative Management System Ready");
-});
+      // Automatic Daily Backup Scheduler
+      startBackupScheduler();
+
+      console.log("✅ Backup Scheduler Started");
+      console.log("✅ Deposit Receipt Route Loaded");
+      console.log("✅ Penalty Route Loaded");
+      console.log("✅ Investment & FDR Route Loaded");
+      console.log("✅ Video Gallery Route Loaded");
+      console.log("✅ Photo Gallery Route Loaded");
+      console.log("✅ Skylark Cooperative Management System Ready");
+    });
+  })
+  .catch((err) => {
+    console.log("❌ MongoDB Connection Error:", err.message);
+    process.exit(1);
+  });
