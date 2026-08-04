@@ -2,7 +2,7 @@ const Photo = require("../models/Photo");
 const mongoose = require("mongoose");
 const fs = require("fs");
 const path = require("path");
-const categories = require("../utils/categories");
+const { PHOTO_CATEGORIES } = require("../utils/categories");
 
 // ১. সব অ্যাক্টিভ ছবি পাওয়ার জন্য (Get All Photos - with lean)
 const getPhotos = async (req, res) => {
@@ -100,7 +100,7 @@ const addPhoto = async (req, res) => {
     }
 
     // Category Validation
-    if (category && !categories.includes(category)) {
+    if (category && !PHOTO_CATEGORIES.includes(category)) {
       return res.status(400).json({
         success: false,
         message: "Invalid category.",
@@ -180,7 +180,7 @@ const updatePhoto = async (req, res) => {
       });
     }
 
-    if (category && !categories.includes(category)) {
+    if (category && !PHOTO_CATEGORIES.includes(category)) {
       return res.status(400).json({
         success: false,
         message: "Invalid category.",
