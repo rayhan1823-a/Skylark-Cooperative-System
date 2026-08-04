@@ -65,7 +65,7 @@ const getPhotoById = async (req, res) => {
   }
 };
 
-// ৩. নতুন ছবি যোগ করার জন্য (Add New Photo - Local & Cloudinary Ready)
+// ৩. নতুন ছবি যোগ করার জন্য (Add New Photo - Local Path Fixed)
 const addPhoto = async (req, res) => {
   if (
     !req.user ||
@@ -107,8 +107,8 @@ const addPhoto = async (req, res) => {
       });
     }
 
-    // Local + Cloudinary Support Flexible Path
-    const imageUrl = req.file.path || `uploads/photos/${req.file.filename}`;
+    // Local Path Fixed with leading slash
+    const imageUrl = `/uploads/photos/${req.file.filename}`;
 
     const newPhoto = new Photo({
       title,
@@ -144,7 +144,7 @@ const addPhoto = async (req, res) => {
   }
 };
 
-// ৪. ছবি আপডেট করার জন্য (Update Photo & Safe Async Delete Old File)
+// ৪. ছবি আপডেট করার জন্য (Update Photo & Path Fix)
 const updatePhoto = async (req, res) => {
   if (
     !req.user ||
@@ -197,10 +197,14 @@ const updatePhoto = async (req, res) => {
       }
     }
 
-    // যদি নতুন ছবি আপলোড করা হয়, তবে পুরনো ছবির অস্তিত্ব চেক করে সেফলি ডিলিট হবে
+    // যদি নতুন ছবি আপলোড করা হয়, তবে পুরনো ছবির অস্তিত্ব চেক করে সেফলি ডিলিট হবে
     if (req.file) {
       if (photo.imageUrl && !photo.imageUrl.startsWith("http")) {
-        const oldImage = path.join(__dirname, "..", photo.imageUrl);
+        const oldImage = path.join(
+          __dirname,
+          "..",
+          photo.imageUrl.replace(/^\/+/, "")
+        );
 
         fs.unlink(oldImage, (err) => {
           if (err && err.code !== "ENOENT") {
@@ -209,7 +213,7 @@ const updatePhoto = async (req, res) => {
         });
       }
 
-      photo.imageUrl = req.file.path || `uploads/photos/${req.file.filename}`;
+      photo.imageUrl = `/uploads/photos/${req.file.filename}`;
     }
 
     const updatedPhoto = await photo.save();
@@ -231,7 +235,7 @@ const updatePhoto = async (req, res) => {
   }
 };
 
-// ৫. ছবি ডিলিট করার জন্য (Soft Delete with runValidators & Safe Async Remove File)
+// ৫. ছবি ডিলিট করার জন্য (Soft Delete & Path Fix)
 const deletePhoto = async (req, res) => {
   try {
     if (!req.user || req.user.role !== "SUPER_ADMIN") {
@@ -273,7 +277,11 @@ const deletePhoto = async (req, res) => {
 
     // সার্ভার থেকেও ছবির অস্তিত্ব চেক করে সেফলি রিমুভ করা (লোকাল ফাইল হলে)
     if (deletedPhoto.imageUrl && !deletedPhoto.imageUrl.startsWith("http")) {
-      const imagePath = path.join(__dirname, "..", deletedPhoto.imageUrl);
+      const imagePath = path.join(
+        __dirname,
+        "..",
+        deletedPhoto.imageUrl.replace(/^\/+/, "")
+      );
 
       fs.unlink(imagePath, (err) => {
         if (err && err.code !== "ENOENT") {
