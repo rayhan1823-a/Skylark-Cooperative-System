@@ -1,46 +1,36 @@
 const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
+const cloudinary = require("cloudinary").v2;
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
 
 console.log("✅ Photo Upload Middleware Loaded");
+console.log("☁️ Using Cloudinary Storage");
 console.log("📷 Upload Limit:", 10 * 1024 * 1024);
 
 // ======================================
-// Upload Directory
+// Cloudinary Configuration
 // ======================================
 
-const uploadDir = path.join(__dirname, "../uploads/photos");
-
-// Folder Create (if not exists)
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-} else {
-  const stats = fs.statSync(uploadDir);
-
-  if (!stats.isDirectory()) {
-    fs.unlinkSync(uploadDir);
-    fs.mkdirSync(uploadDir, { recursive: true });
-  }
-}
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 // ======================================
-// Storage Configuration
+// Cloudinary Storage
 // ======================================
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-
-    cb(null, uploadDir);
-  },
-
-  filename: (req, file, cb) => {
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: async (req, file) => {
     const uniqueName =
-      Date.now() + "-" + Math.round(Math.random() * 1e9);
+      Date.now() + "-" + Math.round(Math.random() * 1000000000);
 
-    cb(null, uniqueName + path.extname(file.originalname));
+    return {
+      folder: "skylark-cooperative/gallery",
+      allowed_formats: ["jpg", "jpeg", "png", "webp"],
+      public_id: uniqueName,
+    };
   },
 });
 
@@ -55,17 +45,19 @@ const allowedMimeTypes = [
   "image/webp",
 ];
 
+// ======================================
+// File Filter
+// ======================================
+
 const fileFilter = (req, file, cb) => {
   if (allowedMimeTypes.includes(file.mimetype)) {
-    return cb(null, true);
+    cb(null, true);
+  } else {
+    cb(
+      new Error("Only JPG, JPEG, PNG and WEBP image files are allowed."),
+      false
+    );
   }
-
-  return cb(
-    new Error(
-      "Only JPG, JPEG, PNG and WEBP image files are allowed."
-    ),
-    false
-  );
 };
 
 // ======================================
@@ -79,5 +71,9 @@ const photoUpload = multer({
     fileSize: 10 * 1024 * 1024, // 10 MB
   },
 });
+
+// ======================================
+// Export
+// ======================================
 
 module.exports = photoUpload;

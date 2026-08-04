@@ -1,7 +1,5 @@
 const Photo = require("../models/Photo");
 const mongoose = require("mongoose");
-const fs = require("fs");
-const path = require("path");
 const { PHOTO_CATEGORIES } = require("../utils/categories");
 
 // ১. সব অ্যাক্টিভ ছবি পাওয়ার জন্য (Get All Photos - with lean)
@@ -65,7 +63,7 @@ const getPhotoById = async (req, res) => {
   }
 };
 
-// ৩. নতুন ছবি যোগ করার জন্য (Add New Photo - Local Path Fixed)
+// ৩. নতুন ছবি যোগ করার জন্য (Add New Photo - Cloudinary Ready)
 const addPhoto = async (req, res) => {
   if (
     !req.user ||
@@ -107,13 +105,10 @@ const addPhoto = async (req, res) => {
       });
     }
 
-    // Local Path Fixed with leading slash
-    const imageUrl = `/uploads/photos/${req.file.filename}`;
-
     const newPhoto = new Photo({
       title,
       category: category || "General",
-      imageUrl: imageUrl,
+      imageUrl: req.file.path,
       uploadedBy: req.user?._id || req.user?.id || null,
       date:
         date && !isNaN(new Date(date).getTime())
@@ -144,7 +139,7 @@ const addPhoto = async (req, res) => {
   }
 };
 
-// ৪. ছবি আপডেট করার জন্য (Update Photo & Path Fix)
+// ৪. ছবি আপডেট করার জন্য (Update Photo - Cloudinary Ready)
 const updatePhoto = async (req, res) => {
   if (
     !req.user ||
@@ -197,23 +192,8 @@ const updatePhoto = async (req, res) => {
       }
     }
 
-    // যদি নতুন ছবি আপলোড করা হয়, তবে পুরনো ছবির অস্তিত্ব চেক করে সেফলি ডিলিট হবে
     if (req.file) {
-      if (photo.imageUrl && !photo.imageUrl.startsWith("http")) {
-        const oldImage = path.join(
-          __dirname,
-          "..",
-          photo.imageUrl.replace(/^\/+/, "")
-        );
-
-        fs.unlink(oldImage, (err) => {
-          if (err && err.code !== "ENOENT") {
-            console.error("Old image delete error:", err);
-          }
-        });
-      }
-
-      photo.imageUrl = `/uploads/photos/${req.file.filename}`;
+      photo.imageUrl = req.file.path;
     }
 
     const updatedPhoto = await photo.save();
@@ -235,7 +215,7 @@ const updatePhoto = async (req, res) => {
   }
 };
 
-// ৫. ছবি ডিলিট করার জন্য (Soft Delete & Path Fix)
+// ৫. ছবি ডিলিট করার জন্য (Soft Delete - Cloudinary Ready)
 const deletePhoto = async (req, res) => {
   try {
     if (!req.user || req.user.role !== "SUPER_ADMIN") {
@@ -275,24 +255,9 @@ const deletePhoto = async (req, res) => {
       });
     }
 
-    // সার্ভার থেকেও ছবির অস্তিত্ব চেক করে সেফলি রিমুভ করা (লোকাল ফাইল হলে)
-    if (deletedPhoto.imageUrl && !deletedPhoto.imageUrl.startsWith("http")) {
-      const imagePath = path.join(
-        __dirname,
-        "..",
-        deletedPhoto.imageUrl.replace(/^\/+/, "")
-      );
-
-      fs.unlink(imagePath, (err) => {
-        if (err && err.code !== "ENOENT") {
-          console.error("Image delete error:", err);
-        }
-      });
-    }
-
     res.status(200).json({
       success: true,
-      message: "ছবি এবং সার্ভার ফাইল সফলভাবে মুছে ফেলা হয়েছে",
+      message: "ছবি সফলভাবে মুছে ফেলা হয়েছে",
       data: deletedPhoto,
     });
   } catch (error) {
