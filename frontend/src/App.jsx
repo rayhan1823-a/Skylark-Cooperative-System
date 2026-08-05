@@ -47,9 +47,9 @@ import Loans from "./pages/Loans";
 import Funds from "./pages/Funds"; 
 import Penalties from "./pages/Penalties";
 
-// ✅ Investment Management & Cheque Management
+// ✅ Investment Management & Cheque Management (Path Corrected)
 import InvestmentManagement from "./pages/InvestmentManagement";
-import ChequeManagement from "./pages/Cheque/ChequeManagement"; // ✅ Cheque Component Import (আপনার ফোল্ডার স্ট্রাকচার অনুযায়ী পাথ ঠিক করে নিতে পারেন)
+import ChequeManagement from "./pages/ChequeManagement"; 
 
 // Reports
 import Reports from "./pages/Reports";
@@ -197,7 +197,7 @@ function App() {
           {/* ✅ Investment Management Route */}
           <Route path="/investments" element={<InvestmentManagement />} />
 
-          {/* ✅ Cheque Management Route (New Added) */}
+          {/* ✅ Cheque Management Route */}
           <Route path="/cheques" element={<ChequeManagement />} />
 
           <Route path="/funds" element={<Funds />} />
