@@ -47,7 +47,7 @@ import Loans from "./pages/Loans";
 import Funds from "./pages/Funds"; 
 import Penalties from "./pages/Penalties";
 
-// ✅ Investment Management & Cheque Management (Path Corrected)
+// ✅ Investment Management & Cheque Management
 import InvestmentManagement from "./pages/InvestmentManagement";
 import ChequeManagement from "./pages/ChequeManagement"; 
 
