@@ -47,8 +47,9 @@ import Loans from "./pages/Loans";
 import Funds from "./pages/Funds"; 
 import Penalties from "./pages/Penalties";
 
-// ✅ Investment Management (New)
+// ✅ Investment Management & Cheque Management
 import InvestmentManagement from "./pages/InvestmentManagement";
+import ChequeManagement from "./pages/Cheque/ChequeManagement"; // ✅ Cheque Component Import (আপনার ফোল্ডার স্ট্রাকচার অনুযায়ী পাথ ঠিক করে নিতে পারেন)
 
 // Reports
 import Reports from "./pages/Reports";
@@ -57,7 +58,7 @@ import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 
 // ✅ Popup Modal Component (New)
-import PopupModal from "./components/PopupModal"; // পাথ আপনার ফোল্ডার স্ট্রাকচার অনুযায়ী অ্যাডজাস্ট করে নিতে পারেন (যদি components ফোল্ডারে থাকে)
+import PopupModal from "./components/PopupModal";
 
 // ======================================
 // 404 Page
@@ -193,8 +194,11 @@ function App() {
           <Route path="/payments" element={<Payments />} />
           <Route path="/loans" element={<Loans />} />
           
-          {/* ✅ Investment Management Route (New) */}
+          {/* ✅ Investment Management Route */}
           <Route path="/investments" element={<InvestmentManagement />} />
+
+          {/* ✅ Cheque Management Route (New Added) */}
+          <Route path="/cheques" element={<ChequeManagement />} />
 
           <Route path="/funds" element={<Funds />} />
           <Route path="/penalties" element={<Penalties />} />

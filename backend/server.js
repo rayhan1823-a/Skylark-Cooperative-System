@@ -137,6 +137,9 @@ const videoRoutes = require("./routes/videoRoutes");
 // ✅ Photos Route
 const photoRoutes = require("./routes/photoRoutes");
 
+// ✅ Cheques Route (New)
+const chequeRoutes = require("./routes/chequeRoutes");
+
 // ======================================
 // API Routes
 // ======================================
@@ -207,6 +210,9 @@ app.use("/api/videos", videoRoutes);
 
 // ✅ Photo Gallery API Route
 app.use("/api/photos", photoRoutes);
+
+// ✅ Cheques API Route (New)
+app.use("/api/cheques", chequeRoutes);
 
 // ======================================
 // Root Route
@@ -279,6 +285,7 @@ mongoose
       console.log("✅ Investment & FDR Route Loaded");
       console.log("✅ Video Gallery Route Loaded");
       console.log("✅ Photo Gallery Route Loaded");
+      console.log("✅ Cheques Route Loaded");
       console.log("✅ Skylark Cooperative Management System Ready");
     });
   })

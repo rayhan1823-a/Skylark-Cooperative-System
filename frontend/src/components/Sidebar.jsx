@@ -21,6 +21,7 @@ import {
   FaVideo,
   FaChevronDown,
   FaChevronUp,
+  FaMoneyCheckAlt, // ✅ Cheque Management Icon Added
 } from "react-icons/fa";
 
 function Sidebar() {
@@ -105,6 +106,12 @@ function Sidebar() {
       roles: ["SUPER_ADMIN", "ADMIN", "STAFF"],
     },
     {
+      title: "Cheque Management",
+      path: "/cheques",
+      icon: <FaMoneyCheckAlt />,
+      roles: ["SUPER_ADMIN", "ADMIN", "STAFF"],
+    },
+    {
       title: "Fund Management",
       path: "/funds",
       icon: <FaExchangeAlt />,
@@ -151,7 +158,7 @@ function Sidebar() {
 
       {/* ================= Menu (Scrollable for Android/Mobile views) ================= */}
       <nav className="flex-1 mt-2 px-3 space-y-1.5 overflow-y-auto custom-sidebar-scroll">
-        {menu.map((item, index) => {
+        {menu.map((item) => {
           if (item.roles && !item.roles.includes(role)) {
             return null;
           }
