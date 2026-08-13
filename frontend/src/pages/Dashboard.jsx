@@ -28,7 +28,6 @@ function Dashboard() {
   const [totalInvested, setTotalInvested] = useState(0);
   const [totalRefundAmount, setTotalRefundAmount] = useState(0);
   
-  // Reports পেজের মেম্বার রিপোর্ট থেকে হিসাব করা সঠিক Total Due এবং Active Members Total Due
   const [calculatedTotalDue, setCalculatedTotalDue] = useState(0);
   const [activeMembersTotalDue, setActiveMembersTotalDue] = useState(0);
   
@@ -47,7 +46,6 @@ function Dashboard() {
 
         let calculatedTotalMembers = 5;
 
-        // ১. মেইন ড্যাশবোর্ড ডাটা ফেচ
         try {
           const dashRes = await axios.get(`${API}/dashboard`, config);
           if (dashRes.data && dashRes.data.success) {
@@ -100,7 +98,6 @@ function Dashboard() {
           console.error("Error fetching main dashboard API:", dashErr);
         }
 
-        // ২. মেম্বার রিপোর্ট ডাটা ফেচ (Total Due এবং Active Members Total Due হিসাব)
         try {
           const reportRes = await axios.get(`${API}/reports/members`, config);
           if (reportRes.data && reportRes.data.success) {
@@ -109,14 +106,12 @@ function Dashboard() {
               calculatedTotalMembers = reportList.length;
             }
 
-            // Reports পেজের মেম্বার রিপোর্ট থেকে সঠিক Total Due হিসাব
             const sumDue = reportList.reduce(
               (sum, item) => sum + Number(item.totalDue || 0),
               0
             );
             setCalculatedTotalDue(sumDue);
 
-            // Active Members Total Due হিসাব
             const activeDue = reportList
               .filter(item => item.status === "Active" || item.isActive)
               .reduce((sum, item) => sum + Number(item.totalDue || 0), 0);
@@ -144,7 +139,6 @@ function Dashboard() {
           console.error("Error fetching reports API in dashboard:", reportErr);
         }
 
-        // ৩. লোন ডাটা ফেচ
         try {
           const loanRes = await axios.get(`${API}/loans`, config);
           const loans = loanRes.data?.loans || loanRes.data?.data || loanRes.data || [];
@@ -154,7 +148,6 @@ function Dashboard() {
           console.error("Error fetching loans API:", err);
         }
 
-        // ৪. ফান্ড ও ট্রানজেকশন ফেচ
         try {
           const fundRes = await axios.get(`${API}/funds`, config);
           const fundData = fundRes.data;
@@ -172,7 +165,6 @@ function Dashboard() {
           console.error("Error fetching funds:", err);
         }
 
-        // ৫. পেনাল্টি ডাটা ফেচ
         try {
           const penaltyRes = await axios.get(`${API}/penalties`, config);
           const penaltyData = penaltyRes.data?.penalties || penaltyRes.data?.data || penaltyRes.data || [];
@@ -184,7 +176,6 @@ function Dashboard() {
           console.error("Error fetching penalties API:", err);
         }
 
-        // ৬. ইনভেস্টমেন্ট ডাটা ফেচ
         try {
           const investRes = await axios.get(`${API}/investments`, config);
           const investData = investRes.data?.investments || investRes.data?.data || investRes.data || [];
@@ -199,7 +190,6 @@ function Dashboard() {
           console.error("Error fetching investments API:", err);
         }
 
-        // ৭. এক্সিটেড মেম্বারস / রিফান্ড ডাটা ফেচ
         try {
           const res = await axios.get(`${API}/members`, config);
           const allMembersData = res.data.members || res.data.data || res.data || [];
@@ -243,7 +233,6 @@ function Dashboard() {
     .filter(t => t && t.type === "EXPENSE")
     .reduce((sum, t) => sum + Number(t.amount || 0), 0);
 
-  // Main Cash Balance হিসাব (Total Refund Amount বাদ দেওয়া হলো)
   const currentMainCashBalance = (Number(totalDepositBalance) + Number(totalFundIncome) + Number(totalPenaltyAmount) + Number(stats.bankProfit || 0)) - Number(totalLoanGiven) - Number(totalExpense) - Number(totalWithdrawal) - Number(totalInvested) - Number(totalRefundAmount);
   const totalProfit = Number(stats.bankProfit || 0) + Number(totalFundIncome || 0) + Number(totalPenaltyAmount || 0) - Number(totalExpense);
 
@@ -409,10 +398,10 @@ function Dashboard() {
           </div>
         </div>
 
-        {/* নতুন যুক্ত হওয়া Active Members Total Due কার্ড */}
-        <div className="bg-gradient-to-br from-emerald-950 via-teal-950 to-slate-900 border border-emerald-800/50 text-white p-6 rounded-3xl shadow-[0_10px_35px_rgba(6,95,70,0.4)] hover:shadow-2xl transition-all duration-300 flex justify-between items-center group transform hover:-translate-y-1">
+        {/* Active Members Total Due কার্ড (লালচে বা rose থিমযুক্ত) */}
+        <div className="bg-gradient-to-br from-rose-950 via-red-950 to-slate-900 border border-rose-800/50 text-white p-6 rounded-3xl shadow-[0_10px_35px_rgba(159,18,57,0.4)] hover:shadow-2xl transition-all duration-300 flex justify-between items-center group transform hover:-translate-y-1">
           <div>
-            <p className="text-[11px] font-black text-emerald-300 tracking-wider uppercase">Active Members Total Due</p>
+            <p className="text-[11px] font-black text-rose-300 tracking-wider uppercase">Active Members Total Due</p>
             <h3 className="text-2xl font-black mt-2 text-white">৳ {activeMembersTotalDue.toLocaleString()}</h3>
           </div>
           <div className="p-4 bg-white/10 text-white rounded-2xl backdrop-blur-xl group-hover:scale-110 transition duration-300 shadow-inner border border-white/20">
