@@ -28,8 +28,9 @@ function Dashboard() {
   const [totalInvested, setTotalInvested] = useState(0);
   const [totalRefundAmount, setTotalRefundAmount] = useState(0);
   
-  // Reports পেজের মেম্বার রিপোর্ট থেকে হিসাব করা সঠিক Total Due রাখার স্টেট
+  // Reports পেজের মেম্বার রিপোর্ট থেকে হিসাব করা সঠিক Total Due এবং Active Members Total Due
   const [calculatedTotalDue, setCalculatedTotalDue] = useState(0);
+  const [activeMembersTotalDue, setActiveMembersTotalDue] = useState(0);
   
   const [depositChartData, setDepositChartData] = useState([]);
   const [dueChartData, setDueChartData] = useState([]);
@@ -99,7 +100,7 @@ function Dashboard() {
           console.error("Error fetching main dashboard API:", dashErr);
         }
 
-        // ২. মেম্বার রিপোর্ট ডাটা ফেচ (এখান থেকেই Reports পেজের মতো সরাসরি totalDue এর সঠিক যোগফল বের করা হচ্ছে)
+        // ২. মেম্বার রিপোর্ট ডাটা ফেচ (Total Due এবং Active Members Total Due হিসাব)
         try {
           const reportRes = await axios.get(`${API}/reports/members`, config);
           if (reportRes.data && reportRes.data.success) {
@@ -114,6 +115,12 @@ function Dashboard() {
               0
             );
             setCalculatedTotalDue(sumDue);
+
+            // Active Members Total Due হিসাব
+            const activeDue = reportList
+              .filter(item => item.status === "Active" || item.isActive)
+              .reduce((sum, item) => sum + Number(item.totalDue || 0), 0);
+            setActiveMembersTotalDue(activeDue);
 
             const calculatedTotalDep = reportList.reduce((sum, item) => sum + Number(item.totalDeposit || 0), 0);
             if (calculatedTotalDep > 0) {
@@ -396,6 +403,17 @@ function Dashboard() {
           <div>
             <p className="text-[11px] font-black text-rose-300 tracking-wider uppercase">Total Due</p>
             <h3 className="text-2xl font-black mt-2 text-white">৳ {calculatedTotalDue.toLocaleString()}</h3>
+          </div>
+          <div className="p-4 bg-white/10 text-white rounded-2xl backdrop-blur-xl group-hover:scale-110 transition duration-300 shadow-inner border border-white/20">
+            <TrendingDown size={24} />
+          </div>
+        </div>
+
+        {/* নতুন যুক্ত হওয়া Active Members Total Due কার্ড */}
+        <div className="bg-gradient-to-br from-emerald-950 via-teal-950 to-slate-900 border border-emerald-800/50 text-white p-6 rounded-3xl shadow-[0_10px_35px_rgba(6,95,70,0.4)] hover:shadow-2xl transition-all duration-300 flex justify-between items-center group transform hover:-translate-y-1">
+          <div>
+            <p className="text-[11px] font-black text-emerald-300 tracking-wider uppercase">Active Members Total Due</p>
+            <h3 className="text-2xl font-black mt-2 text-white">৳ {activeMembersTotalDue.toLocaleString()}</h3>
           </div>
           <div className="p-4 bg-white/10 text-white rounded-2xl backdrop-blur-xl group-hover:scale-110 transition duration-300 shadow-inner border border-white/20">
             <TrendingDown size={24} />
