@@ -28,6 +28,9 @@ function Dashboard() {
   const [totalInvested, setTotalInvested] = useState(0);
   const [totalRefundAmount, setTotalRefundAmount] = useState(0);
   
+  // Reports পেজের মেম্বার রিপোর্ট থেকে হিসাব করা সঠিক Total Due রাখার স্টেট
+  const [calculatedTotalDue, setCalculatedTotalDue] = useState(0);
+  
   const [depositChartData, setDepositChartData] = useState([]);
   const [dueChartData, setDueChartData] = useState([]);
 
@@ -96,7 +99,7 @@ function Dashboard() {
           console.error("Error fetching main dashboard API:", dashErr);
         }
 
-        // ২. মেম্বার রিপোর্ট ডাটা ফেচ
+        // ২. মেম্বার রিপোর্ট ডাটা ফেচ (এখান থেকেই Reports পেজের মতো সরাসরি totalDue এর সঠিক যোগফল বের করা হচ্ছে)
         try {
           const reportRes = await axios.get(`${API}/reports/members`, config);
           if (reportRes.data && reportRes.data.success) {
@@ -104,6 +107,13 @@ function Dashboard() {
             if (reportList.length > 0) {
               calculatedTotalMembers = reportList.length;
             }
+
+            // Reports পেজের মেম্বার রিপোর্ট থেকে সঠিক Total Due হিসাব
+            const sumDue = reportList.reduce(
+              (sum, item) => sum + Number(item.totalDue || 0),
+              0
+            );
+            setCalculatedTotalDue(sumDue);
 
             const calculatedTotalDep = reportList.reduce((sum, item) => sum + Number(item.totalDeposit || 0), 0);
             if (calculatedTotalDep > 0) {
@@ -182,7 +192,7 @@ function Dashboard() {
           console.error("Error fetching investments API:", err);
         }
 
-        // ৭. এক্সিটেড মেম্বারস / রিফান্ড ডাটা ফেচ (সরাসরি /api/members থেকে Exited মেম্বার ফিল্টার করা হলো যেমনটা ExitedMembers পেজে করা হয়েছে)
+        // ৭. এক্সিটেড মেম্বারস / রিফান্ড ডাটা ফেচ
         try {
           const res = await axios.get(`${API}/members`, config);
           const allMembersData = res.data.members || res.data.data || res.data || [];
@@ -225,11 +235,6 @@ function Dashboard() {
   const totalExpense = fundTransactions
     .filter(t => t && t.type === "EXPENSE")
     .reduce((sum, t) => sum + Number(t.amount || 0), 0);
-
-  const memberCountForTarget = stats.totalMembers > 0 ? stats.totalMembers : 5;
-  const targetPerMember = 38000;
-  const totalTargetDeposit = memberCountForTarget * targetPerMember;
-  const calculatedTotalDue = Math.max(0, (totalTargetDeposit - Number(totalDepositBalance)) + Number(totalWithdrawal));
 
   // Main Cash Balance হিসাব (Total Refund Amount বাদ দেওয়া হলো)
   const currentMainCashBalance = (Number(totalDepositBalance) + Number(totalFundIncome) + Number(totalPenaltyAmount) + Number(stats.bankProfit || 0)) - Number(totalLoanGiven) - Number(totalExpense) - Number(totalWithdrawal) - Number(totalInvested) - Number(totalRefundAmount);
