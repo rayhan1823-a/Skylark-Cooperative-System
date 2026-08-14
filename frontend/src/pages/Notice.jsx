@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { FaBullhorn, FaCalendarAlt, FaFilePdf, FaSearch, FaExclamationCircle } from "react-icons/fa";
 
 function Notice() {
-  // ডেমো বা স্যাম্পল নোটিশ ডাটা (নতুন নির্দেশনা নোটিশ সহ সম্পূর্ণ বাংলায় আপডেট করা হলো)
+  // ডেমো বা স্যাম্পল নোটিশ ডাটা
   const [notices] = useState([
     {
       id: 6,
@@ -15,7 +15,7 @@ function Notice() {
 
 সংগ্রহ করার পর Money Receipt-এ উল্লেখিত জমার পরিমাণ, তারিখ, লেনদেনের বিবরণ এবং অন্যান্য তথ্য সঠিকভাবে রয়েছে কি না, তা ভালোভাবে যাচাই করে নিন। কোনো তথ্য অসঙ্গতিপূর্ণ মনে হলে দ্রুত সংশ্লিষ্ট কর্তৃপক্ষকে অবহিত করুন।
 
-উল্লেখ্য, প্রতিটি Money Receipt সংশ্লিষ্ট লেনদেনের একটি গুরুত্বপূর্ণ আর্থিক প্রমাণপত্র। ভবিষ্যতে হিসাব যাচাই, লেনদেনের তথ্য নিশ্চিতকরণ কিংবা অন্য কোনো আর্থিক প্রয়োজনে Money Receipt প্রয়োজন হতে পারে। তাই প্রতিটি লেনদেনের পর সংগৃহীত Money Receipt নিরাপده সংরক্ষণ করা অত্যন্ত গুরুত্বপূর্ণ।
+উল্লেখ্য, প্রতিটি Money Receipt সংশ্লিষ্ট লেনদেনের একটি গুরুত্বপূর্ণ আর্থিক প্রমাণপত্র। ভবিষ্যতে হিসাব যাচাই, লেনদেনের তথ্য নিশ্চিতকরণ কিংবা অন্য কোনো আর্থিক প্রয়োজনে Money Receipt প্রয়োজন হতে পারে। তাই প্রতিটি লেনদেনের পর সংগৃহীত Money Receipt নিরাপদে সংরক্ষণ করা অত্যন্ত গুরুত্বপূর্ণ।
 
 সকল সদস্যকে অনুরোধ করা যাচ্ছে, প্রতিবার অর্থ জমা দেওয়ার পর Deposit History থেকে নিজ দায়িত্বে Money Receipt সংগ্রহ করুন এবং ভবিষ্যৎ প্রয়োজনে ব্যবহারের জন্য তা যথাযথভাবে সংরক্ষণ করুন।
 
@@ -113,7 +113,7 @@ Skylark Cooperative Society`,
     <div className="space-y-6 pb-10">
       
       {/* ==========================================
-          HEADER SECTION
+          HEADER SECTION (Fixed spelling)
       ========================================== */}
       <div className="bg-gradient-to-r from-blue-700 to-indigo-900 rounded-3xl p-6 lg:p-8 text-white shadow-xl flex flex-col md:flex-row justify-between items-center gap-4">
         <div>
@@ -121,7 +121,7 @@ Skylark Cooperative Society`,
             Notice Board
           </span>
           <h1 className="text-2xl lg:text-3xl font-black mt-2">
-            সম সমিতির সকল নোটিশ ও ঘোষণা
+            সমিতির সকল নোটিশ ও ঘোষণা
           </h1>
           <p className="text-blue-100 text-sm mt-1">
             সমিতির সাম্প্রতিক সকল গুরুত্বপূর্ণ আপডেট, মিটিং ও নীতিমালা এখানে প্রকাশিত হয়।
@@ -144,7 +144,7 @@ Skylark Cooperative Society`,
       </div>
 
       {/* ==========================================
-          CATEGORY FILTER TABS (Translated to Bangla)
+          CATEGORY FILTER TABS
       ========================================== */}
       <div className="flex flex-wrap gap-2 items-center">
         {["All", "Condolence", "General Meeting", "Financial Update", "Office Notice", "Member Notification"].map((cat) => (
@@ -153,7 +153,6 @@ Skylark Cooperative Society`,
             onClick={() => setSelectedCategory(cat)}
             className={`px-4 py-2 rounded-xl text-xs lg:text-sm font-semibold transition ${
               selectedCategory === cat
-                .trim()
                 ? "bg-blue-600 text-white shadow-md shadow-blue-600/20"
                 : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
             }`}
