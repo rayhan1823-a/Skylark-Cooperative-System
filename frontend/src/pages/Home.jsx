@@ -157,6 +157,11 @@ function Home() {
 
               <h4 className="font-extrabold text-slate-900 text-2xl tracking-tight">IFIC Bank PLC</h4>
               <p className="text-sm font-medium text-slate-600 mt-0.5">Branch: Darus Salam Road, Mirpur</p>
+              
+              {/* Routing Number Added */}
+              <div className="mt-2 text-xs font-semibold text-slate-700 bg-blue-100/60 px-3 py-1.5 rounded-xl inline-block border border-blue-200/50">
+                Routing Number: <span className="font-mono text-blue-900 font-bold">120260946</span>
+              </div>
             </div>
             
             <div className="mt-6 pt-5 border-t border-slate-200/80 space-y-4">
@@ -196,7 +201,7 @@ function Home() {
             </div>
           </div>
 
-          {/* 2. bKash / Nagad Card (Without Rocket, Larger Text & Notice) */}
+          {/* 2. bKash / Nagad Card */}
           <div className="bg-gradient-to-br from-white via-slate-50 to-pink-50/50 p-7 rounded-3xl shadow-xl border border-pink-100 hover:shadow-2xl transition-all duration-300 relative overflow-hidden flex flex-col justify-between group">
             <div className="absolute top-0 right-0 w-32 h-32 bg-pink-600/5 rounded-bl-full pointer-events-none transition group-hover:scale-110"></div>
 
@@ -246,11 +251,11 @@ function Home() {
                 </span>
               </div>
 
-              {/* Notice Inside bKash/Nagad Card (Without Rocket) */}
+              {/* Notice Updated with Expense & Reference Instruction */}
               <div className="mt-4 bg-gradient-to-r from-pink-600 to-rose-600 text-white p-3.5 rounded-2xl shadow-md flex items-start gap-3 border border-pink-400/30">
                 <FaExclamationCircle className="text-yellow-200 shrink-0 mt-0.5 text-lg" />
                 <p className="text-xs lg:text-sm font-bold leading-snug text-pink-50">
-                  বিকাশ বা নগদে টাকা দিলে অবশ্যই খরচসহ দেবেন।
+                  বিকাশ বা নগদে টাকা দিলে অবশ্যই খরচসহ দেবেন এবং রেফারেন্সে নিজের নাম দেবেন।
                 </p>
               </div>
 
