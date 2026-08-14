@@ -137,6 +137,7 @@ function Home() {
           <span className="text-xs text-slate-500 bg-white px-3 py-1 rounded-full shadow-sm border border-slate-200">
             💡 যেকোনো ফিল্ডে ক্লিক করে তথ্য কপি করতে পারেন
           </span>
+
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -181,6 +182,7 @@ function Home() {
                 <span className="text-blue-500 group-hover/item:scale-110 transition p-1">
                   {copiedText === "MD Hasan Al Mamun, MD Mahidul Mollla, MD Ahsanul Islam" ? <FaCheck className="text-emerald-600 text-base" /> : <FaCopy className="text-base" />}
                 </span>
+
               </div>
 
               {/* Account Number with Copy Button */}
@@ -196,6 +198,7 @@ function Home() {
                 <span className="text-blue-500 group-hover/item:scale-110 transition p-1">
                   {copiedText === "0200044702812" ? <FaCheck className="text-emerald-600 text-base" /> : <FaCopy className="text-base" />}
                 </span>
+
               </div>
 
             </div>
@@ -234,6 +237,7 @@ function Home() {
                 <span className="text-slate-400 group-hover/item:text-pink-600 transition text-lg">
                   {copiedText === "01314533222" ? <FaCheck className="text-emerald-600 text-base" /> : <FaCopy className="text-base" />}
                 </span>
+
               </div>
 
               {/* Nagad */}
@@ -249,6 +253,7 @@ function Home() {
                 <span className="text-slate-400 group-hover/item:text-orange-600 transition text-lg">
                   {copiedText === "01400444424" ? <FaCheck className="text-emerald-600 text-base" /> : <FaCopy className="text-base" />}
                 </span>
+
               </div>
 
               {/* Notice Updated with Expense & Reference Instruction */}
@@ -262,20 +267,29 @@ function Home() {
             </div>
           </div>
 
-          {/* 3. Premium Security & Instruction Card */}
+          {/* 3. Premium Security & Instruction Card (Updated with requested text) */}
           <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 text-white p-7 rounded-3xl shadow-xl flex flex-col justify-between border border-slate-800 relative overflow-hidden">
             <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-blue-500/10 rounded-full blur-2xl pointer-events-none"></div>
 
             <div>
-              <div className="flex items-center gap-2 text-emerald-400 font-bold mb-4 bg-emerald-950/60 w-fit px-3.5 py-1.5 rounded-full border border-emerald-800/50 text-xs">
-                <FaShieldAlt /> নিরাপদ লেনদেন নির্দেশিকা
+              <div className="flex items-center gap-2 text-emerald-400 font-bold mb-3 bg-emerald-950/60 w-fit px-3.5 py-1.5 rounded-full border border-emerald-800/50 text-xs">
+                <FaShieldAlt /> লেনদেন ও মানি রসিদ নির্দেশনা
               </div>
-              <p className="text-sm text-slate-300 leading-relaxed pt-2">
-                যেকোনো ব্যাংকিং বা মোবাইল ওয়ালেটে টাকা প্রেরণের পর অবশ্যই সঠিক ট্রানজাকশন আইডি (<span className="text-blue-300 font-mono font-bold">TrxID</span>) এবং রসিদ সংরক্ষণ করুন। পরবর্তীতে পেমেন্ট সেকশনে এটি সাবমিট করুন।
-              </p>
+              
+              <div className="space-y-2 text-xs text-slate-300 leading-relaxed pt-1">
+                <p>
+                  যেকোনো ব্যাংকিং বা মোবাইল ফাইন্যান্সিয়াল সার্ভিসের মাধ্যমে টাকা জমা দেওয়ার পর নিজ নিজ লেনদেনের তথ্য যাচাই করুন এবং <span className="text-blue-300 font-semibold">Deposit History</span>-তে তথ্য সংরক্ষিত হয়েছে কি না নিশ্চিত করুন।
+                </p>
+                <p>
+                  সফল লেনদেনের পর Deposit History থেকে সংশ্লিষ্ট লেনদেন নির্বাচন করে নিজেই <span className="text-emerald-300 font-semibold">Money Receipt</span> সংগ্রহ করুন এবং তথ্য যাচাই করে নিন।
+                </p>
+                <p className="text-slate-400 text-[11px]">
+                  ভবিষ্যতের যেকোনো আর্থিক প্রয়োজনে এই রসিদ গুরুত্বপূর্ণ প্রমাণপত্র হিসেবে ব্যবহৃত হবে। তাই টাকা জমা দেওয়ার পর রসিদ সংগ্রহ করতে ভুলবেন না।
+                </p>
+              </div>
             </div>
             
-            <div className="mt-8 pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400 font-medium">
+            <div className="mt-6 pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400 font-medium">
               <span>সিস্টেম সিকিউরিটি</span>
               <span className="text-blue-400 font-semibold">Skylark Management</span>
             </div>
