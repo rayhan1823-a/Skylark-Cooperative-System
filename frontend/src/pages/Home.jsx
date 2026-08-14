@@ -139,10 +139,11 @@ function Home() {
           </span>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+        {/* Fixed: items-start added to prevent stretching height */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
           
           {/* 1. IFIC Bank Card */}
-          <div className="bg-gradient-to-br from-white via-slate-50 to-blue-50/50 p-6 rounded-3xl shadow-xl border border-blue-100 hover:shadow-2xl transition-all duration-300 relative overflow-hidden flex flex-col justify-between group">
+          <div className="bg-gradient-to-br from-white via-slate-50 to-blue-50/50 p-6 rounded-3xl shadow-xl border border-blue-100 hover:shadow-2xl transition-all duration-300 relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/5 rounded-bl-full pointer-events-none transition group-hover:scale-110"></div>
             
             <div>
@@ -202,7 +203,7 @@ function Home() {
           </div>
 
           {/* 2. bKash / Nagad Card */}
-          <div className="bg-gradient-to-br from-white via-slate-50 to-pink-50/50 p-6 rounded-3xl shadow-xl border border-pink-100 hover:shadow-2xl transition-all duration-300 relative overflow-hidden flex flex-col justify-between group">
+          <div className="bg-gradient-to-br from-white via-slate-50 to-pink-50/50 p-6 rounded-3xl shadow-xl border border-pink-100 hover:shadow-2xl transition-all duration-300 relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-32 h-32 bg-pink-600/5 rounded-bl-full pointer-events-none transition group-hover:scale-110"></div>
 
             <div>
