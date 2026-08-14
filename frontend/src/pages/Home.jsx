@@ -142,20 +142,20 @@ function Home() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
           
           {/* 1. IFIC Bank Card */}
-          <div className="bg-gradient-to-br from-white via-slate-50 to-blue-50/50 p-6 rounded-3xl shadow-xl border border-blue-100 hover:shadow-2xl transition-all duration-300 relative overflow-hidden flex flex-col justify-between group">
+          <div className="bg-gradient-to-br from-white via-slate-50 to-blue-50/50 p-5 rounded-3xl shadow-xl border border-blue-100 hover:shadow-2xl transition-all duration-300 relative overflow-hidden flex flex-col justify-between group">
             <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/5 rounded-bl-full pointer-events-none transition group-hover:scale-110"></div>
             
             <div>
               <div className="flex items-center justify-between mb-3">
-                <div className="bg-gradient-to-tr from-blue-600 to-indigo-700 text-white p-3 rounded-2xl shadow-md shadow-blue-500/20">
-                  <FaUniversity size={22} />
+                <div className="bg-gradient-to-tr from-blue-600 to-indigo-700 text-white p-2.5 rounded-2xl shadow-md shadow-blue-500/20">
+                  <FaUniversity size={20} />
                 </div>
                 <span className="text-xs font-bold bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full border border-emerald-200">
                   ● Active Bank
                 </span>
               </div>
 
-              <h4 className="font-extrabold text-slate-900 text-xl tracking-tight">IFIC Bank PLC</h4>
+              <h4 className="font-extrabold text-slate-900 text-lg tracking-tight">IFIC Bank PLC</h4>
               <p className="text-xs font-medium text-slate-600 mt-0.5">Branch: Darus Salam Road, Mirpur</p>
               
               {/* Routing Number Added */}
@@ -164,12 +164,12 @@ function Home() {
               </div>
             </div>
             
-            <div className="mt-5 pt-4 border-t border-slate-200/80 space-y-3">
+            <div className="mt-4 pt-3 border-t border-slate-200/80 space-y-2.5">
               
               {/* Account Name with Copy Button */}
               <div 
                 onClick={() => handleCopy("MD Hasan Al Mamun, MD Mahidul Mollla, MD Ahsanul Islam")}
-                className="bg-white p-3 rounded-2xl border border-blue-100 hover:border-blue-400 cursor-pointer flex items-center justify-between shadow-sm transition group/item"
+                className="bg-white p-2.5 rounded-2xl border border-blue-100 hover:border-blue-400 cursor-pointer flex items-center justify-between shadow-sm transition group/item"
                 title="Click to copy Account Name"
               >
                 <div className="pr-2">
@@ -186,12 +186,12 @@ function Home() {
               {/* Account Number with Copy Button */}
               <div 
                 onClick={() => handleCopy("0200044702812")}
-                className="bg-white p-3 rounded-2xl border border-blue-100 hover:border-blue-400 cursor-pointer flex items-center justify-between shadow-sm transition group/item"
+                className="bg-white p-2.5 rounded-2xl border border-blue-100 hover:border-blue-400 cursor-pointer flex items-center justify-between shadow-sm transition group/item"
                 title="Click to copy Account Number"
               >
                 <div>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Account Number</p>
-                  <span className="text-blue-700 font-mono font-black text-base tracking-wider">0200044702812</span>
+                  <span className="text-blue-700 font-mono font-black text-sm tracking-wider">0200044702812</span>
                 </div>
                 <span className="text-blue-500 group-hover/item:scale-110 transition p-1 shrink-0">
                   {copiedText === "0200044702812" ? <FaCheck className="text-emerald-600 text-base" /> : <FaCopy className="text-base" />}
@@ -202,34 +202,34 @@ function Home() {
           </div>
 
           {/* 2. bKash / Nagad Card */}
-          <div className="bg-gradient-to-br from-white via-slate-50 to-pink-50/50 p-6 rounded-3xl shadow-xl border border-pink-100 hover:shadow-2xl transition-all duration-300 relative overflow-hidden flex flex-col justify-between group">
+          <div className="bg-gradient-to-br from-white via-slate-50 to-pink-50/50 p-5 rounded-3xl shadow-xl border border-pink-100 hover:shadow-2xl transition-all duration-300 relative overflow-hidden flex flex-col justify-between group">
             <div className="absolute top-0 right-0 w-32 h-32 bg-pink-600/5 rounded-bl-full pointer-events-none transition group-hover:scale-110"></div>
 
             <div>
               <div className="flex items-center justify-between mb-3">
-                <div className="bg-gradient-to-tr from-pink-600 to-rose-700 text-white p-3 rounded-2xl shadow-md shadow-pink-500/20">
-                  <FaMobileAlt size={22} />
+                <div className="bg-gradient-to-tr from-pink-600 to-rose-700 text-white p-2.5 rounded-2xl shadow-md shadow-pink-500/20">
+                  <FaMobileAlt size={20} />
                 </div>
                 <span className="text-xs font-bold bg-pink-100 text-pink-800 px-3 py-1 rounded-full border border-pink-200">
                   ● Personal Wallets
                 </span>
               </div>
 
-              <h4 className="font-extrabold text-slate-900 text-xl tracking-tight">bKash / Nagad</h4>
+              <h4 className="font-extrabold text-slate-900 text-lg tracking-tight">bKash / Nagad</h4>
               <p className="text-xs font-medium text-slate-600 mt-0.5">Official Personal Numbers</p>
             </div>
             
-            <div className="mt-5 pt-4 border-t border-slate-200/80 space-y-3">
+            <div className="mt-4 pt-3 border-t border-slate-200/80 space-y-2.5">
               
               {/* bKash */}
               <div 
                 onClick={() => handleCopy("01314533222")}
-                className="flex items-center justify-between bg-white px-3.5 py-3 rounded-2xl border border-slate-100 hover:border-pink-300 cursor-pointer shadow-sm transition group/item"
+                className="flex items-center justify-between bg-white px-3 py-2.5 rounded-2xl border border-slate-100 hover:border-pink-300 cursor-pointer shadow-sm transition group/item"
                 title="Click to copy bKash number"
               >
                 <div>
                   <span className="font-bold text-slate-600 text-xs">bKash:</span>
-                  <span className="text-pink-600 font-mono font-extrabold text-base ml-2">01314533222</span>
+                  <span className="text-pink-600 font-mono font-extrabold text-sm ml-2">01314533222</span>
                 </div>
                 <span className="text-slate-400 group-hover/item:text-pink-600 transition text-base shrink-0">
                   {copiedText === "01314533222" ? <FaCheck className="text-emerald-600 text-base" /> : <FaCopy className="text-base" />}
@@ -239,12 +239,12 @@ function Home() {
               {/* Nagad */}
               <div 
                 onClick={() => handleCopy("01400444424")}
-                className="flex items-center justify-between bg-white px-3.5 py-3 rounded-2xl border border-slate-100 hover:border-orange-300 cursor-pointer shadow-sm transition group/item"
+                className="flex items-center justify-between bg-white px-3 py-2.5 rounded-2xl border border-slate-100 hover:border-orange-300 cursor-pointer shadow-sm transition group/item"
                 title="Click to copy Nagad number"
               >
                 <div>
                   <span className="font-bold text-slate-600 text-xs">Nagad:</span>
-                  <span className="text-orange-600 font-mono font-extrabold text-base ml-2">01400444424</span>
+                  <span className="text-orange-600 font-mono font-extrabold text-sm ml-2">01400444424</span>
                 </div>
                 <span className="text-slate-400 group-hover/item:text-orange-600 transition text-base shrink-0">
                   {copiedText === "01400444424" ? <FaCheck className="text-emerald-600 text-base" /> : <FaCopy className="text-base" />}
@@ -252,9 +252,9 @@ function Home() {
               </div>
 
               {/* Notice Updated with Expense & Reference Instruction */}
-              <div className="mt-3 bg-gradient-to-r from-pink-600 to-rose-600 text-white p-3 rounded-2xl shadow-md flex items-start gap-2.5 border border-pink-400/30">
-                <FaExclamationCircle className="text-yellow-200 shrink-0 mt-0.5 text-base" />
-                <p className="text-xs font-bold leading-snug text-pink-50">
+              <div className="mt-2 bg-gradient-to-r from-pink-600 to-rose-600 text-white p-2.5 rounded-2xl shadow-md flex items-start gap-2 border border-pink-400/30">
+                <FaExclamationCircle className="text-yellow-200 shrink-0 mt-0.5 text-sm" />
+                <p className="text-[11px] font-bold leading-snug text-pink-50">
                   বিকাশ বা নগদে টাকা দিলে অবশ্যই খরচসহ দেবেন এবং রেফারেন্সে নিজের নাম দেবেন।
                 </p>
               </div>
@@ -263,7 +263,7 @@ function Home() {
           </div>
 
           {/* 3. Premium Security & Instruction Card (Exact requested text) */}
-          <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 text-white p-6 rounded-3xl shadow-xl flex flex-col justify-between border border-slate-800 relative overflow-hidden">
+          <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 text-white p-5 rounded-3xl shadow-xl flex flex-col justify-between border border-slate-800 relative overflow-hidden">
             <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-blue-500/10 rounded-full blur-2xl pointer-events-none"></div>
 
             <div>
@@ -287,7 +287,7 @@ function Home() {
               </div>
             </div>
             
-            <div className="mt-5 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400 font-medium">
+            <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400 font-medium">
               <span>সিস্টেম সিকিউরিটি</span>
               <span className="text-blue-400 font-semibold">Skylark Management</span>
             </div>
