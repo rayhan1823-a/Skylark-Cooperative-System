@@ -267,7 +267,7 @@ function Home() {
             </div>
           </div>
 
-          {/* 3. Premium Security & Instruction Card (Updated with requested text) */}
+          {/* 3. Premium Security & Instruction Card (Exact requested text) */}
           <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 text-white p-7 rounded-3xl shadow-xl flex flex-col justify-between border border-slate-800 relative overflow-hidden">
             <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-blue-500/10 rounded-full blur-2xl pointer-events-none"></div>
 
@@ -278,13 +278,16 @@ function Home() {
               
               <div className="space-y-2 text-xs text-slate-300 leading-relaxed pt-1">
                 <p>
-                  যেকোনো ব্যাংকিং বা মোবাইল ফাইন্যান্সিয়াল সার্ভিসের মাধ্যমে টাকা জমা দেওয়ার পর নিজ নিজ লেনদেনের তথ্য যাচাই করুন এবং <span className="text-blue-300 font-semibold">Deposit History</span>-তে তথ্য সংরক্ষিত হয়েছে কি না নিশ্চিত করুন।
+                  যেকোনো ব্যাংকিং সেবা, মোবাইল ব্যাংকিং অথবা মোবাইল ফাইন্যান্সিয়াল সার্ভিসের মাধ্যমে টাকা জমা দেওয়ার পর প্রত্যেক সদস্যকে নিজ নিজ লেনদেনের তথ্য সঠিকভাবে যাচাই করার জন্য অনুরোধ করা যাচ্ছে। লেনদেন সম্পন্ন হওয়ার পর আপনার জমাকৃত অর্থের তথ্য <span className="text-blue-300 font-semibold">Deposit History</span>-তে সংরক্ষিত হয়েছে কি না তা নিশ্চিত করুন।
                 </p>
                 <p>
-                  সফল লেনদেনের পর Deposit History থেকে সংশ্লিষ্ট লেনদেন নির্বাচন করে নিজেই <span className="text-emerald-300 font-semibold">Money Receipt</span> সংগ্রহ করুন এবং তথ্য যাচাই করে নিন।
+                  লেনদেনটি সফলভাবে সম্পন্ন হওয়ার পর Deposit History-তে প্রবেশ করে সংশ্লিষ্ট লেনদেনটি নির্বাচন করুন এবং সেখান থেকে নিজেই <span className="text-emerald-300 font-semibold">Money Receipt</span> সংগ্রহ করুন। সংগৃহীত Money Receipt-এ জমার পরিমাণ, তারিখ, লেনদেনের বিবরণসহ প্রয়োজনীয় তথ্য সঠিকভাবে উল্লেখ রয়েছে কি না, তা ভালোভাবে যাচাই করে নিন।
                 </p>
                 <p className="text-slate-400 text-[11px]">
-                  ভবিষ্যতের যেকোনো আর্থিক প্রয়োজনে এই রসিদ গুরুত্বপূর্ণ প্রমাণপত্র হিসেবে ব্যবহৃত হবে। তাই টাকা জমা দেওয়ার পর রসিদ সংগ্রহ করতে ভুলবেন না।
+                  প্রতিটি লেনদেনের Money Receipt ভবিষ্যতের জন্য গুরুত্বপূর্ণ প্রমাণপত্র হিসেবে বিবেচিত হবে। তাই টাকা জমা দেওয়ার পর কোনোভাবেই Money Receipt সংগ্রহের বিষয়টি এড়িয়ে যাবেন না। প্রয়োজনে পরবর্তীতে হিসাব যাচাই, লেনদেনের তথ্য নিশ্চিতকরণ অথবা যেকোনো ধরনের আর্থিক প্রয়োজনে এই Money Receipt ব্যবহার করা যেতে পারে।
+                </p>
+                <p className="text-slate-400 text-[11px]">
+                  সকল সদস্যকে অনুরোধ করা যাচ্ছে, প্রতিবার টাকা জমা দেওয়ার পর Deposit History থেকে নিজেই Money Receipt সংগ্রহ করে নিরাপদে সংরক্ষণ করুন এবং ভবিষ্যতে প্রয়োজন হলে সহজেই তা ব্যবহার করুন।
                 </p>
               </div>
             </div>
