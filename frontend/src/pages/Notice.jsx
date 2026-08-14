@@ -2,8 +2,29 @@ import React, { useState } from "react";
 import { FaBullhorn, FaCalendarAlt, FaFilePdf, FaSearch, FaExclamationCircle } from "react-icons/fa";
 
 function Notice() {
-  // ডেমো বা স্যাম্পল নোটিশ ডাটা (আপনার নতুন শোকবার্তা সহ আপডেট করা হলো)
+  // ডেমো বা স্যাম্পল নোটিশ ডাটা (নতুন নির্দেশনা নোটিশ সহ সম্পূর্ণ বাংলায় আপডেট করা হলো)
   const [notices] = useState([
+    {
+      id: 6,
+      title: "লেনদেন ও Money Receipt সংগ্রহ সংক্রান্ত গুরুত্বপূর্ণ নির্দেশনা",
+      category: "Office Notice",
+      date: "14 August 2026",
+      description: `সকল সদস্যের অবগতির জন্য জানানো যাচ্ছে যে, যেকোনো ব্যাংকিং সেবা, মোবাইল ব্যাংকিং অথবা মোবাইল ফাইন্যান্সিয়াল সার্ভিসের মাধ্যমে অর্থ জমা দেওয়ার পর প্রত্যেক সদস্যকে নিজ নিজ লেনদেনের তথ্য সঠিকভাবে যাচাই করার জন্য বিশেষভাবে অনুরোধ করা হচ্ছে।
+
+অর্থ জমা দেওয়ার পর প্রথমে নিশ্চিত হয়ে নিন যে, আপনার লেনদেনটি সফলভাবে সম্পন্ন হয়েছে এবং জমাকৃত অর্থের তথ্য Deposit History-তে সঠিকভাবে সংরক্ষিত হয়েছে। এরপর Deposit History-তে প্রবেশ করে সংশ্লিষ্ট লেনদেনটি নির্বাচন করুন এবং সেখান থেকে নিজেই Money Receipt সংগ্রহ করুন।
+
+সংগ্রহ করার পর Money Receipt-এ উল্লেখিত জমার পরিমাণ, তারিখ, লেনদেনের বিবরণ এবং অন্যান্য তথ্য সঠিকভাবে রয়েছে কি না, তা ভালোভাবে যাচাই করে নিন। কোনো তথ্য অসঙ্গতিপূর্ণ মনে হলে দ্রুত সংশ্লিষ্ট কর্তৃপক্ষকে অবহিত করুন।
+
+উল্লেখ্য, প্রতিটি Money Receipt সংশ্লিষ্ট লেনদেনের একটি গুরুত্বপূর্ণ আর্থিক প্রমাণপত্র। ভবিষ্যতে হিসাব যাচাই, লেনদেনের তথ্য নিশ্চিতকরণ কিংবা অন্য কোনো আর্থিক প্রয়োজনে Money Receipt প্রয়োজন হতে পারে। তাই প্রতিটি লেনদেনের পর সংগৃহীত Money Receipt নিরাপده সংরক্ষণ করা অত্যন্ত গুরুত্বপূর্ণ।
+
+সকল সদস্যকে অনুরোধ করা যাচ্ছে, প্রতিবার অর্থ জমা দেওয়ার পর Deposit History থেকে নিজ দায়িত্বে Money Receipt সংগ্রহ করুন এবং ভবিষ্যৎ প্রয়োজনে ব্যবহারের জন্য তা যথাযথভাবে সংরক্ষণ করুন।
+
+সবার সহযোগিতা ও সচেতনতা একান্তভাবে কাম্য।
+— কর্তৃপক্ষ
+Skylark Cooperative Society`,
+      priority: "High",
+      author: "Management Committee"
+    },
     {
       id: 5,
       title: "🕊️ শোকবার্তা ও গভীর সমবেদনা: শ্রী দিলদার রবি দাশের পিতার পরলোকগমন প্রসঙ্গে।",
@@ -49,7 +70,7 @@ function Notice() {
     },
     {
       id: 3,
-      title: "পবিত্র ঈদুল আজহা ও সরকারি ছুদিন উপলক্ষে অফিস বন্ধের বিজ্ঞপ্তি।",
+      title: "পবিত্র ঈদুল আজহা ও সরকারি ছুটি উপলক্ষে অফিস বন্ধের বিজ্ঞপ্তি।",
       category: "Office Notice",
       date: "10 June 2026",
       description: "আসন্ন পবিত্র ঈদুল আজহা উপলক্ষে আগামী ১৭ জুন থেকে ২১ জুন পর্যন্ত সমিতির সকল কার্যক্রম ও অফিশিয়াল লেনদেন বন্ধ থাকবে। ২২ জুন থেকে যথারীতি অফিস খোলা থাকবে।",
@@ -69,6 +90,16 @@ function Notice() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+
+  // ক্যাটাগরি নামগুলোর বাংলা রূপান্তর ম্যাপ
+  const categoryNames = {
+    All: "সকল নোটিশ",
+    Condolence: "শোকবার্তা",
+    "General Meeting": "সাধারণ সভা",
+    "Financial Update": "আর্থিক আপডেট",
+    "Office Notice": "অফিস নোটিশ",
+    "Member Notification": "সদস্য বিজ্ঞপ্তি"
+  };
 
   // ফিল্টার করার লজিক
   const filteredNotices = notices.filter((notice) => {
@@ -90,7 +121,7 @@ function Notice() {
             Notice Board
           </span>
           <h1 className="text-2xl lg:text-3xl font-black mt-2">
-            সমিতির সকল নোটিশ ও ঘোষণা
+            সম সমিতির সকল নোটিশ ও ঘোষণা
           </h1>
           <p className="text-blue-100 text-sm mt-1">
             সমিতির সাম্প্রতিক সকল গুরুত্বপূর্ণ আপডেট, মিটিং ও নীতিমালা এখানে প্রকাশিত হয়।
@@ -113,7 +144,7 @@ function Notice() {
       </div>
 
       {/* ==========================================
-          CATEGORY FILTER TABS
+          CATEGORY FILTER TABS (Translated to Bangla)
       ========================================== */}
       <div className="flex flex-wrap gap-2 items-center">
         {["All", "Condolence", "General Meeting", "Financial Update", "Office Notice", "Member Notification"].map((cat) => (
@@ -122,11 +153,12 @@ function Notice() {
             onClick={() => setSelectedCategory(cat)}
             className={`px-4 py-2 rounded-xl text-xs lg:text-sm font-semibold transition ${
               selectedCategory === cat
+                .trim()
                 ? "bg-blue-600 text-white shadow-md shadow-blue-600/20"
                 : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
             }`}
           >
-            {cat === "All" ? "সকল নোটিশ" : cat === "Condolence" ? "শোকবার্তা" : cat}
+            {categoryNames[cat] || cat}
           </button>
         ))}
       </div>
@@ -144,7 +176,7 @@ function Notice() {
               <div className="space-y-2 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="bg-blue-50 text-blue-700 text-xs font-bold px-3 py-1 rounded-md">
-                    {notice.category === "Condolence" ? "শোকবার্তা" : notice.category}
+                    {categoryNames[notice.category] || notice.category}
                   </span>
                   
                   {notice.priority === "High" && (
@@ -171,7 +203,7 @@ function Notice() {
                 </div>
               </div>
 
-              {/* Action Button (Optional Download/View) */}
+              {/* Action Button */}
               <div className="w-full md:w-auto flex md:flex-col justify-end">
                 <button 
                   onClick={() => alert(`নোটিশ আইডি: ${notice.id} - বিস্তারিত পঠিত হয়েছে।`)}
