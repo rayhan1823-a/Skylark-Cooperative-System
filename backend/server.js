@@ -215,6 +215,11 @@ app.use("/api/photos", photoRoutes);
 app.use("/api/cheques", chequeRoutes);
 
 // ======================================
+// Extra Direct Route Support (Fixes 404 for Cheques without /api prefix)
+// ======================================
+app.use("/cheques", chequeRoutes);
+
+// ======================================
 // Root Route
 // ======================================
 
