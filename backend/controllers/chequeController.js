@@ -2,7 +2,15 @@ const Cheque = require("../models/chequeModel"); // আপনার মডেল
 const mongoose = require("mongoose");
 
 const ALLOWED_STATUS = ["Available", "Used", "Cancelled"];
-const ALLOWED_USED_FOR = ["Loan", "Expense", "Withdrawal", "Other", ""];
+const ALLOWED_USED_FOR = [
+  "Deposit",
+  "Loan",
+  "Withdrawal",
+  "Investment",
+  "Office Expense",
+  "Other",
+  "",
+];
 
 // তারিখ পার্স করার হেল্পার ফাংশন
 const parseDate = (dateVal) => {
