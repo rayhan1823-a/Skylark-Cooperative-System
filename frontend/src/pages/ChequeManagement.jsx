@@ -50,8 +50,7 @@ function ChequeManagement() {
   const isSuperAdmin = currentUser.role === "SUPER_ADMIN";
   const token = localStorage.getItem("token");
 
-  // সঠিক ফরম্যাটে কনফিগারেশন অবজেক্ট
-  const config = {
+  const headers = {
     headers: { Authorization: `Bearer ${token}` },
   };
 
@@ -61,7 +60,7 @@ function ChequeManagement() {
       setLoading(true);
       const res = await axios.get(
         `${API_BASE_URL}/cheques?search=${search}&status=${statusFilter}&sort=${sort}&page=${page}&limit=${limit}`,
-        config
+        headers
       );
       if (res.data.success) {
         setCheques(res.data.data);
@@ -76,7 +75,7 @@ function ChequeManagement() {
 
   const fetchSummary = async () => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/cheques/summary`, config);
+      const res = await axios.get(`${API_BASE_URL}/cheques/summary`, headers);
       if (res.data.success) {
         setSummary(res.data);
       }
@@ -135,18 +134,18 @@ function ChequeManagement() {
     e.preventDefault();
     try {
       if (isEditMode) {
-        await axios.put(`${API_BASE_URL}/cheques/${selectedChequeId}`, formData, config);
-        alert("চেক সফলভাবে আপডেট করা হয়েছে!");
+        await axios.put(`${API_BASE_URL}/cheques/${selectedChequeId}`, formData, headers);
+        alert("চেক সফলভাবে আপডেট করা হয়েছে!");
       } else {
-        await axios.post(`${API_BASE_URL}/cheques`, formData, config);
-        alert("নতুন চেক সফলভাবে যুক্ত করা হয়েছে!");
+        await axios.post(`${API_BASE_URL}/cheques`, formData, headers);
+        alert("নতুন চেক সফলভাবে যুক্ত করা হয়েছে!");
       }
       setIsModalOpen(false);
       fetchCheques();
       fetchSummary();
     } catch (error) {
       console.error("Error saving cheque:", error);
-      alert(error.response?.data?.message || "কিছু সমস্যা হয়েছে!");
+      alert(error.response?.data?.message || "কিছু সমস্যা হয়েছে!");
     }
   };
 
@@ -154,13 +153,13 @@ function ChequeManagement() {
   const handleDelete = async (id) => {
     if (!window.confirm("আপনি কি নিশ্চিতভাবে এই চেকটি ডিলিট করতে চান?")) return;
     try {
-      await axios.delete(`${API_BASE_URL}/cheques/${id}`, config);
-      alert("চেক সফলভাবে মুছে ফেলা হয়েছে!");
+      await axios.delete(`${API_BASE_URL}/cheques/${id}`, headers);
+      alert("চেক সফলভাবে মুছে ফেলা হয়েছে!");
       fetchCheques();
       fetchSummary();
     } catch (error) {
       console.error("Error deleting cheque:", error);
-      alert(error.response?.data?.message || "ডিলিট করতে সমস্যা হয়েছে!");
+      alert(error.response?.data?.message || "ডিলিট করতে সমস্যা হয়েছে!");
     }
   };
 
@@ -264,7 +263,7 @@ function ChequeManagement() {
                 </tr>
               ) : cheques.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="text-center py-8 text-slate-500 font-medium">কোনো চেক পাওয়া যায়নি।</td>
+                  <td colSpan="6" className="text-center py-8 text-slate-500 font-medium">কোনো চেক পাওয়া যায়নি।</td>
                 </tr>
               ) : (
                 cheques.map((cheque) => (
