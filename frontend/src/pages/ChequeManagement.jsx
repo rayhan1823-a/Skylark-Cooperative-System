@@ -14,7 +14,7 @@ import {
   FaTimes,
 } from "react-icons/fa";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API_BASE_URL = "https://skylark-cooperative-system.onrender.com/api";
 
 function ChequeManagement() {
   const [cheques, setCheques] = useState([]);
