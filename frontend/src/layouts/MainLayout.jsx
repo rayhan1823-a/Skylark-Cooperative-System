@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, Link, useLocation, Outlet } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 
@@ -18,12 +18,47 @@ function MainLayout() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const user = JSON.parse(localStorage.getItem("user")) || {};
+  // Outside click এবং conflict সমাধানের জন্য Refs
+  const menuRef = useRef(null);
+  const notificationRef = useRef(null);
+  const mobileProfileRef = useRef(null); // মোবাইল প্রোফাইল মেনুর জন্য Ref
+
+  // বসের পরামর্শ অনুযায়ী Safe JSON.parse ফাংশন (ক্র্যাশ রোধ করতে)
+  const getStoredUser = () => {
+    try {
+      const item = localStorage.getItem("user");
+      return item ? JSON.parse(item) : {};
+    } catch (error) {
+      console.error("Invalid user data in localStorage:", error);
+      return {};
+    }
+  };
+
+  const user = getStoredUser();
+  const userId = user?.memberId || user?._id;
 
   const [currentTime, setCurrentTime] = useState(new Date());
   const [showMenu, setShowMenu] = useState(false);
   const [showMobileProfileMenu, setShowMobileProfileMenu] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  // Desktop এবং Mobile উভয় মেনুর জন্য Outside Click লজিক
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowMenu(false);
+      }
+      if (notificationRef.current && !notificationRef.current.contains(event.target)) {
+        setShowNotifications(false);
+      }
+      if (mobileProfileRef.current && !mobileProfileRef.current.contains(event.target)) {
+        setShowMobileProfileMenu(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -33,10 +68,12 @@ function MainLayout() {
     return () => clearInterval(timer);
   }, []);
 
-  // লোকেশন পরিবর্তন হলে মোবাইল সাইডবার এবং মোবাইল প্রোফাইল মেনু স্বয়ংক্রিয়ভাবে বন্ধ হয়ে যাবে
+  // লোকেশন পরিবর্তন হলে সবকিছু বন্ধ হয়ে যাবে
   useEffect(() => {
     setIsMobileSidebarOpen(false);
     setShowMobileProfileMenu(false);
+    setShowNotifications(false);
+    setShowMenu(false);
   }, [location.pathname]);
 
   const logout = () => {
@@ -47,6 +84,14 @@ function MainLayout() {
       navigate("/login", {
         replace: true,
       });
+    }
+  };
+
+  // আইডি না থাকলে সেফ হ্যান্ডেল করার ফাংশন
+  const handleProfileClick = (e) => {
+    if (!userId) {
+      e.preventDefault();
+      alert("সদস্যের আইডি পাওয়া যায়নি!");
     }
   };
 
@@ -134,21 +179,60 @@ function MainLayout() {
 
             {/* Right */}
             <div className="flex items-center gap-4 lg:gap-6">
+              
               {/* Notification */}
-              <button className="relative hover:scale-110 duration-300">
-                <Bell
-                  size={22}
-                  className="text-gray-700 lg:w-6 lg:h-6"
-                />
-                <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  3
-                </span>
-              </button>
+              <div className="relative" ref={notificationRef}>
+                <button
+                  onClick={() => {
+                    setShowNotifications(!showNotifications);
+                    setShowMenu(false); // প্রোফাইল মেনু বন্ধ হবে
+                  }}
+                  className="relative hover:scale-110 duration-300 focus:outline-none"
+                >
+                  <Bell
+                    size={22}
+                    className="text-gray-700 lg:w-6 lg:h-6"
+                  />
+                  <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    3
+                  </span>
+                </button>
+
+                {/* Notification Dropdown Box */}
+                {showNotifications && (
+                  <div className="absolute right-0 mt-3 w-80 bg-white rounded-xl shadow-2xl border overflow-hidden z-50">
+                    <div className="bg-blue-700 text-white px-4 py-3 flex justify-between items-center">
+                      <h3 className="font-bold text-sm">Notifications</h3>
+                      <span className="text-xs bg-blue-800 px-2 py-0.5 rounded-full">3 New</span>
+                    </div>
+                    <div className="divide-y divide-gray-100 max-h-72 overflow-y-auto">
+                      <div className="p-3 hover:bg-gray-50 transition cursor-pointer">
+                        <p className="text-xs font-semibold text-gray-800">মাসিক জমা ও কিস্তি পরিশোধ</p>
+                        <p className="text-xs text-gray-500 mt-1">সকল সদস্যবৃন্দকে চলতি মাসের কিস্তি নির্দিষ্ট সময়ের মধ্যে পরিশোধ করার অনুরোধ করা হলো।</p>
+                        <span className="text-[10px] text-blue-600 mt-1 block">2 hours ago</span>
+                      </div>
+                      <div className="p-3 hover:bg-gray-50 transition cursor-pointer">
+                        <p className="text-xs font-semibold text-gray-800">জরুরি মিটিং নোটিশ</p>
+                        <p className="text-xs text-gray-500 mt-1">আগামী শুক্রবার সমিতির কার্যনির্বাহী কমিটির জরুরি সভা অনুষ্ঠিত হবে।</p>
+                        <span className="text-[10px] text-blue-600 mt-1 block">1 day ago</span>
+                      </div>
+                      <div className="p-3 hover:bg-gray-50 transition cursor-pointer">
+                        <p className="text-xs font-semibold text-gray-800">সিস্টেম আপডেট</p>
+                        <p className="text-xs text-gray-500 mt-1">ডিজিটাল কোপারেটিভ ম্যানেজমেন্ট সিস্টেম সফলভাবে আপডেট করা হয়েছে।</p>
+                        <span className="text-[10px] text-blue-600 mt-1 block">3 days ago</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {/* User */}
-              <div className="relative">
+              <div className="relative" ref={menuRef}>
                 <button
-                  onClick={() => setShowMenu(!showMenu)}
+                  onClick={() => {
+                    setShowMenu(!showMenu);
+                    setShowNotifications(false); // নোটিফিকেশন বন্ধ হবে
+                  }}
                   className="flex items-center gap-2 lg:gap-3 focus:outline-0"
                 >
                   <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-blue-700 text-white flex items-center justify-center text-lg lg:text-xl font-bold">
@@ -182,10 +266,13 @@ function MainLayout() {
                         </div>
                       </div>
 
-                      {/* My Profile Link (Updated to dynamically link to member profile) */}
+                      {/* My Profile Link (Safe ID Check সহ) */}
                       <Link
-                        to={`/member/${user?.memberId || user?._id}`}
-                        onClick={() => setShowMenu(false)}
+                        to={userId ? `/member/${userId}` : "#"}
+                        onClick={(e) => {
+                          handleProfileClick(e);
+                          setShowMenu(false);
+                        }}
                         className="w-full text-left px-5 py-3 hover:bg-gray-100 transition block text-gray-800"
                       >
                         👤 My Profile
@@ -243,7 +330,7 @@ function MainLayout() {
         <div className="w-[1px] h-8 bg-gray-200"></div>
 
         {/* Right Button: My Profile Icon */}
-        <div className="relative w-1/2 flex justify-center">
+        <div className="relative w-1/2 flex justify-center" ref={mobileProfileRef}>
           <button
             onClick={() => setShowMobileProfileMenu(!showMobileProfileMenu)}
             className={`flex flex-col items-center justify-center w-full py-1 transition-colors ${
@@ -272,8 +359,11 @@ function MainLayout() {
               </div>
 
               <Link
-                to={`/member/${user?.memberId || user?._id}`}
-                onClick={() => setShowMobileProfileMenu(false)}
+                to={userId ? `/member/${userId}` : "#"}
+                onClick={(e) => {
+                  handleProfileClick(e);
+                  setShowMobileProfileMenu(false);
+                }}
                 className="w-full text-left px-5 py-3 hover:bg-gray-100 transition block text-gray-800 text-sm font-medium border-b border-gray-100"
               >
                 👤 My Profile Data
