@@ -1,5 +1,8 @@
 const express = require("express");
 const router = express.Router();
+
+const authMiddleware = require("../middlewares/authMiddleware");
+
 const {
   getCheques,
   getChequeById,
@@ -9,36 +12,24 @@ const {
   getChequeSummary,
 } = require("../controllers/chequeController");
 
-// যদি আপনার প্রজেক্টে অথেন্টিকেশন বা রোল চেক করার মিডলওয়্যার থাকে, 
-// তবে নিচে সেগুলো import করে রাউটে ব্যবহার করতে হবে। যেমন:
-// const { protect, authorize } = require("../middlewares/authMiddleware");
+// ======================================
+// General Routes
+// ======================================
 
-// -------------------------------------------------------------
-// Public or General Routes (অথবা অথেন্টিকেটেড ইউজারের জন্য)
-// -------------------------------------------------------------
+router.get("/summary", authMiddleware, getChequeSummary);
 
-// ১. সামারি পাওয়ার জন্য (এটি আইডি রাউটের উপরে রাখা হয়েছে যাতে 'summary' কে যেন MongoDB-তে ObjectId হিসেবে ভুল না ধরে)
-router.get("/summary", getChequeSummary);
+router.get("/", authMiddleware, getCheques);
 
-// ২. সব চেক পাওয়ার জন্য (Search, Filter, Pagination সহ)
-router.get("/", getCheques);
+router.get("/:id", authMiddleware, getChequeById);
 
-// ৩. নির্দিষ্ট আইডি দিয়ে চেক খোঁজা
-router.get("/:id", getChequeById);
+// ======================================
+// Super Admin Routes
+// ======================================
 
+router.post("/", authMiddleware, addCheque);
 
-// -------------------------------------------------------------
-// Super Admin Protected Routes (চেক অ্যাড, আপডেট ও ডিলিট)
-// -------------------------------------------------------------
+router.put("/:id", authMiddleware, updateCheque);
 
-// ৪. নতুন চেক যোগ করা (নোট: কন্ট্রোলারের ভেতরে অলরেডি `SUPER_ADMIN` চেক করা আছে, 
-// তবে চাইলে এখানে `protect, authorize("SUPER_ADMIN")` মিডলওয়্যার দিতে পারেন)
-router.post("/", addCheque);
-
-// ৫. চেক আপডেট করা
-router.put("/:id", updateCheque);
-
-// ৬. চেক সফট ডিলিট করা
-router.delete("/:id", deleteCheque);
+router.delete("/:id", authMiddleware, deleteCheque);
 
 module.exports = router;
