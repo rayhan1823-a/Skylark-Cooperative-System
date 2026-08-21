@@ -135,17 +135,17 @@ function ChequeManagement() {
     try {
       if (isEditMode) {
         await axios.put(`${API_BASE_URL}/cheques/${selectedChequeId}`, formData, headers);
-        alert("চেক সফলভাবে আপডেট করা হয়েছে!");
+        alert("চেক সফলভাবে আপডেট করা হয়েছে!");
       } else {
         await axios.post(`${API_BASE_URL}/cheques`, formData, headers);
-        alert("নতুন চেক সফলভাবে যুক্ত করা হয়েছে!");
+        alert("নতুন চেক সফলভাবে যুক্ত করা হয়েছে!");
       }
       setIsModalOpen(false);
       fetchCheques();
       fetchSummary();
     } catch (error) {
       console.error("Error saving cheque:", error);
-      alert(error.response?.data?.message || "কিছু সমস্যা হয়েছে!");
+      alert(error.response?.data?.message || "কিছু সমস্যা হয়েছে!");
     }
   };
 
@@ -154,12 +154,12 @@ function ChequeManagement() {
     if (!window.confirm("আপনি কি নিশ্চিতভাবে এই চেকটি ডিলিট করতে চান?")) return;
     try {
       await axios.delete(`${API_BASE_URL}/cheques/${id}`, headers);
-      alert("চেক সফলভাবে মুছে ফেলা হয়েছে!");
+      alert("চেক সফলভাবে মুছে ফেলা হয়েছে!");
       fetchCheques();
       fetchSummary();
     } catch (error) {
       console.error("Error deleting cheque:", error);
-      alert(error.response?.data?.message || "ডিলিট করতে সমস্যা হয়েছে!");
+      alert(error.response?.data?.message || "ডিলিট করতে সমস্যা হয়েছে!");
     }
   };
 
@@ -252,6 +252,8 @@ function ChequeManagement() {
                 <th className="p-4">Bank & Account</th>
                 <th className="p-4">Status</th>
                 <th className="p-4">Used For</th>
+                <th className="p-4">Issue Date</th>
+                <th className="p-4">Used Date</th>
                 <th className="p-4">Added By</th>
                 <th className="p-4 text-center">Actions</th>
               </tr>
@@ -259,11 +261,11 @@ function ChequeManagement() {
             <tbody className="divide-y divide-slate-800 text-sm">
               {loading ? (
                 <tr>
-                  <td colSpan="6" className="text-center py-8 text-slate-500 font-medium">Loading cheques...</td>
+                  <td colSpan="8" className="text-center py-8 text-slate-500 font-medium">Loading cheques...</td>
                 </tr>
               ) : cheques.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="text-center py-8 text-slate-500 font-medium">কোনো চেক পাওয়া যায়নি।</td>
+                  <td colSpan="8" className="text-center py-8 text-slate-500 font-medium">কোনো চেক পাওয়া যায়নি।</td>
                 </tr>
               ) : (
                 cheques.map((cheque) => (
@@ -288,6 +290,16 @@ function ChequeManagement() {
                     </td>
                     <td className="p-4 text-slate-300">
                       {cheque.usedFor || <span className="text-slate-600">-</span>}
+                    </td>
+                    <td className="p-4 text-slate-300 text-xs">
+                      {cheque.issueDate
+                        ? cheque.issueDate.split("T")[0]
+                        : <span className="text-slate-600">-</span>}
+                    </td>
+                    <td className="p-4 text-slate-300 text-xs">
+                      {cheque.usedDate
+                        ? cheque.usedDate.split("T")[0]
+                        : <span className="text-slate-600">-</span>}
                     </td>
                     <td className="p-4 text-slate-400 text-xs">
                       {cheque.addedBy?.name || "System"}
@@ -433,29 +445,29 @@ function ChequeManagement() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-400 mb-1">Issue Date</label>
+                  <label className="block text-xs font-semibold text-slate-400 mb-1">
+                    Issue Date
+                  </label>
                   <input
-  type="date"
-  name="issueDate"
-  value={formData.issueDate}
-  onChange={handleChange}
-  onClick={(e) => e.target.showPicker?.()}
-  onFocus={(e) => e.target.showPicker?.()}
-  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 cursor-pointer"
-/>
-                  
+                    type="date"
+                    name="issueDate"
+                    value={formData.issueDate}
+                    onChange={handleChange}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 cursor-pointer"
+                  />
                 </div>
+
                 <div>
-                  <label className="block text-xs font-semibold text-slate-400 mb-1">Used Date</label>
+                  <label className="block text-xs font-semibold text-slate-400 mb-1">
+                    Used Date
+                  </label>
                   <input
-  type="date"
-  name="usedDate"
-  value={formData.usedDate}
-  onChange={handleChange}
-  onClick={(e) => e.target.showPicker?.()}
-  onFocus={(e) => e.target.showPicker?.()}
-  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 cursor-pointer"
-/>
+                    type="date"
+                    name="usedDate"
+                    value={formData.usedDate}
+                    onChange={handleChange}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 cursor-pointer"
+                  />
                 </div>
               </div>
 
