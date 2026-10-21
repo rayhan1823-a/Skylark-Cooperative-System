@@ -118,6 +118,9 @@ function MemberProfile() {
     }
   }
 
+  // মেম্বার Exited কিনা তা চেক করার জন্য
+  const isExited = member?.status?.toString().toLowerCase() === "exited";
+
   return (
     <div className="flex-1 p-3 sm:p-6 lg:p-10 overflow-y-auto w-full bg-gradient-to-br from-slate-50 via-indigo-50/30 to-slate-100 min-h-screen">
       <div className="profile-print-container max-w-7xl mx-auto space-y-6 sm:space-y-8">
@@ -188,10 +191,20 @@ function MemberProfile() {
               
               <div><p className="text-slate-400 text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider">Blood Group</p><p className="font-extrabold text-sm sm:text-base text-rose-600 mt-0.5 sm:mt-1">{member.bloodGroup || "-"}</p></div>
               <div><p className="text-slate-400 text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider">Joining Date</p><p className="font-bold text-sm sm:text-base text-slate-700 mt-0.5 sm:mt-1">{member.joiningDate ? new Date(member.joiningDate).toLocaleDateString() : "-"}</p></div>
+              
+              {/* এক্সিট মেম্বার হলে এক্সিট ডেট দেখানোর জন্য */}
+              {isExited && (member.exitDate || member.updatedAt) && (
+                <div><p className="text-slate-400 text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider">Exit Date</p><p className="font-bold text-sm sm:text-base text-rose-600 mt-0.5 sm:mt-1">{new Date(member.exitDate || member.updatedAt).toLocaleDateString()}</p></div>
+              )}
+
               <div>
                 <p className="text-slate-400 text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider">Status</p>
                 <div className="mt-1">
-                  <span className="inline-flex items-center gap-1.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-3 py-1 rounded-full text-xs font-black shadow-md shadow-emerald-500/20">
+                  <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black shadow-md ${
+                    isExited 
+                      ? "bg-gradient-to-r from-rose-500 to-red-600 text-white shadow-rose-500/20" 
+                      : "bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-emerald-500/20"
+                  }`}>
                     <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
                     {member.status}
                   </span>
@@ -202,24 +215,45 @@ function MemberProfile() {
           </div>
         </div>
 
-        {/* Summary Cards with Vibrant Gradients & Responsive Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4">
-          {[
-            { label: 'Total Deposit', val: totalDeposit, bg: 'from-emerald-500 via-teal-600 to-emerald-700', shadow: 'shadow-emerald-500/20' },
-            { label: 'Total Withdrawal', val: totalWithdrawal, bg: 'from-pink-500 via-rose-600 to-pink-700', shadow: 'shadow-pink-500/20' },
-            { label: 'Total Loan', val: loanAmount, bg: 'from-purple-600 via-indigo-700 to-purple-800', shadow: 'shadow-purple-500/20' },
-            { label: 'Penalty', val: totalPenalty, bg: 'from-amber-500 via-orange-600 to-amber-600', shadow: 'shadow-amber-500/20' },
-            { label: 'Advance', val: summary?.advanceBalance ?? 0, bg: 'from-blue-500 via-cyan-600 to-blue-700', shadow: 'shadow-blue-500/20' },
-            { label: 'Current Balance', val: currentBalance, bg: 'from-teal-600 via-emerald-700 to-teal-800', shadow: 'shadow-teal-500/20' },
-            { label: 'Total Due', val: totalDueAmount, bg: 'from-rose-600 via-red-700 to-rose-800', shadow: 'shadow-rose-500/20' },
-          ].map((item, index) => (
-            <div key={index} className={`bg-gradient-to-br ${item.bg} text-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 text-center shadow-xl ${item.shadow} transform hover:-translate-y-1 transition-all duration-300 border border-white/20 relative overflow-hidden group`}>
-              <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              <p className="text-[9px] sm:text-[10px] opacity-90 uppercase font-black tracking-widest relative z-10">{item.label}</p>
-              <h2 className="text-base sm:text-lg lg:text-xl font-black mt-2 relative z-10 drop-shadow-sm">৳ {item.val}</h2>
+        {/* ── Summary Cards: Active হলে ৭টি কার্ড দেখাবে, Exited হলে ব্যানার দেখাবে ── */}
+        {!isExited ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4">
+            {[
+              { label: 'Total Deposit', val: totalDeposit, bg: 'from-emerald-500 via-teal-600 to-emerald-700', shadow: 'shadow-emerald-500/20' },
+              { label: 'Total Withdrawal', val: totalWithdrawal, bg: 'from-pink-500 via-rose-600 to-pink-700', shadow: 'shadow-pink-500/20' },
+              { label: 'Total Loan', val: loanAmount, bg: 'from-purple-600 via-indigo-700 to-purple-800', shadow: 'shadow-purple-500/20' },
+              { label: 'Penalty', val: totalPenalty, bg: 'from-amber-500 via-orange-600 to-amber-600', shadow: 'shadow-amber-500/20' },
+              { label: 'Advance', val: summary?.advanceBalance ?? 0, bg: 'from-blue-500 via-cyan-600 to-blue-700', shadow: 'shadow-blue-500/20' },
+              { label: 'Current Balance', val: currentBalance, bg: 'from-teal-600 via-emerald-700 to-teal-800', shadow: 'shadow-teal-500/20' },
+              { label: 'Total Due', val: totalDueAmount, bg: 'from-rose-600 via-red-700 to-rose-800', shadow: 'shadow-rose-500/20' },
+            ].map((item, index) => (
+              <div key={index} className={`bg-gradient-to-br ${item.bg} text-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 text-center shadow-xl ${item.shadow} transform hover:-translate-y-1 transition-all duration-300 border border-white/20 relative overflow-hidden group`}>
+                <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <p className="text-[9px] sm:text-[10px] opacity-90 uppercase font-black tracking-widest relative z-10">{item.label}</p>
+                <h2 className="text-base sm:text-lg lg:text-xl font-black mt-2 relative z-10 drop-shadow-sm">৳ {item.val}</h2>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="bg-gradient-to-r from-rose-500 via-red-600 to-rose-700 text-white rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-xl border border-rose-400/30 relative overflow-hidden">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-2xl border border-white/30 shadow-inner shrink-0">
+                🚪
+              </div>
+              <div>
+                <span className="inline-block bg-white/20 text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full mb-1">
+                  Exited Member Record
+                </span>
+                <h2 className="text-lg sm:text-xl font-black">
+                  এই সদস্য সমিতি থেকে অব্যহতি নিয়েছেন (Exited Member)
+                </h2>
+                <p className="text-rose-100 text-xs mt-0.5 font-medium">
+                  তাঁর আর্থিক সামারি কার্ডসমূহ নিষ্ক্রিয় করা হয়েছে। পূর্ববর্তী সকল লেনদেনের হিস্ট্রি নিচে সংরক্ষিত রয়েছে।
+                </p>
+              </div>
             </div>
-          ))}
-        </div>
+          </div>
+        )}
 
         {/* 1. Deposit History (Updated with Note Column) */}
         <div className="bg-white/95 backdrop-blur-xl border border-slate-100 rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl shadow-slate-200/50">
