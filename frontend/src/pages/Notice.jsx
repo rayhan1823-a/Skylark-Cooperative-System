@@ -2,8 +2,24 @@ import React, { useState } from "react";
 import { FaBullhorn, FaCalendarAlt, FaFilePdf, FaSearch, FaExclamationCircle } from "react-icons/fa";
 
 function Notice() {
-  // ডেমো বা স্যাম্পল নোটিশ ডাটা
+  // ডেমো বা স্যাম্পল নোটিশ ডাটা (আপনার নতুন জরুরি সভার নোটিশটি উপরে যুক্ত করা হয়েছে)
   const [notices] = useState([
+    {
+      id: 7,
+      title: "📢 জরুরি সভার আহ্বান — Skylark Cooperative Society",
+      category: "General Meeting",
+      date: "21 October 2026",
+      description: `সমিতির বেশ কয়েকজন সদস্যের নির্ধারিত টাকা জমা বকেয়া থাকায় সমিতির আর্থিক কার্যক্রম ও ভবিষ্যৎ পরিকল্পনা নিয়ে আলোচনা করা জরুরি হয়ে পড়েছে।
+এ বিষয়ে করণীয় নির্ধারণ এবং বকেয়া টাকা পরিশোধের সময়সীমা ঠিক করতে একটি অনলাইন অথবা অফলাইন সভা আয়োজনের উদ্যোগ নেওয়া হচ্ছে।
+সকল সদস্যকে সভায় অংশগ্রহণ করে নিজেদের মতামত প্রদান এবং সমিতির স্বার্থে দায়িত্বশীল ভূমিকা রাখার জন্য বিশেষভাবে অনুরোধ জানাচ্ছি।
+সভাটি অনলাইন নাকি অফলাইনে হবে, তা সদস্যদের সুবিধা বিবেচনা করে নির্ধারণ করা হবে।
+
+ধন্যবাদান্তে,
+পরিচালনা কমিটি
+Skylark Cooperative Society`,
+      priority: "High",
+      author: "Management Committee"
+    },
     {
       id: 6,
       title: "লেনদেন ও Money Receipt সংগ্রহ সংক্রান্ত গুরুত্বপূর্ণ নির্দেশনা",
@@ -113,7 +129,7 @@ Skylark Cooperative Society`,
     <div className="space-y-6 pb-10">
       
       {/* ==========================================
-          HEADER SECTION (Fixed spelling)
+          HEADER SECTION
       ========================================== */}
       <div className="bg-gradient-to-r from-blue-700 to-indigo-900 rounded-3xl p-6 lg:p-8 text-white shadow-xl flex flex-col md:flex-row justify-between items-center gap-4">
         <div>
@@ -205,7 +221,7 @@ Skylark Cooperative Society`,
               {/* Action Button */}
               <div className="w-full md:w-auto flex md:flex-col justify-end">
                 <button 
-                  onClick={() => alert(`নোটিশ আইডি: ${notice.id} - বিস্তারিত পঠিত হয়েছে।`)}
+                  onClick={() => alert(`নোটিশ আইডি: ${notice.id} বিস্তারিত পঠিত হয়েছে।`)}
                   className="w-full md:w-auto flex items-center justify-center gap-2 bg-slate-100 hover:bg-blue-600 hover:text-white text-slate-700 px-4 py-2.5 rounded-xl text-xs font-bold transition"
                 >
                   <FaFilePdf /> বিস্তারিত পড়ুন
