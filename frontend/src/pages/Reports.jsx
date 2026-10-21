@@ -32,6 +32,13 @@ function Reports(){
   },[]);
 
   // ============================
+  // Helper: Exited Member Check
+  // ============================
+  const isMemberExited = (status) => {
+    return ["exited", "exit", "left", "closed"].includes(String(status || "").toLowerCase());
+  };
+
+  // ============================
   // Load Report & Sort by Member ID
   // ============================
   const loadReport = async()=>{
@@ -66,7 +73,7 @@ function Reports(){
     const status = String(item.status || "active").toLowerCase();
     if(filterType === "active") return status === "active";
     if(filterType === "inactive") return status === "inactive";
-    if(filterType === "exited") return ["exited", "exit", "left", "closed"].includes(status);
+    if(filterType === "exited") return isMemberExited(status);
     return true; // "all" এর জন্য সব দেখাবে
   });
 
@@ -84,7 +91,7 @@ function Reports(){
   ).length;
 
   const exitedMembers = report.filter(
-    item => ["exited", "exit", "left", "closed"].includes(String(item.status || "").toLowerCase())
+    item => isMemberExited(item.status)
   ).length;
 
   // ============================
@@ -95,13 +102,14 @@ function Reports(){
     0
   );
 
+  // Exited সদস্যদের Due সামারি কার্ডে যোগ হবে না
   const totalDue = filteredReport.reduce(
-    (sum,item)=> sum + Number(item.totalDue || 0),
+    (sum,item)=> sum + (isMemberExited(item.status) ? 0 : Number(item.totalDue || 0)),
     0
   );
 
   // ============================
-  // Table Footers Calculation (Based on Filtered Data)
+  // Table Footers Calculation (Exited সদস্যদের Due ও Current Balance বাদ রেখে)
   // ============================
   const tableSumFixedDeposit = filteredReport.reduce((sum, item) => sum + Number(item.fixedDeposit || 0), 0);
   const tableSumDeposit = filteredReport.reduce((sum, item) => sum + Number(item.totalDeposit || 0), 0);
@@ -109,14 +117,14 @@ function Reports(){
   const tableSumLoan = filteredReport.reduce((sum, item) => sum + Number(item.totalLoan || 0), 0);
   const tableSumPenalty = filteredReport.reduce((sum, item) => sum + Number(item.totalPenalty || 0), 0);
   const tableSumAdvance = filteredReport.reduce((sum, item) => sum + Number(item.advance || 0), 0);
-  const tableSumDue = filteredReport.reduce((sum, item) => sum + Number(item.totalDue || 0), 0);
-  const tableSumCurrentBalance = filteredReport.reduce((sum, item) => sum + Number(item.currentBalance || 0), 0);
+  const tableSumDue = filteredReport.reduce((sum, item) => sum + (isMemberExited(item.status) ? 0 : Number(item.totalDue || 0)), 0);
+  const tableSumCurrentBalance = filteredReport.reduce((sum, item) => sum + (isMemberExited(item.status) ? 0 : Number(item.currentBalance || 0)), 0);
 
   // ============================
-  // PDF Export (Fixed & Centered Header with Logo)
+  // PDF Export
   // ============================
   const exportPDF = () => {
-    const doc = new jsPDF('l', 'mm', 'a4'); // Landscape mode
+    const doc = new jsPDF('l', 'mm', 'a4');
 
     const getImageDataUrl = (url, callback) => {
       const img = new Image();
@@ -144,7 +152,7 @@ function Reports(){
         startY = 31;
       }
 
-      // Header Texts (Centered)
+      // Header Texts
       doc.setFont("helvetica", "bold");
       doc.setFontSize(16);
       doc.setTextColor(15, 23, 42);
@@ -159,7 +167,6 @@ function Reports(){
       doc.setTextColor(100, 116, 139);
       doc.text(`Date: ${new Date().toLocaleDateString()}`, 148.5, startY + 12, { align: "center" });
 
-      // AutoTable
       autoTable(doc, {
         startY: startY + 16,
         head: [
@@ -191,8 +198,8 @@ function Reports(){
           `Tk ${Number(item.totalLoan || 0).toLocaleString()}`,
           `Tk ${Number(item.totalPenalty || 0).toLocaleString()}`,
           `Tk ${Number(item.advance || 0).toLocaleString()}`,
-          `Tk ${Number(item.totalDue || 0).toLocaleString()}`,
-          `Tk ${Number(item.currentBalance || 0).toLocaleString()}`
+          isMemberExited(item.status) ? "—" : `Tk ${Number(item.totalDue || 0).toLocaleString()}`,
+          isMemberExited(item.status) ? "—" : `Tk ${Number(item.currentBalance || 0).toLocaleString()}`
         ]),
         foot: [[
           "Total", "", "", "", "",
@@ -237,11 +244,10 @@ function Reports(){
       "Total Loan": item.totalLoan || 0,
       "Total Penalty": item.totalPenalty || 0,
       "Advance": item.advance || 0,
-      "Total Due": item.totalDue || 0,
-      "Current Balance": item.currentBalance || 0
+      "Total Due": isMemberExited(item.status) ? "—" : (item.totalDue || 0),
+      "Current Balance": isMemberExited(item.status) ? "—" : (item.currentBalance || 0)
     }));
 
-    // এক্সেলেও টোটাল রো যোগ করা হলো
     data.push({
       "SL": "Total",
       "Member ID": "",
@@ -309,7 +315,7 @@ function Reports(){
         </div>
       </div>
 
-      {/* Professional & Premium Summary Cards - 4 cards per row (Clickable for filtering) */}
+      {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div onClick={() => setFilterType("all")} className="cursor-pointer">
           <SummaryCard
@@ -442,33 +448,44 @@ function Reports(){
             <tbody>
               {
                 filteredReport.length > 0 ? (
-                  filteredReport.map((item,index)=>(
-                    <tr key={index} className="hover:bg-slate-50 transition-colors">
-                      <td className="border border-gray-200 p-3 text-center text-gray-600 font-medium">{index + 1}</td>
-                      <td className="border border-gray-200 p-3 whitespace-nowrap font-semibold text-gray-800">{item.memberId}</td>
-                      <td className="border border-gray-200 p-3 whitespace-nowrap font-semibold text-gray-900">{item.name}</td>
-                      <td className="border border-gray-200 p-3 text-center whitespace-nowrap">
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
-                          String(item.status || "").toLowerCase() === "active" 
-                            ? "bg-green-50 text-green-700" 
-                            : String(item.status || "").toLowerCase() === "inactive"
-                            ? "bg-amber-50 text-amber-700"
-                            : "bg-rose-50 text-rose-700"
-                        }`}>
-                          {item.status || "Active"}
-                        </span>
-                      </td>
-                      <td className="border border-gray-200 p-3 whitespace-nowrap text-gray-600">{item.phone}</td>
-                      <td className="border border-gray-200 p-3 text-center text-indigo-700 font-semibold whitespace-nowrap">৳ {Number(item.fixedDeposit || 0).toLocaleString()}</td>
-                      <td className="border border-gray-200 p-3 text-center text-emerald-700 font-semibold whitespace-nowrap">৳ {Number(item.totalDeposit || 0).toLocaleString()}</td>
-                      <td className="border border-gray-200 p-3 text-center text-amber-700 font-semibold whitespace-nowrap">৳ {Number(item.totalWithdrawal || 0).toLocaleString()}</td>
-                      <td className="border border-gray-200 p-3 text-center text-blue-700 font-semibold whitespace-nowrap">৳ {Number(item.totalLoan || 0).toLocaleString()}</td>
-                      <td className="border border-gray-200 p-3 text-center text-rose-600 font-semibold whitespace-nowrap">৳ {Number(item.totalPenalty || 0).toLocaleString()}</td>
-                      <td className="border border-gray-200 p-3 text-center text-gray-700 font-semibold whitespace-nowrap">৳ {Number(item.advance || 0).toLocaleString()}</td>
-                      <td className="border border-gray-200 p-3 text-center text-red-600 font-semibold whitespace-nowrap">৳ {Number(item.totalDue || 0).toLocaleString()}</td>
-                      <td className="border border-gray-200 p-3 text-center text-teal-800 font-bold whitespace-nowrap bg-gray-50">৳ {Number(item.currentBalance || 0).toLocaleString()}</td>
-                    </tr>
-                  ))
+                  filteredReport.map((item,index)=>{
+                    const isExited = isMemberExited(item.status);
+                    return (
+                      <tr key={index} className="hover:bg-slate-50 transition-colors">
+                        <td className="border border-gray-200 p-3 text-center text-gray-600 font-medium">{index + 1}</td>
+                        <td className="border border-gray-200 p-3 whitespace-nowrap font-semibold text-gray-800">{item.memberId}</td>
+                        <td className="border border-gray-200 p-3 whitespace-nowrap font-semibold text-gray-900">{item.name}</td>
+                        <td className="border border-gray-200 p-3 text-center whitespace-nowrap">
+                          <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
+                            String(item.status || "").toLowerCase() === "active" 
+                              ? "bg-green-50 text-green-700" 
+                              : String(item.status || "").toLowerCase() === "inactive"
+                              ? "bg-amber-50 text-amber-700"
+                              : "bg-rose-50 text-rose-700"
+                          }`}>
+                            {item.status || "Active"}
+                          </span>
+                        </td>
+                        <td className="border border-gray-200 p-3 whitespace-nowrap text-gray-600">{item.phone}</td>
+                        <td className="border border-gray-200 p-3 text-center text-indigo-700 font-semibold whitespace-nowrap">৳ {Number(item.fixedDeposit || 0).toLocaleString()}</td>
+                        <td className="border border-gray-200 p-3 text-center text-emerald-700 font-semibold whitespace-nowrap">৳ {Number(item.totalDeposit || 0).toLocaleString()}</td>
+                        <td className="border border-gray-200 p-3 text-center text-amber-700 font-semibold whitespace-nowrap">৳ {Number(item.totalWithdrawal || 0).toLocaleString()}</td>
+                        <td className="border border-gray-200 p-3 text-center text-blue-700 font-semibold whitespace-nowrap">৳ {Number(item.totalLoan || 0).toLocaleString()}</td>
+                        <td className="border border-gray-200 p-3 text-center text-rose-600 font-semibold whitespace-nowrap">৳ {Number(item.totalPenalty || 0).toLocaleString()}</td>
+                        <td className="border border-gray-200 p-3 text-center text-gray-700 font-semibold whitespace-nowrap">৳ {Number(item.advance || 0).toLocaleString()}</td>
+                        
+                        {/* Due Column (Exited হলে — দেখাবে) */}
+                        <td className="border border-gray-200 p-3 text-center text-red-600 font-semibold whitespace-nowrap">
+                          {isExited ? "—" : `৳ ${Number(item.totalDue || 0).toLocaleString()}`}
+                        </td>
+                        
+                        {/* Current Balance Column (Exited হলে — দেখাবে) */}
+                        <td className="border border-gray-200 p-3 text-center text-teal-800 font-bold whitespace-nowrap bg-gray-50">
+                          {isExited ? "—" : `৳ ${Number(item.currentBalance || 0).toLocaleString()}`}
+                        </td>
+                      </tr>
+                    );
+                  })
                 ) : (
                   <tr>
                     <td colSpan="13" className="text-center p-6 text-gray-500 font-medium">
